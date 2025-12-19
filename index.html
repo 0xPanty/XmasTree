@@ -464,6 +464,102 @@
             100% { transform: translateY(100vh) rotate(360deg); opacity: 0.3; }
         }
         
+        /* Plaza transition - Camera follow star animation */
+        .scene-rotating {
+            animation: sceneRotate 3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            transform-style: preserve-3d;
+            perspective: 1000px;
+        }
+        @keyframes sceneRotate {
+            0% { transform: rotateY(0deg) scale(1); }
+            50% { transform: rotateY(180deg) scale(1.05); }
+            100% { transform: rotateY(360deg) scale(1); }
+        }
+        .plaza-transition-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .comet-star {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #fff 0%, #ffd700 30%, transparent 70%);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 30px 15px rgba(255,215,0,0.9),
+                0 0 60px 30px rgba(255,215,0,0.6),
+                0 0 100px 50px rgba(255,215,0,0.3);
+            filter: blur(0.5px);
+        }
+        .comet-star::before {
+            content: '⭐';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 28px;
+            filter: drop-shadow(0 0 15px #ffd700) drop-shadow(0 0 30px #fff);
+            animation: starPulse 0.3s ease-in-out infinite alternate;
+        }
+        @keyframes starPulse {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            100% { transform: translate(-50%, -50%) scale(1.2); }
+        }
+        .comet-tail {
+            position: absolute;
+            top: 50%;
+            right: 100%;
+            width: 120px;
+            height: 8px;
+            background: linear-gradient(to left, rgba(255,255,255,0.95), rgba(255,215,0,0.7), rgba(255,215,0,0.3), transparent);
+            border-radius: 4px;
+            transform: translateY(-50%);
+            filter: blur(2px);
+        }
+        .comet-tail::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 0;
+            width: 100%;
+            height: 16px;
+            background: linear-gradient(to left, rgba(255,215,0,0.3), transparent);
+            filter: blur(4px);
+        }
+        .transition-particle {
+            position: absolute;
+            background: radial-gradient(circle, #fff, #ffd700);
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 6px 2px rgba(255,215,0,0.8);
+        }
+        @keyframes particleDrift {
+            0% { transform: scale(1) translate(0, 0); opacity: 1; }
+            100% { transform: scale(0) translate(var(--dx), var(--dy)); opacity: 0; }
+        }
+        .final-flash {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 20%, rgba(255,255,255,0.8), rgba(255,215,0,0.4) 30%, transparent 60%);
+            animation: flashBurst 0.6s ease-out forwards;
+            pointer-events: none;
+            z-index: 999;
+        }
+        @keyframes flashBurst {
+            0% { opacity: 0; transform: scale(0.8); }
+            20% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.2); }
+        }
+
         /* Shooting star */
         .shooting-star {
             position: fixed;
@@ -1560,9 +1656,120 @@
         let plazaGifts = JSON.parse(localStorage.getItem('plaza_gifts') || '[]');
         let isPlazaMode = false;
 
+        // Plaza transition animation
+        function playPlazaTransition(callback) {
+            const canvas = document.getElementById('canvas-container');
+            const overlay = document.createElement('div');
+            overlay.className = 'plaza-transition-overlay';
+            
+            // Create comet star
+            const comet = document.createElement('div');
+            comet.className = 'comet-star';
+            comet.style.top = '18%';
+            comet.style.left = '50%';
+            comet.style.transform = 'translate(-50%, -50%)';
+            
+            // Create tail
+            const tail = document.createElement('div');
+            tail.className = 'comet-tail';
+            comet.appendChild(tail);
+            
+            overlay.appendChild(comet);
+            document.body.appendChild(overlay);
+            
+            // Add rotation to scene
+            canvas.classList.add('scene-rotating');
+            
+            // Animate comet in smooth orbit
+            const duration = 3000;
+            const startTime = performance.now();
+            const centerX = window.innerWidth / 2;
+            const startY = window.innerHeight * 0.03; // Tree top position
+            const centerY = window.innerHeight * 0.45;
+            const radiusX = window.innerWidth * 0.35;
+            const radiusY = window.innerHeight * 0.28;
+            
+            function animateComet(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Smooth easing
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const angle = eased * Math.PI * 2;
+                
+                // Elliptical orbit starting and ending at top
+                const x = centerX + Math.sin(angle) * radiusX;
+                const y = startY + (1 - Math.cos(angle)) * radiusY;
+                
+                // Scale based on depth (front = bigger)
+                const scale = 1 + Math.sin(angle) * 0.3;
+                
+                // Tail rotation follows movement direction
+                const dx = Math.cos(angle) * radiusX;
+                const dy = Math.sin(angle) * radiusY;
+                const tailAngle = Math.atan2(dy, dx) * 180 / Math.PI + 180;
+                
+                comet.style.left = x + 'px';
+                comet.style.top = y + 'px';
+                comet.style.transform = `translate(-50%, -50%) scale(${scale})`;
+                tail.style.transform = `translateY(-50%) rotate(${tailAngle}deg)`;
+                
+                // Spawn particles
+                if (Math.random() > 0.5) {
+                    spawnParticle(overlay, x, y);
+                }
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animateComet);
+                } else {
+                    // Final flash and cleanup
+                    const flash = document.createElement('div');
+                    flash.className = 'final-flash';
+                    document.body.appendChild(flash);
+                    
+                    setTimeout(() => {
+                        flash.remove();
+                        overlay.remove();
+                        canvas.classList.remove('scene-rotating');
+                        if (callback) callback();
+                    }, 600);
+                }
+            }
+            
+            requestAnimationFrame(animateComet);
+        }
+        
+        function spawnParticle(container, x, y) {
+            for (let i = 0; i < 2; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'transition-particle';
+                const size = 3 + Math.random() * 8;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = (x + (Math.random() - 0.5) * 30) + 'px';
+                particle.style.top = (y + (Math.random() - 0.5) * 30) + 'px';
+                particle.style.setProperty('--dx', (Math.random() - 0.5) * 60 + 'px');
+                particle.style.setProperty('--dy', (Math.random() * 40 + 20) + 'px');
+                particle.style.animation = `particleDrift ${0.8 + Math.random() * 0.5}s ease-out forwards`;
+                container.appendChild(particle);
+                setTimeout(() => particle.remove(), 1300);
+            }
+        }
+        
         // Toggle Plaza Mode
         function togglePlazaMode() {
-            isPlazaMode = !isPlazaMode;
+            // If entering plaza, play transition first
+            if (!isPlazaMode) {
+                playPlazaTransition(() => {
+                    activatePlazaMode(true);
+                });
+                return;
+            }
+            activatePlazaMode(false);
+        }
+        
+        function activatePlazaMode(entering) {
+            isPlazaMode = entering;
             const plazaBtn = document.getElementById('plaza-btn');
             const plaza = document.getElementById('gift-plaza');
             const plazaSendBtn = document.getElementById('plaza-send-btn');
