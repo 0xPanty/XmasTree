@@ -1606,7 +1606,7 @@
     <script>
         let giftType = 'equal';
         let currentUser = null; // Will be set by Farcaster SDK
-        const NEYNAR_API_KEY = 'A8C2B3A3-AA8B-4E53-86F3-3E218D70A9BD';
+        // Neynar API calls go through /api/neynar to protect API key
         const MAX_PLAZA_GIFTS = 10;
         let plazaGifts = JSON.parse(localStorage.getItem('plaza_gifts') || '[]');
         let isPlazaMode = false;
@@ -1789,9 +1789,7 @@
         async function fetchAuthorInfo() {
             if (authorInfo) return;
             try {
-                const res = await fetch(`https://api.neynar.com/v2/farcaster/user/search?q=${AUTHOR_USERNAME}&limit=1`, {
-                    headers: { 'accept': 'application/json', 'x-api-key': NEYNAR_API_KEY }
-                });
+                const res = await fetch(`/api/neynar?action=search&q=${AUTHOR_USERNAME}&limit=1`);
                 const data = await res.json();
                 if (data.result?.users?.[0]) {
                     authorInfo = data.result.users[0];
@@ -1947,9 +1945,7 @@
                 
                 // Use current user's fid or default to a popular user for demo
                 const fid = currentUser?.fid || 3; // dwr.eth as default
-                const res = await fetch(`https://api.neynar.com/v2/farcaster/following?fid=${fid}&limit=5`, {
-                    headers: { 'accept': 'application/json', 'x-api-key': NEYNAR_API_KEY }
-                });
+                const res = await fetch(`/api/neynar?action=following&fid=${fid}&limit=5`);
                 const data = await res.json();
                 if (data.users?.length > 0) {
                     selectedRecipients = data.users.slice(0, 5).map(u => ({
@@ -1976,9 +1972,7 @@
             if (!query || query.length < 2) { resultsDiv.style.display = 'none'; return; }
             searchTimeout = setTimeout(async () => {
                 try {
-                    const res = await fetch(`https://api.neynar.com/v2/farcaster/user/search?q=${encodeURIComponent(query)}&limit=5`, {
-                        headers: { 'accept': 'application/json', 'x-api-key': NEYNAR_API_KEY }
-                    });
+                    const res = await fetch(`/api/neynar?action=search&q=${encodeURIComponent(query)}&limit=5`);
                     const data = await res.json();
                     if (data.result?.users?.length > 0) {
                         resultsDiv.innerHTML = data.result.users.map(u => `
