@@ -2407,7 +2407,8 @@
         // Render orbiting avatars around the tree
         function renderPlaza() {
             const plaza = document.getElementById('gift-plaza');
-            const activeGifts = plazaGifts.filter(g => g.claimed < g.shares).slice(0, MAX_PLAZA_GIFTS);
+            // Only show plaza gifts, not direct gifts
+            const activeGifts = plazaGifts.filter(g => g.claimed < g.shares && g.mode !== 'direct').slice(0, MAX_PLAZA_GIFTS);
             
             // Responsive orbit radius based on viewport - closer to tree
             const baseRadius = Math.min(window.innerWidth, window.innerHeight) * 0.12;
