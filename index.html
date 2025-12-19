@@ -351,6 +351,97 @@
             75% { transform: rotateY(-270deg) translateX(var(--orbit-radius, 180px)) rotateY(270deg); opacity: 1; z-index: 10; }
             100% { transform: rotateY(-360deg) translateX(var(--orbit-radius, 180px)) rotateY(360deg); opacity: 1; z-index: 10; }
         }
+        
+        /* Fancy Banner - Romantic Style */
+        #banner-container {
+            position: absolute;
+            top: 12%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            text-align: center;
+            display: none;
+            pointer-events: none;
+        }
+        #banner-container.active { display: block; }
+        .fancy-banner {
+            position: relative;
+        }
+        .banner-text {
+            font-size: clamp(36px, 8vw, 90px);
+            font-weight: bold;
+            font-family: 'Brush Script MT', 'Segoe Script', cursive;
+            color: #fff;
+            text-shadow: 
+                0 0 10px rgba(255,255,255,0.8),
+                0 0 20px rgba(255,255,255,0.6),
+                0 0 40px rgba(255,255,255,0.4),
+                0 0 80px rgba(200,220,255,0.3),
+                2px 2px 4px rgba(0,0,0,0.3);
+            animation: textGlow 3s ease-in-out infinite;
+            letter-spacing: 2px;
+        }
+        @keyframes textGlow {
+            0%, 100% { 
+                text-shadow: 
+                    0 0 10px rgba(255,255,255,0.8),
+                    0 0 20px rgba(255,255,255,0.6),
+                    0 0 40px rgba(255,255,255,0.4),
+                    0 0 80px rgba(200,220,255,0.3),
+                    2px 2px 4px rgba(0,0,0,0.3);
+            }
+            50% { 
+                text-shadow: 
+                    0 0 20px rgba(255,255,255,1),
+                    0 0 40px rgba(255,255,255,0.8),
+                    0 0 60px rgba(255,255,255,0.6),
+                    0 0 100px rgba(200,220,255,0.5),
+                    2px 2px 4px rgba(0,0,0,0.3);
+            }
+        }
+        .banner-sender {
+            font-size: clamp(14px, 2.5vw, 22px);
+            color: rgba(255,255,255,0.7);
+            margin-top: 12px;
+            font-style: italic;
+            font-family: 'Georgia', serif;
+            text-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+        
+        /* Plaza mode - smaller title */
+        .title.plaza-mode {
+            font-size: clamp(20px, 4vw, 36px) !important;
+            margin-top: 2% !important;
+        }
+        .subtitle.plaza-mode {
+            font-size: clamp(8px, 1.2vw, 12px) !important;
+        }
+        
+        /* Full screen snowfall */
+        #snowfall-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 99;
+            overflow: hidden;
+            display: none;
+        }
+        #snowfall-container.active { display: block; }
+        .snow {
+            position: absolute;
+            top: -50px;
+            color: #fff;
+            opacity: 0.9;
+            animation: snowFalling linear infinite;
+            text-shadow: 0 0 5px rgba(255,255,255,0.5);
+        }
+        @keyframes snowFalling {
+            0% { transform: translateY(-50px) rotate(0deg); opacity: 0.9; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0.3; }
+        }
         .requirement-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
         .requirement-row label { flex: 1; color: rgba(255,255,255,0.7); font-size: 0.8rem; }
         .requirement-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--gold); }
@@ -656,6 +747,44 @@
         </div>
     </div>
 
+    <!-- Banner Modal -->
+    <div id="banner-modal" class="custom-modal">
+        <div class="modal-box" style="max-width: 380px;">
+            <div class="modal-title">🔔 Blessing Banner</div>
+            <div style="color:rgba(255,255,255,0.6); font-size:0.8rem; margin-bottom:12px; text-align:center;">
+                Your message will shine above the tree!
+            </div>
+            <div class="form-group">
+                <label>Your Blessing</label>
+                <input type="text" id="banner-message" placeholder="Merry Christmas!" maxlength="20">
+                <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-top:4px;">Max 20 characters</div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Token</label>
+                    <select id="banner-token">
+                        <option value="USDC">USDC</option>
+                        <option value="ETH">ETH</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Price</label>
+                    <input type="number" id="banner-price" value="1" readonly style="background:rgba(0,0,0,0.3);">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Duration</label>
+                <select id="banner-duration" onchange="updateBannerPrice()">
+                    <option value="60">1 Hour - 1 USDC</option>
+                    <option value="360">6 Hours - 5 USDC</option>
+                    <option value="1440">24 Hours - 15 USDC</option>
+                </select>
+            </div>
+            <button class="btn-gift" onclick="createBanner()">✨ Create Banner</button>
+            <button class="btn-cancel" onclick="closeBannerModal()">Cancel</button>
+        </div>
+    </div>
+
     <!-- Tip Author Modal -->
     <div id="tip-modal" class="custom-modal">
         <div class="modal-box" style="max-width: 340px;">
@@ -761,6 +890,7 @@
             </div>
             <div class="btn-group" id="plaza-send-btn" style="display:none;">
                 <button onclick="openGiftModal()">🎁 Plaza Gift</button>
+                <button onclick="openBannerModal()">🔔 Banner</button>
             </div>
             <div class="btn-group" id="main-btns">
                 <button onclick="openDirectGiftModal()">🎁 Send to Friends</button>
@@ -775,6 +905,8 @@
         
         <!-- Gift Plaza - Orbiting Avatars (hidden by default) -->
         <div id="gift-plaza" style="display:none;"></div>
+        <div id="banner-container"></div>
+        <div id="snowfall-container"></div>
     </div>
     
     <div id="canvas-container">
@@ -1353,6 +1485,10 @@
             const plazaSendBtn = document.getElementById('plaza-send-btn');
             const mainBtns = document.getElementById('main-btns');
             const tipBtn = document.getElementById('tip-btn');
+            const claimBtn = document.getElementById('claim-btn');
+            const titleEl = document.querySelector('.title');
+            const subtitleEl = document.querySelector('.subtitle');
+            const bannerContainer = document.getElementById('banner-container');
             
             if (isPlazaMode) {
                 plazaBtn.textContent = '↩ Return';
@@ -1360,6 +1496,11 @@
                 plazaSendBtn.style.display = 'block';
                 mainBtns.style.display = 'none';
                 tipBtn.style.display = 'none';
+                claimBtn.style.display = 'none';
+                // Shrink title, show banner
+                if (titleEl) titleEl.classList.add('plaza-mode');
+                if (subtitleEl) subtitleEl.classList.add('plaza-mode');
+                renderBanner();
                 renderPlaza();
             } else {
                 plazaBtn.textContent = '🎄 Plaza';
@@ -1367,6 +1508,12 @@
                 plazaSendBtn.style.display = 'none';
                 mainBtns.style.display = 'block';
                 tipBtn.style.display = 'block';
+                claimBtn.style.display = 'block';
+                // Restore title, hide banner and snow
+                if (titleEl) titleEl.classList.remove('plaza-mode');
+                if (subtitleEl) subtitleEl.classList.remove('plaza-mode');
+                bannerContainer.classList.remove('active');
+                document.getElementById('snowfall-container').classList.remove('active');
             }
         }
 
@@ -1707,6 +1854,95 @@
             if (!show) document.getElementById('gift-code').value = '';
         }
         
+        // Banner functions
+        let activeBanners = JSON.parse(localStorage.getItem('blessing_banners') || '[]');
+        
+        function openBannerModal() {
+            document.getElementById('banner-modal').classList.add('visible');
+            document.getElementById('banner-message').value = '';
+            updateBannerPrice();
+        }
+        
+        function closeBannerModal() {
+            document.getElementById('banner-modal').classList.remove('visible');
+        }
+        
+        function updateBannerPrice() {
+            const duration = document.getElementById('banner-duration').value;
+            const prices = { '60': 1, '360': 5, '1440': 15 };
+            document.getElementById('banner-price').value = prices[duration] || 1;
+        }
+        
+        function createBanner() {
+            const message = document.getElementById('banner-message').value.trim();
+            if (!message) { alert('Please enter a message'); return; }
+            
+            const duration = parseInt(document.getElementById('banner-duration').value);
+            
+            // TODO: Process payment via smart contract
+            
+            const banner = {
+                id: Date.now().toString(),
+                message: message,
+                sender: currentUser?.username || 'Anonymous',
+                expiresAt: Date.now() + duration * 60 * 1000,
+                createdAt: Date.now()
+            };
+            
+            activeBanners.push(banner);
+            localStorage.setItem('blessing_banners', JSON.stringify(activeBanners));
+            
+            closeBannerModal();
+            renderBanner();
+            
+            alert('✨ Your banner is now shining!');
+        }
+        
+        function renderBanner() {
+            const container = document.getElementById('banner-container');
+            const snowContainer = document.getElementById('snowfall-container');
+            const now = Date.now();
+            
+            // Filter out expired banners
+            activeBanners = activeBanners.filter(b => b.expiresAt > now);
+            localStorage.setItem('blessing_banners', JSON.stringify(activeBanners));
+            
+            if (activeBanners.length === 0) {
+                container.classList.remove('active');
+                snowContainer.classList.remove('active');
+                container.innerHTML = '';
+                snowContainer.innerHTML = '';
+                return;
+            }
+            
+            // Show latest banner
+            const banner = activeBanners[activeBanners.length - 1];
+            
+            // Generate big romantic snowflakes
+            let snowflakes = '';
+            const snowSymbols = ['❄', '❅', '❆', '✻', '✼'];
+            for (let i = 0; i < 40; i++) {
+                const left = Math.random() * 100;
+                const delay = Math.random() * 8;
+                const duration = 6 + Math.random() * 8;
+                const size = 16 + Math.random() * 24;
+                const symbol = snowSymbols[Math.floor(Math.random() * snowSymbols.length)];
+                snowflakes += `<span class="snow" style="left:${left}%; animation-delay:${delay}s; animation-duration:${duration}s; font-size:${size}px;">${symbol}</span>`;
+            }
+            
+            container.classList.add('active');
+            snowContainer.classList.add('active');
+            
+            container.innerHTML = `
+                <div class="fancy-banner">
+                    <div class="banner-text">${banner.message}</div>
+                    <div class="banner-sender">@${banner.sender}</div>
+                </div>
+            `;
+            
+            snowContainer.innerHTML = snowflakes;
+        }
+        
         function togglePlazaCustomToken() {
             const token = document.getElementById('gift-token').value;
             document.getElementById('plaza-custom-token-group').style.display = token === 'CUSTOM' ? 'block' : 'none';
@@ -2000,6 +2236,17 @@
             
             // Check if user has gifts
             checkMyGifts();
+            
+            // TEST: Add demo banner
+            if (activeBanners.length === 0) {
+                activeBanners = [{
+                    id: 'demo1',
+                    message: 'Merry Christmas!',
+                    sender: 'Santa',
+                    expiresAt: Date.now() + 24 * 60 * 60 * 1000,
+                    createdAt: Date.now()
+                }];
+            }
             
             // Check URL for gift parameter
             const urlParams = new URLSearchParams(window.location.search);
