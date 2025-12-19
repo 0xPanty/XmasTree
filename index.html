@@ -518,6 +518,32 @@
             animation: cardAppear 0.5s ease-out;
         }
         @keyframes cardAppear { from { transform: scale(0.8) rotateY(-20deg); opacity: 0; } to { transform: scale(1) rotateY(0); opacity: 1; } }
+        @keyframes cardOpen { 
+            0% { transform: perspective(1000px) rotateX(0); }
+            50% { transform: perspective(1000px) rotateX(-90deg); }
+            100% { transform: perspective(1000px) rotateX(-180deg) scale(0.8); opacity: 0; }
+        }
+        .greeting-card.opening { animation: cardOpen 1s ease-in-out forwards; }
+        
+        /* Christmas confetti burst */
+        .confetti-container {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            opacity: 0;
+            animation: confettiFall 3s ease-out forwards;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
         .card-sparkles {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -1797,7 +1823,17 @@
         function closeClaimInput() { document.getElementById('claim-input-modal').classList.remove('visible'); }
         function showLoading(text) { document.getElementById('loading-text').textContent = text; document.getElementById('loading-modal').classList.add('visible'); }
         function hideLoading() { document.getElementById('loading-modal').classList.remove('visible'); }
-        function closeSuccessModal() { document.getElementById('success-modal').querySelector('.modal-box').style.display = 'none'; }
+        function closeSuccessModal() { 
+            document.getElementById('success-modal').querySelector('.modal-box').style.display = 'none';
+            // Scatter tree after closing modal
+            setTimeout(() => {
+                if (window.scatterTree) window.scatterTree();
+                // Reassemble after 1.5s
+                setTimeout(() => {
+                    if (window.assembleTree) window.assembleTree();
+                }, 1500);
+            }, 100);
+        }
         
         // Tip Author functions
         const AUTHOR_USERNAME = 'xqc';
@@ -2231,33 +2267,69 @@
         
         function claimCardGift() {
             if (!currentCardGift) return;
-            document.getElementById('card-modal').classList.remove('visible');
             
-            // Process claim
-            showLoading('Opening gift...');
-            document.querySelector('.controls').style.display = 'none';
+            // Step 1: Play card opening animation
+            const card = document.querySelector('.greeting-card');
+            card.classList.add('opening');
             
-            // TODO: In production, call smart contract here
-            // await contract.claimGift(giftId, password, isPro);
+            // Step 2: Launch confetti burst
+            launchConfetti();
             
-            currentCardGift.claimed = 1;
-            currentCardGift.claimedBy.push(currentUser?.fid || 'guest');
-            localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
-            
+            // Step 3: After animation, process claim
             setTimeout(() => {
-                hideLoading();
-                document.getElementById('success-amount').textContent = currentCardGift.amount + ' ' + currentCardGift.token;
-                document.getElementById('success-modal').classList.add('visible');
+                document.getElementById('card-modal').classList.remove('visible');
+                card.classList.remove('opening');
                 
-                // Scatter tree AFTER claim for impact
+                showLoading('Claiming gift...');
+                document.querySelector('.controls').style.display = 'none';
+                
+                // TODO: In production, call smart contract here
+                currentCardGift.claimed = 1;
+                currentCardGift.claimedBy.push(currentUser?.fid || 'guest');
+                localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+                
                 setTimeout(() => {
-                    if (window.scatterTree) window.scatterTree();
-                }, 300);
+                    hideLoading();
+                    document.getElementById('success-amount').textContent = currentCardGift.amount + ' ' + currentCardGift.token;
+                    document.getElementById('success-modal').classList.add('visible');
+                    
+                    checkMyGifts();
+                    currentCardGift = null;
+                }, 800);
+            }, 1000);
+        }
+        
+        // Christmas confetti burst effect
+        function launchConfetti() {
+            const container = document.createElement('div');
+            container.className = 'confetti-container';
+            document.body.appendChild(container);
+            
+            const colors = ['#D4AF37', '#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffeaa7', '#ff7675', '#74b9ff'];
+            const shapes = ['🎄', '⭐', '❄️', '🎁', '🔔', '✨'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.top = '-10px';
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
                 
-                // Update mailbox status
-                checkMyGifts();
-                currentCardGift = null;
-            }, 800);
+                if (Math.random() > 0.5) {
+                    confetti.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+                    confetti.style.fontSize = (12 + Math.random() * 12) + 'px';
+                    confetti.style.width = 'auto';
+                    confetti.style.height = 'auto';
+                } else {
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                }
+                
+                container.appendChild(confetti);
+            }
+            
+            setTimeout(() => container.remove(), 4000);
         }
 
         function toggleCodeInput() {
@@ -2621,11 +2693,6 @@
                 hideLoading();
                 document.getElementById('success-amount').textContent = claimAmount + ' ' + gift.token;
                 document.getElementById('success-modal').classList.add('visible');
-                
-                // Scatter tree AFTER claim for impact
-                setTimeout(() => {
-                    if (window.scatterTree) window.scatterTree();
-                }, 300);
                 
                 renderPlaza();
             } catch (error) {
