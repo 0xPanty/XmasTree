@@ -2404,10 +2404,13 @@
                 } catch (e) { console.log('Not in Farcaster frame'); }
             }).catch(() => {});
 
-            // Load gifts from storage
+            // Clear old demo data and load fresh
             const stored = localStorage.getItem('plaza_gifts');
             if (stored) {
-                plazaGifts = JSON.parse(stored);
+                const parsed = JSON.parse(stored);
+                // Filter out demo/test data
+                plazaGifts = parsed.filter(g => !g.id.startsWith('demo') && !g.id.startsWith('test'));
+                localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
             }
             
             // Check if user has gifts
