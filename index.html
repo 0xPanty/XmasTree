@@ -952,8 +952,8 @@
                 <div class="form-group" style="position:relative;">
                     <label>Recipients (max 10)</label>
                     <div style="display:flex; gap:8px; margin-bottom:8px;">
-                        <input type="text" id="user-search" placeholder="Search Farcaster username..." oninput="searchUsers(this.value)" style="flex:1;">
-                        <button type="button" onclick="fetchTopFriends()" style="padding:8px 12px; background:rgba(212,175,55,0.2); border:1px solid var(--gold); color:var(--gold); cursor:pointer; white-space:nowrap; font-size:0.8rem;">👥 Friends</button>
+                        <input type="text" id="user-search" placeholder="Search Farcaster username..." oninput="searchUsers(this.value)" style="flex:3; min-width:0;">
+                        <button type="button" onclick="fetchTopFriends()" style="flex:1; padding:6px 8px; background:rgba(212,175,55,0.2); border:1px solid var(--gold); color:var(--gold); cursor:pointer; white-space:nowrap; font-size:0.7rem;">👥</button>
                     </div>
                     <div id="user-results" class="user-search-results" style="display:none;"></div>
                     <div id="selected-users"></div>
