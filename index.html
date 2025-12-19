@@ -1710,11 +1710,22 @@
         
         // Toggle Plaza Mode
         function togglePlazaMode() {
-            // If entering plaza, play transition first
             if (!isPlazaMode) {
-                playPlazaTransition(() => {
-                    activatePlazaMode(true);
-                });
+                // Step 1: Scatter tree
+                if (window.scatterTree) window.scatterTree();
+                
+                // Step 2: Reassemble tree after 1.5s
+                setTimeout(() => {
+                    if (window.assembleTree) window.assembleTree();
+                    
+                    // Step 3: Play comet animation after reassembly
+                    setTimeout(() => {
+                        playPlazaTransition(() => {
+                            // Step 4: Activate plaza mode with snowfall
+                            activatePlazaMode(true);
+                        });
+                    }, 1000);
+                }, 1500);
                 return;
             }
             activatePlazaMode(false);
