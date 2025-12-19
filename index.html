@@ -1499,12 +1499,14 @@
         const root = createRoot(document.getElementById('canvas-container'));
         root.render(<App />);
         
-        // Farcaster Mini App SDK - signal ready
-        import('https://esm.sh/@farcaster/miniapp-sdk').then(({ sdk }) => {
-            window.farcasterSDK = sdk;
-            sdk.actions.ready();
-            console.log('Farcaster Mini App ready');
-        }).catch(err => console.log('SDK error:', err));
+        // Farcaster Mini App SDK - signal ready after render
+        setTimeout(() => {
+            import('https://esm.sh/@farcaster/miniapp-sdk').then(({ sdk }) => {
+                window.farcasterSDK = sdk;
+                sdk.actions.ready();
+                console.log('Farcaster Mini App ready');
+            }).catch(err => console.log('SDK error:', err));
+        }, 100);
     </script>
 
     <!-- Gift Plaza System -->
