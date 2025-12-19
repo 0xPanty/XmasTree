@@ -1478,7 +1478,7 @@
             useFrame(() => {
                 // Target positions
                 const isMobile = size.width < 768;
-                const topPos = { x: 0, y: 40, z: 0.1 };  // Perfect top-down view
+                const topPos = { x: 0, y: 22, z: 0.1 };  // Perfect top-down view, closer
                 const sidePos = { x: 0, y: 4, z: isMobile ? 35 : 20 }; // Side view for tree
                 
                 const target = viewMode === 'top' ? topPos : sidePos;
@@ -1495,7 +1495,7 @@
         const Scene = ({ isTree, viewMode }) => {
             return (
                 <>
-                    <PerspectiveCamera makeDefault position={[0, 40, 0.1]} fov={50} />
+                    <PerspectiveCamera makeDefault position={[0, 22, 0.1]} fov={50} />
                     <CameraController viewMode={viewMode} />
                     <OrbitControls enablePan={false} minDistance={10} maxDistance={50} maxPolarAngle={Math.PI / 1.8} autoRotate={true} autoRotateSpeed={viewMode === 'top' ? 1.2 : 0.5} />
                     <Environment preset="city" blur={1} background={false} />
@@ -1720,9 +1720,11 @@
         // Toggle Plaza Mode
         function togglePlazaMode() {
             if (!isPlazaMode) {
-                // Entering plaza: animate to side view
-                if (window.setSideView) window.setSideView();
-                setTimeout(() => activatePlazaMode(true), 800);
+                // Entering plaza: play comet animation then switch view
+                playPlazaTransition(() => {
+                    if (window.setSideView) window.setSideView();
+                    activatePlazaMode(true);
+                });
             } else {
                 // Leaving plaza: animate back to top view
                 if (window.setTopView) window.setTopView();
