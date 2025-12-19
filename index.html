@@ -1538,7 +1538,7 @@
         };
 
         const App = () => {
-            const [isTree, setIsTree] = useState(false); // Start as sphere, becomes tree in plaza
+            const [isTree, setIsTree] = useState(true); // Start as tree with top-down view
             const [audioReady, setAudioReady] = useState(false);
             const [viewMode, setViewMode] = useState('top'); // 'top' = top-down sphere view, 'side' = tree view
 
@@ -1720,14 +1720,12 @@
         // Toggle Plaza Mode
         function togglePlazaMode() {
             if (!isPlazaMode) {
-                // Entering plaza: animate to tree view
+                // Entering plaza: animate to side view
                 if (window.setSideView) window.setSideView();
-                if (window.assembleTree) window.assembleTree();
                 setTimeout(() => activatePlazaMode(true), 800);
             } else {
-                // Leaving plaza: animate to sphere view
+                // Leaving plaza: animate back to top view
                 if (window.setTopView) window.setTopView();
-                if (window.scatterTree) window.scatterTree();
                 activatePlazaMode(false);
             }
         }
