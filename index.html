@@ -1843,7 +1843,6 @@
             // Process claim
             showLoading('Opening gift...');
             document.querySelector('.controls').style.display = 'none';
-            if (window.scatterTree) window.scatterTree();
             
             setTimeout(() => {
                 // TODO: In production, call smart contract here
@@ -1857,10 +1856,13 @@
                 document.getElementById('success-amount').textContent = currentCardGift.amount + ' ' + currentCardGift.token;
                 document.getElementById('success-modal').classList.add('visible');
                 
+                // Scatter tree AFTER claim for impact
+                if (window.scatterTree) window.scatterTree();
+                
                 // Update mailbox status
                 checkMyGifts();
                 currentCardGift = null;
-            }, 1500);
+            }, 1000);
         }
 
         function toggleCodeInput() {
@@ -2168,10 +2170,9 @@
             closeClaimModal();
             showLoading('Claiming...');
             
-            // Hide plaza and controls, scatter tree for celebration
+            // Hide plaza and controls
             document.getElementById('gift-plaza').style.display = 'none';
             document.querySelector('.controls').style.display = 'none';
-            if (window.scatterTree) window.scatterTree();
 
             // TODO: In production, call smart contract here
             // const password = document.getElementById('claim-password').value;
@@ -2201,6 +2202,9 @@
                 hideLoading();
                 document.getElementById('success-amount').textContent = claimAmount + ' ' + gift.token;
                 document.getElementById('success-modal').classList.add('visible');
+                
+                // Scatter tree AFTER claim for impact
+                if (window.scatterTree) window.scatterTree();
                 renderPlaza(); // Update plaza display
             }, 1000);
         }
