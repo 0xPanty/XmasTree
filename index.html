@@ -299,6 +299,164 @@
         .claim-amount { font-size: 1.5rem; color: var(--gold); font-weight: bold; }
         .claim-shares { font-size: 0.8rem; color: rgba(255,255,255,0.5); }
 
+        /* --- Gift Plaza Styles --- */
+        #gift-plaza {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 5;
+            perspective: 800px;
+        }
+        .plaza-gift {
+            position: absolute;
+            width: clamp(24px, 3vw, 40px);
+            height: clamp(24px, 3vw, 40px);
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: auto;
+            animation: orbit3d var(--orbit-duration, 15s) linear infinite;
+            animation-delay: var(--orbit-delay, 0s);
+            transform-style: preserve-3d;
+        }
+        .plaza-gift:hover {
+            z-index: 100;
+        }
+        .plaza-gift:hover img {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(212,175,55,1);
+        }
+        .plaza-gift img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            box-shadow: 0 0 10px rgba(212,175,55,0.8);
+            transition: all 0.3s;
+        }
+        .plaza-gift .santa-emoji {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(10px, 1.5vw, 14px);
+        }
+        @keyframes orbit3d {
+            0% { transform: rotateY(0deg) translateX(var(--orbit-radius, 180px)) rotateY(0deg); opacity: 1; z-index: 10; }
+            25% { transform: rotateY(-90deg) translateX(var(--orbit-radius, 180px)) rotateY(90deg); opacity: 1; z-index: 10; }
+            50% { transform: rotateY(-180deg) translateX(var(--orbit-radius, 180px)) rotateY(180deg); opacity: 0.3; z-index: 1; }
+            75% { transform: rotateY(-270deg) translateX(var(--orbit-radius, 180px)) rotateY(270deg); opacity: 1; z-index: 10; }
+            100% { transform: rotateY(-360deg) translateX(var(--orbit-radius, 180px)) rotateY(360deg); opacity: 1; z-index: 10; }
+        }
+        .requirement-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+        .requirement-row label { flex: 1; color: rgba(255,255,255,0.7); font-size: 0.8rem; }
+        .requirement-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--gold); }
+        .requirement-row input[type="number"] { width: 60px; padding: 4px 8px; }
+        
+        /* Greeting Card Styles */
+        .greeting-card {
+            position: relative;
+            background: linear-gradient(135deg, #1a472a 0%, #0d2818 50%, #1a472a 100%);
+            border: 3px solid var(--gold);
+            border-radius: 16px;
+            padding: 32px 24px;
+            max-width: 340px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(212,175,55,0.3), inset 0 0 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+            animation: cardAppear 0.5s ease-out;
+        }
+        @keyframes cardAppear { from { transform: scale(0.8) rotateY(-20deg); opacity: 0; } to { transform: scale(1) rotateY(0); opacity: 1; } }
+        .card-sparkles {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(212,175,55,0.8), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(2px 2px at 130px 80px, rgba(212,175,55,0.6), transparent),
+                radial-gradient(2px 2px at 200px 50px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 250px 90px, rgba(212,175,55,0.6), transparent);
+            animation: sparkle 2s ease-in-out infinite;
+            pointer-events: none;
+        }
+        @keyframes sparkle { 0%,100% { opacity: 0.5; } 50% { opacity: 1; } }
+        .card-header { margin-bottom: 16px; }
+        .card-avatar {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            border: 2px solid var(--gold);
+            margin-bottom: 8px;
+            box-shadow: 0 0 15px rgba(212,175,55,0.5);
+        }
+        .card-from { color: rgba(255,255,255,0.7); font-size: 0.9rem; }
+        .card-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            color: var(--gold);
+            text-shadow: 0 0 10px rgba(212,175,55,0.5);
+            margin: 16px 0;
+        }
+        .card-message {
+            color: #fff;
+            font-size: 1rem;
+            line-height: 1.6;
+            padding: 16px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            border-left: 3px solid var(--gold);
+            margin: 16px 0;
+            font-style: italic;
+        }
+        .card-gift {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .card-gift-icon {
+            font-size: 2.5rem;
+            animation: bounce 1s ease-in-out infinite;
+        }
+        @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+        .card-amount {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            color: var(--gold);
+        }
+        
+        /* Tip amount buttons */
+        .tip-amt-btn {
+            flex: 1;
+            padding: 8px;
+            background: rgba(212,175,55,0.2);
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tip-amt-btn:hover { background: rgba(212,175,55,0.4); }
+        
+        /* Mailbox button */
+        .mailbox-btn {
+            font-size: 1.8rem !important;
+            padding: 8px 16px !important;
+            background: rgba(212,175,55,0.1) !important;
+        }
+        .mailbox-btn.has-gift {
+            animation: mailGlow 1.5s ease-in-out infinite;
+        }
+        @keyframes mailGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(212,175,55,0.5), 0 0 20px rgba(212,175,55,0.3); }
+            50% { box-shadow: 0 0 20px rgba(212,175,55,0.8), 0 0 40px rgba(212,175,55,0.5), 0 0 60px rgba(212,175,55,0.3); }
+        }
+        
+        
+
         /* --- MOBILE RESPONSIVE STYLES --- */
         @media (max-width: 768px) {
             #ui {
@@ -362,18 +520,6 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 </head>
 <body>
-    <!-- Customize Text Modal -->
-    <div id="text-modal" class="custom-modal">
-        <div class="modal-box">
-            <div class="modal-title">Personalize Experience</div>
-            <input type="text" id="input-title" class="modal-input" placeholder="Enter Main Title">
-            <input type="text" id="input-subtitle" class="modal-input" placeholder="Enter Subtitle">
-            <div class="modal-actions">
-                <button id="confirm-text-btn">Update Display</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Create Gift Modal -->
     <div id="gift-modal" class="custom-modal">
         <div class="modal-box" style="max-width: 400px;">
@@ -397,16 +543,20 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Token</label>
-                        <select id="gift-token">
-                            <option value="ETH">ETH</option>
+                        <select id="gift-token" onchange="togglePlazaCustomToken()">
                             <option value="USDC">USDC</option>
-                            <option value="DEGEN">DEGEN</option>
+                            <option value="ETH">ETH</option>
+                            <option value="CUSTOM">Custom Token</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Amount</label>
-                        <input type="number" id="gift-amount" placeholder="0.01" step="0.001" min="0" oninput="updatePreview()">
+                        <input type="number" id="gift-amount" value="0.1" step="0.01" min="0.1" oninput="validatePlazaAmount(); updatePreview()">
                     </div>
+                </div>
+                <div class="form-group" id="plaza-custom-token-group" style="display:none;">
+                    <label>Token Contract Address (Base)</label>
+                    <input type="text" id="plaza-token-ca" placeholder="0x..." style="font-size:0.8rem;">
                 </div>
                 <div class="form-group" id="shares-group" style="display:none;">
                     <label>Number of Shares</label>
@@ -419,9 +569,24 @@
                         <button type="button" class="type-btn" onclick="selectGiftType('lucky')">Lucky Draw</button>
                     </div>
                 </div>
-                <div class="form-group" id="password-group" style="display:none;">
-                    <label>Claim Password</label>
-                    <input type="text" id="gift-password" placeholder="Enter claim code" maxlength="20">
+                <div class="form-group" id="requirements-group">
+                    <label>Claim Requirements</label>
+                    <div class="requirement-row">
+                        <label>Require Code</label>
+                        <input type="checkbox" id="require-code" onchange="toggleCodeInput(); updatePreview();">
+                    </div>
+                    <div class="requirement-row" id="code-input-row" style="display:none;">
+                        <label>Secret Code</label>
+                        <input type="text" id="gift-code" placeholder="e.g. XMAS2024" maxlength="20" style="width:100px;">
+                    </div>
+                    <div class="requirement-row">
+                        <label>Require Farcaster Pro</label>
+                        <input type="checkbox" id="require-pro" onchange="updatePreview()">
+                    </div>
+                    <div class="requirement-row">
+                        <label>Min Neynar Score</label>
+                        <input type="number" id="min-score" placeholder="0" min="0" max="1" step="0.01" value="0" oninput="updatePreview()">
+                    </div>
                 </div>
                 <div class="gift-preview">
                     <div class="preview-amount" id="preview-amount">0 ETH</div>
@@ -454,14 +619,33 @@
         </div>
     </div>
 
+    <!-- Greeting Card Modal -->
+    <div id="card-modal" class="custom-modal">
+        <div class="greeting-card">
+            <div class="card-sparkles"></div>
+            <div class="card-header">
+                <img id="card-sender-pfp" src="" class="card-avatar">
+                <div class="card-from">From @<span id="card-sender-name">sender</span></div>
+            </div>
+            <div class="card-title" id="card-title">Merry Christmas!</div>
+            <div class="card-message" id="card-message">Wishing you joy and happiness!</div>
+            <div class="card-gift">
+                <div class="card-gift-icon">🎁</div>
+                <div class="card-amount" id="card-amount">0.01 ETH</div>
+            </div>
+            <button class="btn-gift" onclick="claimCardGift()" style="margin-top:16px;">Open Gift</button>
+        </div>
+    </div>
+
     <!-- Success Modal -->
-    <div id="success-modal" class="custom-modal">
-        <div class="modal-box" style="max-width: 300px; text-align: center;">
+    <div id="success-modal" class="custom-modal" style="background: rgba(0,0,0,0.3); backdrop-filter: none;">
+        <div class="modal-box" style="max-width: 300px; text-align: center; background: rgba(0,0,0,0.7); border-color: var(--gold);">
             <div style="font-size: 3rem;">🎉</div>
             <div class="modal-title">Gift Claimed!</div>
             <div style="color: var(--gold); font-size: 1.5rem; margin: 16px 0;" id="success-amount">0.01 ETH</div>
-            <button class="btn-gift" onclick="document.getElementById('success-modal').classList.remove('visible')">Awesome!</button>
+            <button class="btn-gift" onclick="closeSuccessModal()">Awesome!</button>
         </div>
+        <button onclick="goHome()" style="position:fixed; bottom:40px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.6); border:2px solid var(--gold); color:var(--gold); width:60px; height:60px; border-radius:50%; font-size:2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 20px rgba(212,175,55,0.3);">↩</button>
     </div>
 
     <!-- Loading Modal -->
@@ -472,6 +656,99 @@
         </div>
     </div>
 
+    <!-- Tip Author Modal -->
+    <div id="tip-modal" class="custom-modal">
+        <div class="modal-box" style="max-width: 340px;">
+            <div class="modal-title">☕ Tip the Author</div>
+            <div style="text-align:center; margin-bottom:16px;">
+                <img id="author-avatar" src="" style="width:64px; height:64px; border-radius:50%; border:2px solid var(--gold); margin-bottom:8px;">
+                <div style="color:var(--gold); font-size:1rem; margin-bottom:4px;">@<span id="author-name">xqc</span></div>
+                <div style="color:rgba(255,255,255,0.7); font-size:0.85rem;">Support the creator of this Christmas Tree!</div>
+            </div>
+            <div class="gift-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Token</label>
+                        <input type="text" value="USDC" disabled style="opacity:0.8; background:rgba(0,0,0,0.3); border:1px solid rgba(212,175,55,0.3); color:var(--gold); padding:8px; width:100%; text-align:center;">
+                    </div>
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <input type="number" id="tip-amount" value="1" min="0.1" step="0.1">
+                    </div>
+                </div>
+                <div id="tip-amounts" style="display:flex; gap:8px; margin-bottom:12px;"></div>
+                <button class="btn-gift" onclick="sendTip()">Send Tip ❤️</button>
+                <button style="background:transparent; border:1px solid rgba(212,175,55,0.3); color:var(--gold); padding:8px; margin-top:4px; cursor:pointer; width:100%;" onclick="closeTipModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Direct Gift Modal (Send to Friends) -->
+    <div id="direct-gift-modal" class="custom-modal">
+        <div class="modal-box" style="max-width: 400px;">
+            <div class="modal-title">🎁 Send to Friends</div>
+            <div class="mode-hint">Search and select up to 10 Farcaster users</div>
+            <div class="gift-form">
+                <div class="form-group">
+                    <label>Gift Title</label>
+                    <input type="text" id="direct-gift-title" placeholder="Merry Christmas!" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label>Message</label>
+                    <textarea id="direct-gift-message" placeholder="Write your heartfelt message here..." maxlength="200" style="width:100%; height:60px; resize:none; background:rgba(0,0,0,0.3); border:1px solid rgba(212,175,55,0.3); color:#fff; padding:8px; font-family:inherit;"></textarea>
+                </div>
+                <div class="form-group" style="position:relative;">
+                    <label>Recipients (max 10)</label>
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <input type="text" id="user-search" placeholder="Search Farcaster username..." oninput="searchUsers(this.value)" style="flex:1;">
+                        <button type="button" onclick="fetchTopFriends()" style="padding:8px 12px; background:rgba(212,175,55,0.2); border:1px solid var(--gold); color:var(--gold); cursor:pointer; white-space:nowrap; font-size:0.8rem;">👥 Friends</button>
+                    </div>
+                    <div id="user-results" class="user-search-results" style="display:none;"></div>
+                    <div id="selected-users"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Token</label>
+                        <select id="direct-gift-token" onchange="toggleCustomToken()">
+                            <option value="ETH">ETH</option>
+                            <option value="USDC">USDC</option>
+                            <option value="CUSTOM">Custom Token</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Amount Each</label>
+                        <input type="number" id="direct-gift-amount" value="0.5" step="0.1" min="0.1" oninput="validateDirectAmount(); updateDirectPreview()">
+                    </div>
+                </div>
+                <div class="form-group" id="custom-token-group" style="display:none;">
+                    <label>Token Contract Address (Base)</label>
+                    <input type="text" id="custom-token-ca" placeholder="0x..." style="font-size:0.8rem;">
+                </div>
+                <div class="gift-preview">
+                    <div class="preview-amount" id="direct-preview-amount">0 ETH</div>
+                    <div class="preview-info" id="direct-preview-info">Select recipient(s) above</div>
+                </div>
+                <button class="btn-gift" onclick="createDirectGift()">Send Gift</button>
+                <button style="background:transparent; border:1px solid rgba(212,175,55,0.3); color:var(--gold); padding:8px; margin-top:4px; cursor:pointer; width:100%;" onclick="closeDirectGiftModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Claim Input Modal -->
+    <div id="claim-input-modal" class="custom-modal">
+        <div class="modal-box" style="max-width: 350px;">
+            <div class="modal-title">🎁 Claim Gift</div>
+            <div class="gift-form">
+                <div class="form-group">
+                    <label>Enter Gift Code</label>
+                    <input type="text" id="gift-code-input" placeholder="Paste gift link or code...">
+                </div>
+                <button class="btn-gift" onclick="claimByCode()">Claim</button>
+                <button style="background:transparent; border:1px solid rgba(212,175,55,0.3); color:var(--gold); padding:8px; margin-top:4px; cursor:pointer; width:100%;" onclick="closeClaimInput()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <div id="ui">
         <header id="main-header">
             <!-- TITLE UPDATED -->
@@ -479,21 +756,25 @@
             <div id="app-subtitle" class="subtitle">The Gilded Emerald Edition</div>
         </header>
         <div class="controls">
-            <!-- ORDER UPDATED: Music -> Edit -> Action -->
-            <div class="btn-group" id="group-music">
-                <button onclick="document.getElementById('music-upload').click()">Load Music</button>
-                <input type="file" id="music-upload" accept="audio/*">
+            <div class="btn-group">
+                <button id="plaza-btn" onclick="togglePlazaMode()">🎄 Plaza</button>
             </div>
-            <div class="btn-group" id="group-edit">
-                <button id="edit-text-btn">Customize Text</button>
+            <div class="btn-group" id="plaza-send-btn" style="display:none;">
+                <button onclick="openGiftModal()">🎁 Plaza Gift</button>
             </div>
-            <div class="btn-group" id="group-action">
-                <button id="toggle-state">Assemble Tree</button>
+            <div class="btn-group" id="main-btns">
+                <button onclick="openDirectGiftModal()">🎁 Send to Friends</button>
             </div>
-            <div class="btn-group" id="group-gift">
-                <button onclick="openGiftModal()">🎁 Send Gift</button>
+            <div class="btn-group" id="claim-btn">
+                <button id="mailbox-button" onclick="openMyGifts()" class="mailbox-btn">📬</button>
+            </div>
+            <div class="btn-group" id="tip-btn">
+                <button onclick="openTipModal()">☕ Tip Author</button>
             </div>
         </div>
+        
+        <!-- Gift Plaza - Orbiting Avatars (hidden by default) -->
+        <div id="gift-plaza" style="display:none;"></div>
     </div>
     
     <div id="canvas-container">
@@ -991,11 +1272,10 @@
         };
 
         const App = () => {
-            const [isTree, setIsTree] = useState(false);
+            const [isTree, setIsTree] = useState(true); // Start with tree assembled
             const [audioReady, setAudioReady] = useState(false);
 
             useEffect(() => {
-                const fileInput = document.getElementById('music-upload');
                 const resumeContext = () => { if (audioContext.state === 'suspended') audioContext.resume(); };
 
                 const startDefaultMusic = () => {
@@ -1010,15 +1290,11 @@
                     
                     defaultAudioEl.play().then(() => {
                         setAudioReady(true);
-                        const btn = document.querySelector('#group-music button');
-                        if(btn) { btn.innerText = "Playing Default..."; btn.classList.add('active'); }
                     }).catch(e => {
                         const unlockAndPlay = () => {
                             resumeContext();
                             defaultAudioEl.play();
                             setAudioReady(true);
-                            const btn = document.querySelector('#group-music button');
-                            if(btn) { btn.innerText = "Playing Default..."; btn.classList.add('active'); }
                             document.removeEventListener('click', unlockAndPlay);
                             document.removeEventListener('touchstart', unlockAndPlay);
                         };
@@ -1028,91 +1304,16 @@
                 };
 
                 startDefaultMusic(); 
-
-                const handleFile = (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        defaultAudioEl.pause();
-                        if (activeSourceNode && activeSourceNode.stop) try { activeSourceNode.stop(); } catch(e){}
-                        const reader = new FileReader();
-                        reader.onload = (ev) => {
-                            audioContext.decodeAudioData(ev.target.result, (buffer) => {
-                                const source = audioContext.createBufferSource();
-                                source.buffer = buffer;
-                                source.connect(analyser);
-                                source.loop = true;
-                                source.start(0);
-                                activeSourceNode = source;
-                                setAudioReady(true);
-                                document.querySelector('#group-music button').innerText = "Playing Custom...";
-                                document.querySelector('#group-music button').classList.add('active');
-                            });
-                        };
-                        reader.readAsArrayBuffer(file);
-                    }
-                };
-
-                fileInput.addEventListener('change', handleFile);
-
-                const editBtn = document.getElementById('edit-text-btn');
-                const modal = document.getElementById('text-modal');
-                const confirmBtn = document.getElementById('confirm-text-btn');
-
-                const openModal = () => {
-                    document.getElementById('input-title').value = document.getElementById('app-title').innerText;
-                    document.getElementById('input-subtitle').value = document.getElementById('app-subtitle').innerText;
-                    modal.classList.add('visible');
-                };
-                const closeModal = () => modal.classList.remove('visible');
-                const updateText = () => {
-                    const newTitle = document.getElementById('input-title').value;
-                    const newSubtitle = document.getElementById('input-subtitle').value;
-                    if(newTitle) document.getElementById('app-title').innerText = newTitle;
-                    if(newSubtitle) document.getElementById('app-subtitle').innerText = newSubtitle;
-                    closeModal();
-                };
-
-                editBtn.addEventListener('click', openModal);
-                confirmBtn.addEventListener('click', updateText);
-                const modalClick = (e) => { if (e.target === modal) closeModal(); };
-                modal.addEventListener('click', modalClick);
-
-                return () => {
-                    fileInput.removeEventListener('change', handleFile);
-                    editBtn.removeEventListener('click', openModal);
-                    confirmBtn.removeEventListener('click', updateText);
-                    modal.removeEventListener('click', modalClick);
-                };
+                
+                // Expose tree control functions globally
+                window.scatterTree = () => setIsTree(false);
+                window.assembleTree = () => setIsTree(true);
+                
+                return () => {};
             }, []); 
 
             useEffect(() => {
-                const toggleBtn = document.getElementById('toggle-state');
-                const header = document.getElementById('main-header');
-                const musicGroup = document.getElementById('group-music');
-                const editGroup = document.getElementById('group-edit');
-                const uiContainer = document.getElementById('ui');
-
-                if (isTree) {
-                    header.classList.add('ui-hidden');
-                    musicGroup.classList.add('ui-hidden');
-                    editGroup.classList.add('ui-hidden');
-                    uiContainer.classList.add('immersive-mode');
-                    toggleBtn.innerText = "Scatter Elements";
-                } else {
-                    header.classList.remove('ui-hidden');
-                    musicGroup.classList.remove('ui-hidden');
-                    editGroup.classList.remove('ui-hidden');
-                    uiContainer.classList.remove('immersive-mode');
-                    toggleBtn.innerText = "Assemble Tree";
-                }
-
-                const handleToggle = () => {
-                    setIsTree(prev => !prev);
-                    if (audioContext.state === 'suspended') audioContext.resume();
-                };
-
-                toggleBtn.onclick = handleToggle; 
-                return () => { toggleBtn.onclick = null; };
+                // Tree state changed
             }, [isTree]);
 
             return (
@@ -1135,67 +1336,174 @@
         }).catch(() => {});
     </script>
 
-    <!-- Gift System Script -->
+    <!-- Gift Plaza System -->
     <script>
         let giftType = 'equal';
-        let giftMode = 'direct';
-        let selectedRecipients = [];
-        let searchTimeout = null;
-        const MAX_RECIPIENTS = 10;
+        let currentUser = null; // Will be set by Farcaster SDK
         const NEYNAR_API_KEY = 'NEYNAR_API_DOCS';
+        const MAX_PLAZA_GIFTS = 10;
+        let plazaGifts = JSON.parse(localStorage.getItem('plaza_gifts') || '[]');
+        let isPlazaMode = false;
 
+        // Toggle Plaza Mode
+        function togglePlazaMode() {
+            isPlazaMode = !isPlazaMode;
+            const plazaBtn = document.getElementById('plaza-btn');
+            const plaza = document.getElementById('gift-plaza');
+            const plazaSendBtn = document.getElementById('plaza-send-btn');
+            const mainBtns = document.getElementById('main-btns');
+            const tipBtn = document.getElementById('tip-btn');
+            
+            if (isPlazaMode) {
+                plazaBtn.textContent = '↩ Return';
+                plaza.style.display = 'block';
+                plazaSendBtn.style.display = 'block';
+                mainBtns.style.display = 'none';
+                tipBtn.style.display = 'none';
+                renderPlaza();
+            } else {
+                plazaBtn.textContent = '🎄 Plaza';
+                plaza.style.display = 'none';
+                plazaSendBtn.style.display = 'none';
+                mainBtns.style.display = 'block';
+                tipBtn.style.display = 'block';
+            }
+        }
+
+        // Modal functions
         function openGiftModal() { 
             document.getElementById('gift-modal').classList.add('visible');
-            selectedRecipients = [];
-            document.getElementById('gift-recipient').value = '';
-            document.getElementById('selected-user').style.display = 'none';
-            document.getElementById('selected-user').innerHTML = '';
-            document.getElementById('user-results').style.display = 'none';
-            selectGiftMode('direct');
+            document.getElementById('gift-title').value = '';
+            document.getElementById('gift-token').value = 'USDC';
+            document.getElementById('gift-amount').value = '0.1';
+            document.getElementById('gift-shares').value = '5';
+            document.getElementById('plaza-custom-token-group').style.display = 'none';
+            document.getElementById('plaza-token-ca').value = '';
+            document.getElementById('require-code').checked = false;
+            document.getElementById('gift-code').value = '';
+            document.getElementById('code-input-row').style.display = 'none';
+            document.getElementById('require-pro').checked = false;
+            document.getElementById('min-score').value = '0';
+            updatePreview();
         }
         function closeGiftModal() { document.getElementById('gift-modal').classList.remove('visible'); }
         function closeClaimModal() { document.getElementById('claim-modal').classList.remove('visible'); }
+        function openClaimInput() { document.getElementById('claim-input-modal').classList.add('visible'); document.getElementById('gift-code-input').value = ''; }
+        function closeClaimInput() { document.getElementById('claim-input-modal').classList.remove('visible'); }
         function showLoading(text) { document.getElementById('loading-text').textContent = text; document.getElementById('loading-modal').classList.add('visible'); }
         function hideLoading() { document.getElementById('loading-modal').classList.remove('visible'); }
-
-        function selectGiftMode(mode) {
-            giftMode = mode;
-            document.querySelectorAll('.mode-btn').forEach((btn, i) => {
-                btn.classList.toggle('active', (i === 0 && mode === 'direct') || (i === 1 && mode === 'redpacket'));
-            });
-            const recipientGroup = document.getElementById('recipient-group');
-            const sharesGroup = document.getElementById('shares-group');
-            const distributionGroup = document.getElementById('distribution-group');
-            const passwordGroup = document.getElementById('password-group');
-            const modeHint = document.getElementById('mode-hint');
-            const createBtn = document.querySelector('.btn-gift');
-            if (mode === 'direct') {
-                recipientGroup.style.display = 'block';
-                sharesGroup.style.display = 'none';
-                distributionGroup.style.display = 'none';
-                passwordGroup.style.display = 'none';
-                modeHint.textContent = 'Send directly to specific Farcaster user(s)';
-                createBtn.textContent = 'Create Gift';
-            } else {
-                recipientGroup.style.display = 'none';
-                sharesGroup.style.display = 'block';
-                distributionGroup.style.display = 'block';
-                passwordGroup.style.display = 'block';
-                modeHint.textContent = 'Share with multiple people via link + password';
-                createBtn.textContent = 'Create Red Packet';
-                selectedRecipients = [];
+        function closeSuccessModal() { document.getElementById('success-modal').querySelector('.modal-box').style.display = 'none'; }
+        
+        // Tip Author functions
+        const AUTHOR_USERNAME = 'xqc';
+        const AUTHOR_ADDRESS = '0x...'; // Replace with actual address
+        const USDC_CA = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+        let authorInfo = null;
+        
+        async function fetchAuthorInfo() {
+            if (authorInfo) return;
+            try {
+                const res = await fetch(`https://api.neynar.com/v2/farcaster/user/search?q=${AUTHOR_USERNAME}&limit=1`, {
+                    headers: { 'accept': 'application/json', 'x-api-key': NEYNAR_API_KEY }
+                });
+                const data = await res.json();
+                if (data.result?.users?.[0]) {
+                    authorInfo = data.result.users[0];
+                    document.getElementById('author-avatar').src = authorInfo.pfp_url || '';
+                    document.getElementById('author-name').textContent = authorInfo.username;
+                }
+            } catch (e) { console.error('Failed to fetch author info:', e); }
+        }
+        
+        function openTipModal() {
+            document.getElementById('tip-modal').classList.add('visible');
+            document.getElementById('tip-amount').value = '1';
+            document.getElementById('tip-amounts').innerHTML = [1, 3, 5].map(amt => 
+                `<button type="button" class="tip-amt-btn" onclick="setTipAmount(${amt})">${amt}</button>`
+            ).join('');
+            fetchAuthorInfo();
+        }
+        function closeTipModal() { document.getElementById('tip-modal').classList.remove('visible'); }
+        function setTipAmount(amount) { document.getElementById('tip-amount').value = amount; }
+        async function sendTip() {
+            const token = document.getElementById('tip-token').value;
+            const amount = document.getElementById('tip-amount').value;
+            if (!amount || parseFloat(amount) <= 0) { alert('Enter valid amount'); return; }
+            
+            closeTipModal();
+            showLoading('Sending tip...');
+            
+            // In production, integrate with wallet (ethers.js / wagmi)
+            // For demo, just show success
+            setTimeout(() => {
+                hideLoading();
+                alert(`Thank you for your tip! ❤️\n\n${amount} ${token} to author`);
+            }, 1500);
+        }
+        
+        // Go back to home
+        function goHome() {
+            document.getElementById('success-modal').classList.remove('visible');
+            document.getElementById('success-modal').querySelector('.modal-box').style.display = 'block';
+            document.querySelector('.controls').style.display = 'flex';
+            document.getElementById('gift-plaza').style.display = 'none';
+            document.getElementById('plaza-btn').textContent = '🎄 Plaza';
+            document.getElementById('main-btns').style.display = 'block';
+            document.getElementById('tip-btn').style.display = 'block';
+            document.getElementById('plaza-send-btn').style.display = 'none';
+            isPlazaMode = false;
+            if (window.assembleTree) window.assembleTree();
+        }
+        
+        // Direct Gift (Send to Friends)
+        let selectedRecipients = [];
+        let searchTimeout = null;
+        const MAX_RECIPIENTS = 10;
+        
+        function openDirectGiftModal() {
+            document.getElementById('direct-gift-modal').classList.add('visible');
+            selectedRecipients = [];
+            document.getElementById('user-search').value = '';
+            document.getElementById('selected-users').innerHTML = '';
+            document.getElementById('user-results').style.display = 'none';
+            document.getElementById('direct-gift-title').value = '';
+            document.getElementById('direct-gift-message').value = '';
+            document.getElementById('direct-gift-amount').value = '0.5';
+            document.getElementById('direct-gift-token').value = 'USDC';
+            document.getElementById('custom-token-group').style.display = 'none';
+            document.getElementById('custom-token-ca').value = '';
+            updateDirectPreview();
+        }
+        
+        async function fetchTopFriends() {
+            try {
+                document.getElementById('selected-users').innerHTML = '<div style="color:rgba(255,255,255,0.5);font-size:0.8rem;">Loading friends...</div>';
+                
+                // Use current user's fid or default to a popular user for demo
+                const fid = currentUser?.fid || 3; // dwr.eth as default
+                const res = await fetch(`https://api.neynar.com/v2/farcaster/following?fid=${fid}&limit=5`, {
+                    headers: { 'accept': 'application/json', 'x-api-key': NEYNAR_API_KEY }
+                });
+                const data = await res.json();
+                if (data.users?.length > 0) {
+                    selectedRecipients = data.users.slice(0, 5).map(u => ({
+                        fid: u.fid,
+                        username: u.username,
+                        display_name: u.display_name,
+                        pfp_url: u.pfp_url
+                    }));
+                    renderSelectedUsers();
+                    updateDirectPreview();
+                } else {
+                    document.getElementById('selected-users').innerHTML = '';
+                }
+            } catch (e) { 
+                console.error('Failed to fetch friends:', e);
+                document.getElementById('selected-users').innerHTML = '';
             }
-            updatePreview();
         }
-
-        function selectGiftType(type) {
-            giftType = type;
-            document.querySelectorAll('.type-btn').forEach((btn, i) => {
-                btn.classList.toggle('active', (i === 0 && type === 'equal') || (i === 1 && type === 'lucky'));
-            });
-            updatePreview();
-        }
-
+        function closeDirectGiftModal() { document.getElementById('direct-gift-modal').classList.remove('visible'); }
+        
         async function searchUsers(query) {
             if (searchTimeout) clearTimeout(searchTimeout);
             const resultsDiv = document.getElementById('user-results');
@@ -1218,143 +1526,495 @@
                 } catch (e) { console.error(e); resultsDiv.style.display = 'none'; }
             }, 300);
         }
-
+        
         function selectUser(user) {
             if (selectedRecipients.find(r => r.fid === user.fid)) { alert('Already selected'); return; }
             if (selectedRecipients.length >= MAX_RECIPIENTS) { alert('Max ' + MAX_RECIPIENTS + ' recipients'); return; }
             selectedRecipients.push(user);
-            document.getElementById('gift-recipient').value = '';
+            document.getElementById('user-search').value = '';
             document.getElementById('user-results').style.display = 'none';
             renderSelectedUsers();
-            updatePreview();
+            updateDirectPreview();
         }
-
+        
         function renderSelectedUsers() {
-            const div = document.getElementById('selected-user');
-            if (selectedRecipients.length === 0) { div.style.display = 'none'; div.innerHTML = ''; return; }
-            div.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:8px;">${selectedRecipients.map((u, i) => `
+            const div = document.getElementById('selected-users');
+            if (selectedRecipients.length === 0) { div.innerHTML = ''; return; }
+            div.innerHTML = `<div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">${selectedRecipients.map((u, i) => `
                 <div class="selected-user-card" style="flex:none; padding:6px 10px;">
                     <img src="${u.pfp_url || 'https://via.placeholder.com/24'}" style="width:24px; height:24px;" onerror="this.src='https://via.placeholder.com/24'">
                     <span style="color:var(--gold); font-size:0.8rem;">@${u.username}</span>
-                    <button class="remove-btn" onclick="removeSelectedUser(${i})" style="font-size:1rem; padding:2px;">×</button>
+                    <button class="remove-btn" onclick="removeUser(${i})" style="font-size:1rem; padding:2px;">×</button>
                 </div>
-            `).join('')}</div><div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-top:6px; text-align:center;">${selectedRecipients.length}/${MAX_RECIPIENTS}</div>`;
-            div.style.display = 'block';
+            `).join('')}</div><div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-top:6px;">${selectedRecipients.length}/${MAX_RECIPIENTS}</div>`;
+        }
+        
+        function removeUser(index) { selectedRecipients.splice(index, 1); renderSelectedUsers(); updateDirectPreview(); }
+        
+        function toggleCustomToken() {
+            const token = document.getElementById('direct-gift-token').value;
+            document.getElementById('custom-token-group').style.display = token === 'CUSTOM' ? 'block' : 'none';
+            updateDirectPreview();
+        }
+        
+        function validateDirectAmount() {
+            const input = document.getElementById('direct-gift-amount');
+            if (parseFloat(input.value) < 0.1) {
+                input.value = '0.1';
+            }
+        }
+        
+        function updateDirectPreview() {
+            const amount = document.getElementById('direct-gift-amount').value || '0';
+            let token = document.getElementById('direct-gift-token').value;
+            if (token === 'CUSTOM') token = 'TOKEN';
+            document.getElementById('direct-preview-amount').textContent = amount + ' ' + token + ' each';
+            document.getElementById('direct-preview-info').textContent = selectedRecipients.length > 0 
+                ? '→ ' + selectedRecipients.map(u => '@' + u.username).join(', ')
+                : 'Select recipient(s) above';
+        }
+        
+        async function createDirectGift() {
+            const title = document.getElementById('direct-gift-title').value || 'Merry Christmas!';
+            const message = document.getElementById('direct-gift-message').value || '';
+            const token = document.getElementById('direct-gift-token').value;
+            const amount = document.getElementById('direct-gift-amount').value;
+            if (!amount || parseFloat(amount) <= 0) { alert('Enter valid amount'); return; }
+            if (selectedRecipients.length === 0) { alert('Select at least one recipient'); return; }
+            
+            closeDirectGiftModal();
+            showLoading('Creating gifts...');
+            
+            // Create a gift for each recipient
+            const links = [];
+            for (const r of selectedRecipients) {
+                const giftId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                const giftData = {
+                    id: giftId, title, message, token, amount,
+                    shares: 1, type: 'equal', mode: 'direct',
+                    requirePro: false, minScore: 0,
+                    claimed: 0, claimedBy: [],
+                    recipient: { fid: r.fid, username: r.username, pfp: r.pfp_url },
+                    sender: currentUser || { fid: 0, username: 'anonymous', pfp: '' },
+                    createdAt: Date.now()
+                };
+                plazaGifts.push(giftData);
+                links.push({ username: r.username, url: location.origin + location.pathname + '?gift=' + giftId });
+            }
+            localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+            
+            // Create share text
+            let shareText = links.length === 1 
+                ? `🎁 Gift for @${links[0].username}!\n\n${title}\n💰 ${amount} ${token}\n\n🔗 ${links[0].url}`
+                : `🎁 Christmas Gifts!\n\n${title}\n💰 ${amount} ${token} each\n\n` + links.map(l => `→ @${l.username}: ${l.url}`).join('\n');
+            
+            hideLoading();
+            if (navigator.clipboard) {
+                await navigator.clipboard.writeText(shareText);
+                alert(`Gift(s) created for ${selectedRecipients.length} friend(s)!\nLink(s) copied to clipboard!`);
+            } else { alert(shareText); }
+        }
+        
+        // Claim by code/link
+        let currentCardGift = null;
+        
+        function claimByCode() {
+            const input = document.getElementById('gift-code-input').value.trim();
+            if (!input) { alert('Please enter a gift code'); return; }
+            
+            // Extract gift ID from input (could be full URL or just ID)
+            let giftId = input;
+            if (input.includes('gift=')) {
+                giftId = input.split('gift=')[1].split('&')[0];
+            }
+            
+            // Check if gift exists in plaza
+            const gift = plazaGifts.find(g => g.id === giftId);
+            if (gift) {
+                closeClaimInput();
+                // Direct gift shows greeting card
+                if (gift.mode === 'direct') {
+                    showGreetingCard(gift);
+                } else {
+                    openClaimModal(giftId);
+                }
+            } else {
+                alert('Gift not found!');
+            }
+        }
+        
+        // Check and show mailbox glow if there are gifts for user
+        function checkMyGifts() {
+            const myGifts = plazaGifts.filter(g => g.mode === 'direct' && g.claimed < g.shares);
+            const mailboxBtn = document.getElementById('mailbox-button');
+            if (myGifts.length > 0) {
+                mailboxBtn.classList.add('has-gift');
+            } else {
+                mailboxBtn.classList.remove('has-gift');
+            }
+        }
+        
+        // Open first available gift
+        function openMyGifts() {
+            const myGifts = plazaGifts.filter(g => g.mode === 'direct' && g.claimed < g.shares);
+            if (myGifts.length > 0) {
+                showGreetingCard(myGifts[0]);
+            } else {
+                alert('No gifts available');
+            }
+        }
+        
+        function showGreetingCard(gift) {
+            currentCardGift = gift;
+            document.getElementById('card-sender-pfp').src = gift.sender.pfp || 'https://i.imgur.com/HeIi0wU.png';
+            document.getElementById('card-sender-name').textContent = gift.sender.username;
+            document.getElementById('card-title').textContent = gift.title;
+            document.getElementById('card-message').textContent = gift.message || 'Wishing you a wonderful holiday season!';
+            document.getElementById('card-amount').textContent = gift.amount + ' ' + gift.token;
+            document.getElementById('card-modal').classList.add('visible');
+        }
+        
+        function claimCardGift() {
+            if (!currentCardGift) return;
+            document.getElementById('card-modal').classList.remove('visible');
+            
+            // Process claim
+            showLoading('Opening gift...');
+            document.querySelector('.controls').style.display = 'none';
+            if (window.scatterTree) window.scatterTree();
+            
+            setTimeout(() => {
+                // TODO: In production, call smart contract here
+                // await contract.claimGift(giftId, password, isPro);
+                
+                currentCardGift.claimed = 1;
+                currentCardGift.claimedBy.push(currentUser?.fid || 'guest');
+                localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+                
+                hideLoading();
+                document.getElementById('success-amount').textContent = currentCardGift.amount + ' ' + currentCardGift.token;
+                document.getElementById('success-modal').classList.add('visible');
+                
+                // Update mailbox status
+                checkMyGifts();
+                currentCardGift = null;
+            }, 1500);
         }
 
-        function removeSelectedUser(index) { selectedRecipients.splice(index, 1); renderSelectedUsers(); updatePreview(); }
+        function toggleCodeInput() {
+            const show = document.getElementById('require-code').checked;
+            document.getElementById('code-input-row').style.display = show ? 'flex' : 'none';
+            if (!show) document.getElementById('gift-code').value = '';
+        }
+        
+        function togglePlazaCustomToken() {
+            const token = document.getElementById('gift-token').value;
+            document.getElementById('plaza-custom-token-group').style.display = token === 'CUSTOM' ? 'block' : 'none';
+            updatePreview();
+        }
+        
+        function validatePlazaAmount() {
+            const input = document.getElementById('gift-amount');
+            if (parseFloat(input.value) < 0.1) {
+                input.value = '0.1';
+            }
+        }
+        
+        function selectGiftType(type) {
+            giftType = type;
+            document.querySelectorAll('.type-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', (i === 0 && type === 'equal') || (i === 1 && type === 'lucky'));
+            });
+            updatePreview();
+        }
 
         function updatePreview() {
             const amount = document.getElementById('gift-amount').value || '0';
             const token = document.getElementById('gift-token').value;
             const shares = document.getElementById('gift-shares').value || '1';
             document.getElementById('preview-amount').textContent = amount + ' ' + token;
-            if (giftMode === 'direct') {
-                document.getElementById('preview-info').textContent = selectedRecipients.length > 0 
-                    ? '→ ' + selectedRecipients.map(u => '@' + u.username).join(', ')
-                    : 'Select recipient(s) above';
-            } else {
-                const perShare = shares > 0 ? (parseFloat(amount) / parseInt(shares)).toFixed(6) : '0';
-                document.getElementById('preview-info').textContent = giftType === 'equal' 
-                    ? `${shares} shares × ${perShare} ${token} each`
-                    : `${shares} lucky shares (random amounts)`;
+            const perShare = shares > 0 ? (parseFloat(amount) / parseInt(shares)).toFixed(6) : '0';
+            const requireCode = document.getElementById('require-code').checked;
+            const requirePro = document.getElementById('require-pro').checked;
+            const minScore = parseFloat(document.getElementById('min-score').value) || 0;
+            let info = giftType === 'equal' ? `${shares} shares × ${perShare} ${token}` : `${shares} lucky shares`;
+            if (requireCode || requirePro || minScore > 0) {
+                info += ' | Requires:';
+                if (requireCode) info += ' 🔑Code';
+                if (requirePro) info += ' FC Pro';
+                if (minScore > 0) info += ` Score≥${minScore}`;
             }
+            document.getElementById('preview-info').textContent = info;
         }
 
+        // Create gift for plaza
         async function createGift() {
+            // Check if plaza is full
+            const activeGifts = plazaGifts.filter(g => g.claimed < g.shares);
+            if (activeGifts.length >= MAX_PLAZA_GIFTS) {
+                alert('🎄 Plaza is full!\n\nMaximum 10 gifts can orbit the tree at once.\nPlease wait for some gifts to be claimed.');
+                return;
+            }
+            
             const title = document.getElementById('gift-title').value || 'Merry Christmas!';
             const token = document.getElementById('gift-token').value;
             const amount = document.getElementById('gift-amount').value;
-            const shares = document.getElementById('gift-shares').value || '1';
-            const password = document.getElementById('gift-password').value;
-            if (!amount) { alert('Enter amount'); return; }
-            if (giftMode === 'direct' && selectedRecipients.length === 0) { alert('Select recipient(s)'); return; }
-            if (giftMode === 'redpacket' && !password) { alert('Enter password'); return; }
+            const shares = document.getElementById('gift-shares').value || '5';
+            const requireCode = document.getElementById('require-code').checked;
+            const giftCode = document.getElementById('gift-code').value.trim();
+            const requirePro = document.getElementById('require-pro').checked;
+            const minScore = parseFloat(document.getElementById('min-score').value) || 0;
+
+            if (!amount || parseFloat(amount) <= 0) { alert('Enter valid amount'); return; }
+            if (requireCode && !giftCode) { alert('Enter a secret code'); return; }
+            if (!shares || parseInt(shares) < 1) { alert('Enter valid shares'); return; }
 
             closeGiftModal();
-            showLoading(giftMode === 'direct' ? 'Sending gift(s)...' : 'Creating red packet...');
+            showLoading('Creating plaza gift...');
 
-            let shareText = '';
-            if (giftMode === 'direct') {
-                const links = [];
-                for (const r of selectedRecipients) {
-                    const giftId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-                    localStorage.setItem('gift_' + giftId, JSON.stringify({ title, token, amount, shares: '1', type: 'equal', mode: 'direct', password: null, claimed: 0, recipient: { fid: r.fid, username: r.username, pfp: r.pfp_url } }));
-                    links.push({ username: r.username, url: location.origin + location.pathname + '?gift=' + giftId });
-                }
-                shareText = links.length === 1 
-                    ? `🎁 Gift for @${links[0].username}!\n\n${title}\n💰 ${amount} ${token}\n\n🔗 ${links[0].url}`
-                    : `🎁 Christmas Gifts!\n\n${title}\n💰 ${amount} ${token} each\n\n` + links.map(l => `→ @${l.username}: ${l.url}`).join('\n');
-            } else {
-                const giftId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-                localStorage.setItem('gift_' + giftId, JSON.stringify({ title, token, amount, shares, type: giftType, mode: 'redpacket', password: btoa(password), claimed: 0, recipient: null }));
-                shareText = `🧧 Red Packet!\n\n${title}\n💰 ${amount} ${token}\n👥 ${shares} shares\n\n🔗 ${location.origin + location.pathname}?gift=${giftId}\n🔑 Password: ${password}`;
-            }
+            // For demo, use a placeholder sender (in production, get from Farcaster SDK)
+            const sender = currentUser || {
+                fid: Date.now(),
+                username: 'anonymous',
+                pfp_url: 'https://i.imgur.com/HeIi0wU.png'
+            };
+
+            const giftId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+            const giftData = {
+                id: giftId,
+                title,
+                token,
+                amount,
+                shares: parseInt(shares),
+                type: giftType,
+                requireCode,
+                giftCode: requireCode ? giftCode : '',
+                requirePro,
+                minScore,
+                claimed: 0,
+                claimedBy: [],
+                sender: {
+                    fid: sender.fid,
+                    username: sender.username,
+                    pfp: sender.pfp_url
+                },
+                createdAt: Date.now()
+            };
+
+            // Add to plaza gifts
+            plazaGifts.push(giftData);
+            localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
 
             hideLoading();
-            if (navigator.clipboard) {
-                await navigator.clipboard.writeText(shareText);
-                alert(giftMode === 'direct' ? `Gift(s) created for ${selectedRecipients.length} recipient(s)!\nLink(s) copied!` : 'Red packet created!\nLink copied!');
-            } else { alert(shareText); }
+            renderPlaza();
+            alert('🎁 Gift added to plaza!\nYour avatar is now orbiting the tree.');
         }
 
-        async function claimGift() {
-            const giftId = new URLSearchParams(location.search).get('gift');
-            if (!giftId) { alert('No gift found'); return; }
-            const giftData = JSON.parse(localStorage.getItem('gift_' + giftId) || '{}');
-            if (!giftData.title) { alert('Gift not found'); return; }
-
-            if (giftData.mode === 'redpacket' || giftData.password) {
-                const pw = document.getElementById('claim-password').value;
-                if (!pw) { alert('Enter password'); return; }
-                if (atob(giftData.password) !== pw) { alert('Wrong password'); return; }
-            }
-            if (giftData.claimed >= parseInt(giftData.shares)) { alert('Already claimed'); return; }
-
-            closeClaimModal();
-            showLoading('Claiming...');
-            const claimAmount = giftData.type === 'equal' 
-                ? (parseFloat(giftData.amount) / parseInt(giftData.shares)).toFixed(6)
-                : (Math.random() * parseFloat(giftData.amount) * 2 / (parseInt(giftData.shares) - giftData.claimed)).toFixed(6);
-            giftData.claimed++;
-            localStorage.setItem('gift_' + giftId, JSON.stringify(giftData));
-
-            setTimeout(() => {
-                hideLoading();
-                document.getElementById('success-amount').textContent = claimAmount + ' ' + giftData.token;
-                document.getElementById('success-modal').classList.add('visible');
-            }, 1000);
+        // Render orbiting avatars around the tree
+        function renderPlaza() {
+            const plaza = document.getElementById('gift-plaza');
+            const activeGifts = plazaGifts.filter(g => g.claimed < g.shares).slice(0, MAX_PLAZA_GIFTS);
+            
+            // Responsive orbit radius based on viewport - closer to tree
+            const baseRadius = Math.min(window.innerWidth, window.innerHeight) * 0.12;
+            const positions = [
+                { duration: 18, delay: 0, y: -100, radius: baseRadius * 0.9 },
+                { duration: 22, delay: -3, y: -70, radius: baseRadius * 1.1 },
+                { duration: 15, delay: -7, y: -35, radius: baseRadius * 0.85 },
+                { duration: 20, delay: -2, y: 0, radius: baseRadius },
+                { duration: 25, delay: -5, y: 35, radius: baseRadius * 1.15 },
+                { duration: 17, delay: -8, y: -85, radius: baseRadius * 0.95 },
+                { duration: 23, delay: -1, y: -50, radius: baseRadius * 1.05 },
+                { duration: 19, delay: -6, y: 18, radius: baseRadius * 0.92 },
+                { duration: 21, delay: -4, y: -18, radius: baseRadius * 1.1 },
+                { duration: 16, delay: -9, y: 50, radius: baseRadius * 0.98 }
+            ];
+            
+            plaza.innerHTML = activeGifts.map((gift, index) => {
+                const pos = positions[index];
+                return `
+                    <div class="plaza-gift" 
+                         style="--orbit-duration: ${pos.duration}s; --orbit-delay: ${pos.delay}s; --orbit-radius: ${pos.radius}px; top: ${pos.y}px;"
+                         onclick="openClaimModal('${gift.id}')"
+                         title="Click to claim mystery gift from @${gift.sender.username}">
+                        <img src="${gift.sender.pfp || 'https://i.imgur.com/HeIi0wU.png'}" 
+                             onerror="this.src='https://i.imgur.com/HeIi0wU.png'"
+                             alt="${gift.sender.username}">
+                        <div class="santa-emoji">🎅</div>
+                    </div>
+                `;
+            }).join('');
         }
 
-        function checkGiftUrl() {
-            const giftId = new URLSearchParams(location.search).get('gift');
-            if (!giftId) return;
-            const g = JSON.parse(localStorage.getItem('gift_' + giftId) || '{}');
-            if (!g.title) return;
+        // Open claim modal for specific gift
+        function openClaimModal(giftId) {
+            const gift = plazaGifts.find(g => g.id === giftId);
+            if (!gift) { alert('Gift not found'); return; }
+            if (gift.claimed >= gift.shares) { alert('All shares claimed!'); return; }
 
-            document.querySelector('#claim-modal .modal-title').textContent = g.mode === 'direct' ? '🎁 You Got a Gift!' : '🧧 Red Packet';
-            document.getElementById('claim-message').textContent = g.title;
-            document.getElementById('claim-remaining').textContent = g.amount + ' ' + g.token;
+            // Store current gift id for claiming
+            document.getElementById('claim-modal').dataset.giftId = giftId;
 
-            const sharesEl = document.getElementById('claim-shares').parentElement;
-            sharesEl.style.display = g.mode === 'direct' ? 'none' : 'inline';
-            if (g.mode !== 'direct') document.getElementById('claim-shares').textContent = (g.claimed || 0) + '/' + g.shares;
+            document.querySelector('#claim-modal .modal-title').textContent = '🎁 Mystery Gift';
+            document.getElementById('claim-message').textContent = gift.title;
+            document.getElementById('claim-remaining').textContent = '??? ' + gift.token;
+            document.getElementById('claim-shares').textContent = gift.claimed + '/' + gift.shares + ' claimed';
+            document.getElementById('claim-shares').parentElement.style.display = 'inline';
 
+            // Show sender info
             const recipientDiv = document.getElementById('claim-recipient');
-            if (g.recipient) {
-                recipientDiv.innerHTML = `<div style="display:flex; align-items:center; justify-content:center; gap:8px;"><img src="${g.recipient.pfp || ''}" style="width:24px; height:24px; border-radius:50%;" onerror="this.style.display='none'"><span style="color:var(--gold); font-size:0.85rem;">For @${g.recipient.username}</span></div>`;
-                recipientDiv.style.display = 'block';
-            } else { recipientDiv.style.display = 'none'; }
+            recipientDiv.innerHTML = `
+                <div style="display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:8px;">
+                    <img src="${gift.sender.pfp || ''}" style="width:32px; height:32px; border-radius:50%; border:2px solid var(--gold);" onerror="this.style.display='none'">
+                    <span style="color:var(--gold);">From @${gift.sender.username}</span>
+                </div>
+                ${gift.requirePro || gift.minScore > 0 ? `
+                    <div style="font-size:0.75rem; color:rgba(255,255,255,0.5); margin-top:4px;">
+                        Requirements: ${gift.requirePro ? '⭐ FC Pro ' : ''}${gift.minScore > 0 ? `Score≥${gift.minScore}` : ''}
+                    </div>
+                ` : ''}
+            `;
+            recipientDiv.style.display = 'block';
 
-            const pwGroup = document.querySelector('#claim-modal .form-group');
-            const claimBtn = document.querySelector('#claim-modal .btn-gift');
-            pwGroup.style.display = g.mode === 'direct' ? 'none' : 'block';
-            claimBtn.textContent = g.mode === 'direct' ? 'Claim Gift' : 'Claim Red Packet';
+            // Show/hide code input based on gift requirements
+            const codeGroup = document.querySelector('#claim-modal .form-group');
+            if (gift.requireCode) {
+                codeGroup.style.display = 'block';
+                document.getElementById('claim-password').value = '';
+            } else {
+                codeGroup.style.display = 'none';
+            }
+            document.querySelector('#claim-modal .btn-gift').textContent = 'Claim Gift';
 
             document.getElementById('claim-modal').classList.add('visible');
         }
 
-        window.addEventListener('DOMContentLoaded', checkGiftUrl);
+        // Claim gift
+        async function claimGift() {
+            const giftId = document.getElementById('claim-modal').dataset.giftId;
+            const gift = plazaGifts.find(g => g.id === giftId);
+            
+            if (!gift) { alert('Gift not found'); return; }
+            if (gift.claimed >= gift.shares) { alert('All shares claimed!'); return; }
+
+            // Verify code if required
+            if (gift.requireCode) {
+                const inputCode = document.getElementById('claim-password').value.trim();
+                if (inputCode !== gift.giftCode) {
+                    alert('Wrong code! Try again.');
+                    return;
+                }
+            }
+
+            // In production, verify user meets requirements via Farcaster SDK
+            if (gift.requirePro) {
+                console.log('FC Pro required - would verify via Farcaster');
+            }
+            if (gift.minScore > 0) {
+                console.log('Min score required:', gift.minScore);
+            }
+
+            closeClaimModal();
+            showLoading('Claiming...');
+            
+            // Hide plaza and controls, scatter tree for celebration
+            document.getElementById('gift-plaza').style.display = 'none';
+            document.querySelector('.controls').style.display = 'none';
+            if (window.scatterTree) window.scatterTree();
+
+            // TODO: In production, call smart contract here
+            // const password = document.getElementById('claim-password').value;
+            // await contract.claimGift(giftId, password, isPro);
+            
+            // Calculate claim amount (demo)
+            let claimAmount;
+            if (gift.type === 'equal') {
+                claimAmount = (parseFloat(gift.amount) / gift.shares).toFixed(6);
+            } else {
+                const remaining = gift.shares - gift.claimed;
+                const remainingAmount = parseFloat(gift.amount) - gift.claimedBy.reduce((sum, c) => sum + parseFloat(c.amount || 0), 0);
+                const maxAmount = remaining > 1 ? (remainingAmount * 2 / remaining) : remainingAmount;
+                claimAmount = (Math.random() * maxAmount).toFixed(6);
+            }
+
+            // Update gift (demo - in production this comes from contract event)
+            gift.claimed++;
+            gift.claimedBy.push({
+                fid: currentUser?.fid || Date.now(),
+                amount: claimAmount,
+                at: Date.now()
+            });
+            localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+
+            setTimeout(() => {
+                hideLoading();
+                document.getElementById('success-amount').textContent = claimAmount + ' ' + gift.token;
+                document.getElementById('success-modal').classList.add('visible');
+                renderPlaza(); // Update plaza display
+            }, 1000);
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            // Hide unused form fields
+            const recipientGroup = document.getElementById('recipient-group');
+            const passwordGroup = document.getElementById('password-group');
+            const modeToggle = document.querySelector('.mode-toggle');
+            const modeHint = document.getElementById('mode-hint');
+            if (recipientGroup) recipientGroup.style.display = 'none';
+            if (passwordGroup) passwordGroup.style.display = 'none';
+            if (modeToggle) modeToggle.style.display = 'none';
+            if (modeHint) modeHint.textContent = 'Gift will appear in the plaza for anyone to claim';
+
+            // Show shares and distribution
+            document.getElementById('shares-group').style.display = 'block';
+            document.getElementById('distribution-group').style.display = 'block';
+
+            // Try to get Farcaster user
+            import('https://esm.sh/@farcaster/miniapp-sdk').then(async ({ sdk }) => {
+                try {
+                    const context = await sdk.context;
+                    if (context?.user) {
+                        currentUser = context.user;
+                        console.log('Farcaster user:', currentUser.username);
+                    }
+                } catch (e) { console.log('Not in Farcaster frame'); }
+            }).catch(() => {});
+
+            // TEST MODE: Always add demo gifts (remove in production)
+            plazaGifts = [
+                // Direct gift for testing greeting card
+                { id: 'testcard', title: '🎄 Merry Christmas!', message: 'Wishing you joy, peace and happiness this holiday season! Thank you for being an amazing friend.', token: 'USDC', amount: '5', shares: 1, type: 'equal', mode: 'direct', requirePro: false, minScore: 0, claimed: 0, claimedBy: [], recipient: { fid: 999, username: 'you' }, sender: { fid: 1, username: 'santa', pfp: 'https://i.imgur.com/JQjIxbJ.png' }, createdAt: Date.now() },
+                { id: 'demo1', title: 'Merry Christmas!', token: 'ETH', amount: '0.01', shares: 5, type: 'equal', requirePro: false, minScore: 0, claimed: 0, claimedBy: [], sender: { fid: 1, username: 'santa', pfp: 'https://i.imgur.com/JQjIxbJ.png' }, createdAt: Date.now() },
+                { id: 'demo2', title: 'Happy Holidays!', token: 'USDC', amount: '10', shares: 3, type: 'lucky', requirePro: true, minScore: 0, claimed: 0, claimedBy: [], sender: { fid: 2, username: 'rudolph', pfp: 'https://i.imgur.com/YqZmGqN.png' }, createdAt: Date.now() },
+                { id: 'demo3', title: 'Season Greetings!', token: 'USDC', amount: '100', shares: 10, type: 'equal', requirePro: false, minScore: 0.5, claimed: 0, claimedBy: [], sender: { fid: 3, username: 'elf', pfp: 'https://i.imgur.com/8Km9tLL.png' }, createdAt: Date.now() },
+                { id: 'demo4', title: 'Ho Ho Ho!', token: 'ETH', amount: '0.005', shares: 8, type: 'lucky', requirePro: false, minScore: 0, claimed: 0, claimedBy: [], sender: { fid: 4, username: 'frosty', pfp: 'https://i.imgur.com/5TYwK9x.png' }, createdAt: Date.now() },
+                { id: 'demo5', title: 'Jingle Bells!', token: 'USDC', amount: '5', shares: 5, type: 'equal', requirePro: false, minScore: 0, claimed: 0, claimedBy: [], sender: { fid: 5, username: 'grinch', pfp: 'https://i.imgur.com/6NfNpVy.png' }, createdAt: Date.now() },
+                { id: 'demo6', title: 'Happy New Year!', token: 'ETH', amount: '0.02', shares: 4, type: 'equal', requirePro: true, minScore: 0, claimed: 0, claimedBy: [], sender: { fid: 6, username: 'snowman', pfp: 'https://i.imgur.com/QWoJbWP.png' }, createdAt: Date.now() },
+                { id: 'demo7', title: 'Winter Magic!', token: 'USDC', amount: '15', shares: 6, type: 'lucky', requirePro: false, minScore: 0.3, claimed: 0, claimedBy: [], sender: { fid: 7, username: 'reindeer', pfp: 'https://i.imgur.com/mCHMpLT.png' }, createdAt: Date.now() },
+                { id: 'demo8', title: 'Festive Joy!', token: 'ETH', amount: '0.008', shares: 10, type: 'equal', requirePro: false, minScore: 0, claimed: 0, claimedBy: [], sender: { fid: 8, username: 'angel', pfp: 'https://i.imgur.com/HeIi0wU.png' }, createdAt: Date.now() },
+                { id: 'demo9', title: 'Xmas Surprise!', token: 'USDC', amount: '25', shares: 5, type: 'lucky', requirePro: false, minScore: 0, claimed: 0, claimedBy: [], sender: { fid: 9, username: 'nutcracker', pfp: 'https://i.imgur.com/tB42KmJ.png' }, createdAt: Date.now() },
+                { id: 'demo10', title: 'Holiday Cheer!', token: 'ETH', amount: '0.015', shares: 7, type: 'equal', requirePro: false, minScore: 0.2, claimed: 0, claimedBy: [], sender: { fid: 10, username: 'mrs_claus', pfp: 'https://i.imgur.com/LxW7IOK.png' }, createdAt: Date.now() }
+            ];
+            localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+            
+            // Check if user has gifts
+            checkMyGifts();
+            
+            // Check URL for gift parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            const giftId = urlParams.get('gift');
+            if (giftId) {
+                setTimeout(() => {
+                    const gift = plazaGifts.find(g => g.id === giftId);
+                    if (gift && gift.mode === 'direct') {
+                        showGreetingCard(gift);
+                    } else if (gift) {
+                        openClaimModal(giftId);
+                    }
+                }, 500);
+            }
+        });
     </script>
 </body>
 </html>
