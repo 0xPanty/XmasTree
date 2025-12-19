@@ -896,7 +896,7 @@
         <div class="modal-box" style="max-width: 400px;">
             <div class="modal-title">📋 My Gifts Record</div>
             <div id="record-list" style="margin-top:12px; max-height:50vh; overflow-y:auto;"></div>
-            <button class="btn-gift" onclick="closeRecordModal()" style="margin-top:16px;">CLOSE</button>
+            <button class="btn-gift" onclick="closeRecordModal()" style="margin-top:16px; width:100%;">CLOSE</button>
         </div>
     </div>
 
@@ -1825,21 +1825,40 @@
             }, 1500);
         }
         
-        // Gift Record feature - show gifts sent and claimed
+        // Gift Record feature - show gifts sent and claimed (only on-chain transactions)
         function openRecordModal() {
-            const myUsername = currentUser?.username || 'santa';
+            const myUsername = currentUser?.username || 'anonymous';
             const myFid = currentUser?.fid;
+            const myAddress = window.connectedAddress?.toLowerCase();
             
-            // Gifts I sent
-            const sentGifts = plazaGifts.filter(g => g.sender?.username === myUsername);
+            // Only show gifts with blockchain transactions (have txHash or contractGiftId)
+            const onChainGifts = plazaGifts.filter(g => g.txHash || g.contractGiftId);
             
-            // Gifts I claimed
-            const claimedGifts = plazaGifts.filter(g => 
-                g.claimedBy?.some(c => c.username === myUsername || c.fid === myFid)
+            // Gifts I sent (on-chain only)
+            const sentGifts = onChainGifts.filter(g => 
+                g.sender?.username === myUsername || 
+                g.senderAddress?.toLowerCase() === myAddress
+            );
+            
+            // Gifts I claimed (on-chain only)
+            const claimedGifts = onChainGifts.filter(g => 
+                g.claimedBy?.some(c => 
+                    c.username === myUsername || 
+                    c.fid === myFid ||
+                    c.address?.toLowerCase() === myAddress
+                )
             );
             
             const recordList = document.getElementById('record-list');
             let html = '';
+            
+            // If no records at all
+            if (sentGifts.length === 0 && claimedGifts.length === 0) {
+                html = '<div style="text-align:center; color:rgba(255,255,255,0.5); padding:24px; font-size:0.9rem;">No transaction records yet<br><span style="font-size:0.75rem; margin-top:8px; display:block;">Send or claim a gift to see records here</span></div>';
+                recordList.innerHTML = html;
+                document.getElementById('record-modal').classList.add('visible');
+                return;
+            }
             
             // Sent gifts section
             html += '<div style="color:var(--gold); font-weight:bold; margin-bottom:8px;">🎁 Gifts I Sent</div>';
