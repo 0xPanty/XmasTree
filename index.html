@@ -108,7 +108,7 @@
             gap: 8px;
             justify-content: flex-end;
             align-items: center;
-            padding-bottom: 10px;
+            padding-bottom: 20px;
             pointer-events: auto;
             opacity: 0;
             animation: fadeUp 1.5s ease-out forwards 1.2s;
@@ -1298,7 +1298,7 @@
                     meshRef.current.material.uniforms.uProgress.value = THREE.MathUtils.lerp(
                         meshRef.current.material.uniforms.uProgress.value,
                         targetProgress,
-                        delta * 5
+                        delta * 1.5
                     );
                     const normalizedAudio = Math.min(audioFreq.current / 128.0, 1.0); 
                     meshRef.current.material.uniforms.uAudio.value = THREE.MathUtils.lerp(
@@ -1376,9 +1376,9 @@
                 const target = isTree ? 1 : 0;
                 
                 meshRef.current.userData.progress = THREE.MathUtils.lerp(
-                    meshRef.current.userData.progress || (isTree ? 1 : 0),
+                    meshRef.current.userData.progress || 0,
                     target,
-                    delta * 5
+                    delta * 1.2
                 );
                 
                 const p = meshRef.current.userData.progress;
@@ -1472,32 +1472,23 @@
             );
         };
 
-        const CameraController = ({ viewMode }) => {
+        const ResponsiveCamera = () => {
             const { camera, size } = useThree();
-            
-            useFrame(() => {
-                // Target positions
-                const isMobile = size.width < 768;
-                const topPos = { x: 0, y: 22, z: 0.1 };  // Perfect top-down view, closer
-                const sidePos = { x: 0, y: 4, z: isMobile ? 35 : 20 }; // Side view for tree
-                
-                const target = viewMode === 'top' ? topPos : sidePos;
-                
-                // Smooth interpolation
-                camera.position.x += (target.x - camera.position.x) * 0.02;
-                camera.position.y += (target.y - camera.position.y) * 0.02;
-                camera.position.z += (target.z - camera.position.z) * 0.02;
-            });
-            
+            useEffect(() => {
+                const isMobilePortrait = size.width < 768 && size.width < size.height;
+                const targetZ = isMobilePortrait ? 35 : 20; 
+                camera.position.z = targetZ;
+                camera.updateProjectionMatrix();
+            }, [size.width, size.height, camera]);
             return null;
         };
 
-        const Scene = ({ isTree, viewMode }) => {
+        const Scene = ({ isTree }) => {
             return (
                 <>
-                    <PerspectiveCamera makeDefault position={[0, 22, 0.1]} fov={50} />
-                    <CameraController viewMode={viewMode} />
-                    <OrbitControls enablePan={false} minDistance={10} maxDistance={50} maxPolarAngle={Math.PI / 1.8} autoRotate={true} autoRotateSpeed={viewMode === 'top' ? 1.2 : 0.5} />
+                    <PerspectiveCamera makeDefault position={[0, 4, 20]} fov={50} />
+                    <ResponsiveCamera /> 
+                    <OrbitControls enablePan={false} minDistance={10} maxDistance={50} maxPolarAngle={Math.PI / 1.5} autoRotate={true} autoRotateSpeed={0.5} />
                     <Environment preset="city" blur={1} background={false} />
                     <ambientLight intensity={0.2} color="#002b16" />
                     <spotLight position={[10, 20, 10]} angle={0.3} penumbra={1} intensity={2} castShadow color="#F7E7CE" />
@@ -1538,12 +1529,14 @@
         };
 
         const App = () => {
-            const [isTree, setIsTree] = useState(true); // Start as tree with top-down view
+            const [isTree, setIsTree] = useState(false); // Start scattered (gift), then become tree
             const [audioReady, setAudioReady] = useState(false);
-            const [viewMode, setViewMode] = useState('top'); // 'top' = top-down sphere view, 'side' = tree view
 
             useEffect(() => {
-                // Stay as sphere on initial load (no auto-transition to tree)
+                // Gift → Tree animation on load
+                const timer = setTimeout(() => {
+                    setIsTree(true);
+                }, 1500); // Wait 1.5s then assemble tree
                 
                 const resumeContext = () => { if (audioContext.state === 'suspended') audioContext.resume(); };
 
@@ -1577,10 +1570,8 @@
                 // Expose tree control functions globally
                 window.scatterTree = () => setIsTree(false);
                 window.assembleTree = () => setIsTree(true);
-                window.setTopView = () => setViewMode('top');
-                window.setSideView = () => setViewMode('side');
                 
-                return () => {};
+                return () => clearTimeout(timer);
             }, []); 
 
             useEffect(() => {
@@ -1591,7 +1582,7 @@
                 <Canvas shadows dpr={[1, 2]} gl={{ antialias: false, toneMappingExposure: 1.5 }}>
                     <color attach="background" args={['#000500']} />
                     <Suspense fallback={null}>
-                        <Scene isTree={isTree} viewMode={viewMode} />
+                        <Scene isTree={isTree} />
                         <PostProcessingEffects />
                     </Suspense>
                 </Canvas>
@@ -1719,17 +1710,14 @@
         
         // Toggle Plaza Mode
         function togglePlazaMode() {
+            // If entering plaza, play transition first
             if (!isPlazaMode) {
-                // Entering plaza: play comet animation then switch view
                 playPlazaTransition(() => {
-                    if (window.setSideView) window.setSideView();
                     activatePlazaMode(true);
                 });
-            } else {
-                // Leaving plaza: animate back to top view
-                if (window.setTopView) window.setTopView();
-                activatePlazaMode(false);
+                return;
             }
+            activatePlazaMode(false);
         }
         
         function activatePlazaMode(entering) {
