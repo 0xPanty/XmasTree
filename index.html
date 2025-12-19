@@ -1298,7 +1298,7 @@
                     meshRef.current.material.uniforms.uProgress.value = THREE.MathUtils.lerp(
                         meshRef.current.material.uniforms.uProgress.value,
                         targetProgress,
-                        delta * 1.5
+                        delta * 5
                     );
                     const normalizedAudio = Math.min(audioFreq.current / 128.0, 1.0); 
                     meshRef.current.material.uniforms.uAudio.value = THREE.MathUtils.lerp(
@@ -1376,9 +1376,9 @@
                 const target = isTree ? 1 : 0;
                 
                 meshRef.current.userData.progress = THREE.MathUtils.lerp(
-                    meshRef.current.userData.progress || 0,
+                    meshRef.current.userData.progress || (isTree ? 1 : 0),
                     target,
-                    delta * 1.2
+                    delta * 5
                 );
                 
                 const p = meshRef.current.userData.progress;
@@ -1478,7 +1478,7 @@
             useFrame(() => {
                 // Target positions
                 const isMobile = size.width < 768;
-                const topPos = { x: 0, y: 30, z: isMobile ? 15 : 8 };  // Top-down view
+                const topPos = { x: 0, y: 40, z: 0.1 };  // Perfect top-down view
                 const sidePos = { x: 0, y: 4, z: isMobile ? 35 : 20 }; // Side view for tree
                 
                 const target = viewMode === 'top' ? topPos : sidePos;
@@ -1495,7 +1495,7 @@
         const Scene = ({ isTree, viewMode }) => {
             return (
                 <>
-                    <PerspectiveCamera makeDefault position={[0, 30, 8]} fov={50} />
+                    <PerspectiveCamera makeDefault position={[0, 40, 0.1]} fov={50} />
                     <CameraController viewMode={viewMode} />
                     <OrbitControls enablePan={false} minDistance={10} maxDistance={50} maxPolarAngle={Math.PI / 1.8} autoRotate={true} autoRotateSpeed={viewMode === 'top' ? 1.2 : 0.5} />
                     <Environment preset="city" blur={1} background={false} />
