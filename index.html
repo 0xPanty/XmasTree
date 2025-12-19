@@ -108,7 +108,7 @@
             gap: 8px;
             justify-content: flex-end;
             align-items: center;
-            padding-bottom: 20px;
+            padding-bottom: 10px;
             pointer-events: auto;
             opacity: 0;
             animation: fadeUp 1.5s ease-out forwards 1.2s;
@@ -1483,12 +1483,36 @@
             return null;
         };
 
-        const Scene = ({ isTree }) => {
+        const CameraController = ({ viewMode }) => {
+            const { camera } = useThree();
+            const controlsRef = useRef();
+            
+            useFrame(() => {
+                if (!controlsRef.current) return;
+                
+                // Target positions
+                const topPos = { x: 0, y: 35, z: 5 };  // Top-down view
+                const sidePos = { x: 0, y: 4, z: 20 }; // Side view for tree
+                
+                const target = viewMode === 'top' ? topPos : sidePos;
+                
+                // Smooth interpolation
+                camera.position.x += (target.x - camera.position.x) * 0.03;
+                camera.position.y += (target.y - camera.position.y) * 0.03;
+                camera.position.z += (target.z - camera.position.z) * 0.03;
+                
+                controlsRef.current.update();
+            });
+            
+            return <OrbitControls ref={controlsRef} enablePan={false} minDistance={10} maxDistance={50} maxPolarAngle={Math.PI / 1.8} autoRotate={true} autoRotateSpeed={viewMode === 'top' ? 1.5 : 0.5} />;
+        };
+
+        const Scene = ({ isTree, viewMode }) => {
             return (
                 <>
-                    <PerspectiveCamera makeDefault position={[0, 4, 20]} fov={50} />
+                    <PerspectiveCamera makeDefault position={[0, 35, 5]} fov={50} />
                     <ResponsiveCamera /> 
-                    <OrbitControls enablePan={false} minDistance={10} maxDistance={50} maxPolarAngle={Math.PI / 1.5} autoRotate={true} autoRotateSpeed={0.5} />
+                    <CameraController viewMode={viewMode} />
                     <Environment preset="city" blur={1} background={false} />
                     <ambientLight intensity={0.2} color="#002b16" />
                     <spotLight position={[10, 20, 10]} angle={0.3} penumbra={1} intensity={2} castShadow color="#F7E7CE" />
@@ -1529,14 +1553,12 @@
         };
 
         const App = () => {
-            const [isTree, setIsTree] = useState(false); // Start scattered (gift), then become tree
+            const [isTree, setIsTree] = useState(false); // Start as sphere, becomes tree in plaza
             const [audioReady, setAudioReady] = useState(false);
+            const [viewMode, setViewMode] = useState('top'); // 'top' = top-down sphere view, 'side' = tree view
 
             useEffect(() => {
-                // Gift → Tree animation on load
-                const timer = setTimeout(() => {
-                    setIsTree(true);
-                }, 1500); // Wait 1.5s then assemble tree
+                // Stay as sphere on initial load (no auto-transition to tree)
                 
                 const resumeContext = () => { if (audioContext.state === 'suspended') audioContext.resume(); };
 
@@ -1570,8 +1592,10 @@
                 // Expose tree control functions globally
                 window.scatterTree = () => setIsTree(false);
                 window.assembleTree = () => setIsTree(true);
+                window.setTopView = () => setViewMode('top');
+                window.setSideView = () => setViewMode('side');
                 
-                return () => clearTimeout(timer);
+                return () => {};
             }, []); 
 
             useEffect(() => {
@@ -1582,7 +1606,7 @@
                 <Canvas shadows dpr={[1, 2]} gl={{ antialias: false, toneMappingExposure: 1.5 }}>
                     <color attach="background" args={['#000500']} />
                     <Suspense fallback={null}>
-                        <Scene isTree={isTree} />
+                        <Scene isTree={isTree} viewMode={viewMode} />
                         <PostProcessingEffects />
                     </Suspense>
                 </Canvas>
@@ -1710,14 +1734,17 @@
         
         // Toggle Plaza Mode
         function togglePlazaMode() {
-            // If entering plaza, play transition first
             if (!isPlazaMode) {
-                playPlazaTransition(() => {
-                    activatePlazaMode(true);
-                });
-                return;
+                // Entering plaza: animate to tree view
+                if (window.setSideView) window.setSideView();
+                if (window.assembleTree) window.assembleTree();
+                setTimeout(() => activatePlazaMode(true), 800);
+            } else {
+                // Leaving plaza: animate to sphere view
+                if (window.setTopView) window.setTopView();
+                if (window.scatterTree) window.scatterTree();
+                activatePlazaMode(false);
             }
-            activatePlazaMode(false);
         }
         
         function activatePlazaMode(entering) {
