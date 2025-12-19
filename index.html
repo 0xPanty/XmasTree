@@ -779,8 +779,8 @@
                 </div>
                 <div class="form-group" id="recipient-group" style="position:relative;">
                     <label>Recipient (max 10)</label>
-                    <input type="text" id="gift-recipient" placeholder="Search Farcaster username..." oninput="searchUsers(this.value)">
-                    <div id="user-results" class="user-search-results" style="display:none;"></div>
+                    <input type="text" id="gift-recipient" placeholder="Search Farcaster username..." oninput="searchUsersPlaza(this.value)">
+                    <div id="plaza-user-results" class="user-search-results" style="display:none;"></div>
                     <div id="selected-user"></div>
                 </div>
                 <div class="form-row">
@@ -1985,6 +1985,39 @@
                     } else { resultsDiv.style.display = 'none'; }
                 } catch (e) { console.error(e); resultsDiv.style.display = 'none'; }
             }, 300);
+        }
+
+        async function searchUsersPlaza(query) {
+            if (searchTimeout) clearTimeout(searchTimeout);
+            const resultsDiv = document.getElementById('plaza-user-results');
+            if (!query || query.length < 2) { resultsDiv.style.display = 'none'; return; }
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const res = await fetch(`/api/neynar?action=search&q=${encodeURIComponent(query)}&limit=5`);
+                    const data = await res.json();
+                    if (data.result?.users?.length > 0) {
+                        resultsDiv.innerHTML = data.result.users.map(u => `
+                            <div class="user-result" onclick='selectUserPlaza(${JSON.stringify(u).replace(/'/g, "&#39;")})'>
+                                <img src="${u.pfp_url || 'https://via.placeholder.com/32'}" onerror="this.src='https://via.placeholder.com/32'">
+                                <div class="info"><div class="name">${u.display_name || u.username}</div><div class="username">@${u.username}</div></div>
+                            </div>
+                        `).join('');
+                        resultsDiv.style.display = 'block';
+                    } else { resultsDiv.style.display = 'none'; }
+                } catch (e) { console.error(e); resultsDiv.style.display = 'none'; }
+            }, 300);
+        }
+
+        function selectUserPlaza(user) {
+            document.getElementById('gift-recipient').value = user.username;
+            document.getElementById('plaza-user-results').style.display = 'none';
+            document.getElementById('selected-user').innerHTML = `
+                <div style="display:flex; align-items:center; gap:8px; margin-top:8px; padding:8px; background:rgba(212,175,55,0.1); border-radius:4px;">
+                    <img src="${user.pfp_url || ''}" style="width:24px; height:24px; border-radius:50%;" onerror="this.src='https://via.placeholder.com/24'">
+                    <span style="color:var(--gold);">@${user.username}</span>
+                </div>
+            `;
+            window.selectedPlazaUser = user;
         }
         
         function selectUser(user) {
