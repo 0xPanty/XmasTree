@@ -1029,11 +1029,6 @@
         <!-- Gift Plaza - Orbiting Avatars (hidden by default) -->
         <div id="gift-plaza" style="display:none;"></div>
         <div id="snowfall-container"></div>
-        <div id="plaza-greeting" style="display:none; position:absolute; top:10%; left:50%; transform:translateX(-50%); text-align:center; z-index:100; pointer-events:none;">
-            <div style="font-size:clamp(32px,7vw,70px); font-family:'Brush Script MT','Segoe Script',cursive; color:#fff; text-shadow:0 0 20px rgba(255,255,255,0.8),0 0 40px rgba(255,215,0,0.5); line-height:1.1;">
-                Merry<br>Christmas
-            </div>
-        </div>
     </div>
     
     <div id="canvas-container">
@@ -1742,7 +1737,7 @@
                 if (titleEl) titleEl.style.display = 'none';
                 if (subtitleEl) subtitleEl.style.display = 'none';
                 startSnowfall();
-                document.getElementById('plaza-greeting').style.display = 'block';
+                // plaza-greeting removed
                 renderPlaza();
             } else {
                 plazaBtn.textContent = '🎄 Plaza Gift';
@@ -1754,7 +1749,7 @@
                 if (titleEl) titleEl.style.display = 'block';
                 if (subtitleEl) subtitleEl.style.display = 'block';
                 stopSnowfall();
-                document.getElementById('plaza-greeting').style.display = 'none';
+                // plaza-greeting removed
             }
         }
 
