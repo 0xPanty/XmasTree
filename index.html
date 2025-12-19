@@ -496,38 +496,7 @@
             100% { opacity: 0; transform: scale(1.2); }
         }
 
-        /* Shooting star */
-        .shooting-star {
-            position: fixed;
-            width: 4px;
-            height: 4px;
-            background: #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 6px 2px rgba(255,255,255,0.8), 0 0 12px 4px rgba(212,175,55,0.5);
-            animation: shootingStar 1.5s linear forwards;
-            pointer-events: none;
-            z-index: 50;
-        }
-        .shooting-star::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            right: 100%;
-            width: 80px;
-            height: 2px;
-            background: linear-gradient(to left, rgba(255,255,255,0.8), transparent);
-            transform: translateY(-50%);
-        }
-        @keyframes shootingStar {
-            0% { 
-                opacity: 1;
-                transform: translate(0, 0) rotate(-35deg);
-            }
-            100% { 
-                opacity: 0;
-                transform: translate(-100vw, 70vh) rotate(-35deg);
-            }
-        }
+        
         .requirement-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
         .requirement-row label { flex: 1; color: rgba(255,255,255,0.7); font-size: 0.8rem; }
         .requirement-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--gold); }
@@ -965,9 +934,9 @@
         <!-- Gift Plaza - Orbiting Avatars (hidden by default) -->
         <div id="gift-plaza" style="display:none;"></div>
         <div id="snowfall-container"></div>
-        <div id="plaza-greeting" style="display:none; position:absolute; top:12%; left:50%; transform:translateX(-50%); text-align:center; z-index:100; pointer-events:none;">
-            <div style="font-size:clamp(28px,6vw,60px); font-family:'Brush Script MT','Segoe Script',cursive; color:#fff; text-shadow:0 0 20px rgba(255,255,255,0.8),0 0 40px rgba(255,215,0,0.5);">
-                🔔 Merry Christmas 🔔
+        <div id="plaza-greeting" style="display:none; position:absolute; top:10%; left:50%; transform:translateX(-50%); text-align:center; z-index:100; pointer-events:none;">
+            <div style="font-size:clamp(32px,7vw,70px); font-family:'Brush Script MT','Segoe Script',cursive; color:#fff; text-shadow:0 0 20px rgba(255,255,255,0.8),0 0 40px rgba(255,215,0,0.5); line-height:1.1;">
+                Merry<br>Christmas
             </div>
         </div>
     </div>
@@ -1675,7 +1644,6 @@
                 // Hide title, show banner
                 if (titleEl) titleEl.style.display = 'none';
                 if (subtitleEl) subtitleEl.style.display = 'none';
-                stopShootingStars();
                 startSnowfall();
                 document.getElementById('plaza-greeting').style.display = 'block';
                 renderPlaza();
@@ -1690,7 +1658,6 @@
                 if (subtitleEl) subtitleEl.style.display = 'block';
                 stopSnowfall();
                 document.getElementById('plaza-greeting').style.display = 'none';
-                startShootingStars();
             }
         }
 
@@ -2007,11 +1974,6 @@
             }
             localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
             
-            // Trigger shooting stars for gift sent
-            for (let i = 0; i < 3; i++) {
-                setTimeout(() => createShootingStar(), i * 300);
-            }
-            
             // Create share text
             let shareText = links.length === 1 
                 ? `🎁 Gift for @${links[0].username}!\n\n${title}\n💰 ${amount} ${token}\n\n🔗 ${links[0].url}`
@@ -2242,11 +2204,6 @@
             plazaGifts.push(giftData);
             localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
 
-            // Trigger shooting stars for gift sent
-            for (let i = 0; i < 3; i++) {
-                setTimeout(() => createShootingStar(), i * 300);
-            }
-
             hideLoading();
             renderPlaza();
             alert('🎁 Gift added to plaza!\nYour avatar is now orbiting the tree.');
@@ -2403,21 +2360,6 @@
             }, 800);
         }
 
-        // Shooting star effect
-        let shootingStarInterval = null;
-        
-        function createShootingStar() {
-            if (plazaMode) return;
-            
-            const star = document.createElement('div');
-            star.className = 'shooting-star';
-            star.style.top = (5 + Math.random() * 20) + '%';
-            star.style.right = (-5 + Math.random() * 10) + '%';
-            document.body.appendChild(star);
-            
-            setTimeout(() => star.remove(), 1500);
-        }
-        
         function startSnowfall() {
             const container = document.getElementById('snowfall-container');
             if (!container) return;
@@ -2443,25 +2385,6 @@
             if (container) {
                 container.classList.remove('active');
                 container.innerHTML = '';
-            }
-        }
-        
-        function startShootingStars() {
-            if (shootingStarInterval) return;
-            function scheduleNext() {
-                const delay = 3000 + Math.random() * 5000;
-                shootingStarInterval = setTimeout(() => {
-                    createShootingStar();
-                    scheduleNext();
-                }, delay);
-            }
-            scheduleNext();
-        }
-        
-        function stopShootingStars() {
-            if (shootingStarInterval) {
-                clearTimeout(shootingStarInterval);
-                shootingStarInterval = null;
             }
         }
         
@@ -2503,9 +2426,6 @@
             
             // Check if user has gifts
             checkMyGifts();
-            
-            // Start shooting stars effect
-            startShootingStars();
             
             // Check URL for gift parameter
             const urlParams = new URLSearchParams(window.location.search);
