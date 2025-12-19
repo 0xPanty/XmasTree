@@ -213,15 +213,17 @@
         .modal-box {
             background: rgba(2, 48, 32, 0.95);
             border: 1px solid var(--gold);
-            padding: 40px 60px;
+            padding: 30px 40px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
             box-shadow: 0 0 60px rgba(212, 175, 55, 0.2);
             transform: translateY(20px);
             transition: transform 0.5s ease;
             text-align: center;
             max-width: 90%;
+            max-height: 85vh;
+            overflow-y: auto;
             box-sizing: border-box;
         }
 
@@ -638,8 +640,9 @@
             }
 
             .modal-box {
-                padding: 30px 20px;
-                width: 90%;
+                padding: 24px 16px;
+                width: 92%;
+                max-height: 80vh;
             }
             
             .modal-input {
