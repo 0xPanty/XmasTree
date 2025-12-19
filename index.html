@@ -1642,9 +1642,12 @@
         root.render(<App />);
         
         // Farcaster Mini App SDK - signal ready
-        import('https://esm.sh/@farcaster/miniapp-sdk').then(({ sdk }) => {
-            setTimeout(() => sdk.actions.ready(), 2000);
-        }).catch(() => {});
+        import('https://esm.sh/@farcaster/miniapp-sdk').then((module) => {
+            const sdk = module.sdk || module.default || module;
+            if (sdk && sdk.actions && sdk.actions.ready) {
+                sdk.actions.ready();
+            }
+        }).catch((err) => console.log('SDK load error:', err));
     </script>
 
     <!-- Gift Plaza System -->
