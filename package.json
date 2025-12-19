@@ -1,0 +1,29 @@
+{
+  "name": "christmastree-main",
+  "version": "1.0.0",
+  "description": "https://david-ta-ai.github.io/ChristmasTree/ # ChristmasTree A Christams tree partcles creatyed by vibe coding on Gemini3",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/0xPanty/XmasTree.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/0xPanty/XmasTree/issues"
+  },
+  "homepage": "https://github.com/0xPanty/XmasTree#readme",
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.4.0"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "dotenv": "^16.3.1",
+    "hardhat": "^2.19.0"
+  }
+}

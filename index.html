@@ -664,6 +664,100 @@
         }
     </script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Ethers.js for Web3 -->
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
+    <script>
+        // Contract Configuration
+        const CONTRACT_ADDRESS = '0x5307bFc2F5bB5efC858622aDcAeE60619C51b884';
+        const BASE_CHAIN_ID = 8453;
+        const CONTRACT_ABI = [
+            "function createGiftETH(uint256 shares, bytes32 passwordHash, uint8 giftType, bool proOnly, string title, uint256 duration) payable returns (uint256)",
+            "function createGiftToken(address token, uint256 amount, uint256 shares, bytes32 passwordHash, uint8 giftType, bool proOnly, string title, uint256 duration) returns (uint256)",
+            "function claimGift(uint256 giftId, string password, bool isPro)",
+            "function refundGift(uint256 giftId)",
+            "function getGift(uint256 giftId) view returns (address creator, address token, uint256 totalAmount, uint256 remainingAmount, uint256 totalShares, uint256 claimedShares, uint8 giftType, bool proOnly, string title, uint256 expireTime, bool active)",
+            "function hasUserClaimed(uint256 giftId, address user) view returns (bool)",
+            "function getUserClaimedAmount(uint256 giftId, address user) view returns (uint256)",
+            "function giftCount() view returns (uint256)",
+            "event GiftCreated(uint256 indexed giftId, address indexed creator, address token, uint256 totalAmount, uint256 shares, uint8 giftType, string title)",
+            "event GiftClaimed(uint256 indexed giftId, address indexed claimer, uint256 amount)"
+        ];
+        
+        // ERC20 ABI for token approvals
+        const ERC20_ABI = [
+            "function approve(address spender, uint256 amount) returns (bool)",
+            "function allowance(address owner, address spender) view returns (uint256)",
+            "function balanceOf(address account) view returns (uint256)",
+            "function decimals() view returns (uint8)"
+        ];
+
+        // Web3 State
+        let web3Provider = null;
+        let web3Signer = null;
+        let giftContract = null;
+        let connectedAddress = null;
+
+        // Connect Wallet
+        async function connectWallet() {
+            try {
+                if (!window.ethereum) {
+                    alert('Please install MetaMask or use a Web3 browser!');
+                    return false;
+                }
+                
+                web3Provider = new ethers.BrowserProvider(window.ethereum);
+                await web3Provider.send("eth_requestAccounts", []);
+                
+                // Check network
+                const network = await web3Provider.getNetwork();
+                if (Number(network.chainId) !== BASE_CHAIN_ID) {
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x' + BASE_CHAIN_ID.toString(16) }],
+                        });
+                    } catch (switchError) {
+                        if (switchError.code === 4902) {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: '0x' + BASE_CHAIN_ID.toString(16),
+                                    chainName: 'Base',
+                                    nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                                    rpcUrls: ['https://mainnet.base.org'],
+                                    blockExplorerUrls: ['https://basescan.org']
+                                }]
+                            });
+                        }
+                    }
+                    web3Provider = new ethers.BrowserProvider(window.ethereum);
+                }
+                
+                web3Signer = await web3Provider.getSigner();
+                connectedAddress = await web3Signer.getAddress();
+                giftContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, web3Signer);
+                
+                // Update UI
+                const walletBtn = document.getElementById('wallet-btn');
+                if (walletBtn) {
+                    walletBtn.textContent = connectedAddress.slice(0, 6) + '...' + connectedAddress.slice(-4);
+                    walletBtn.classList.add('connected');
+                }
+                
+                console.log('Wallet connected:', connectedAddress);
+                return true;
+            } catch (error) {
+                console.error('Wallet connection failed:', error);
+                alert('Failed to connect wallet: ' + error.message);
+                return false;
+            }
+        }
+
+        // Hash password for contract
+        function hashPassword(password) {
+            return ethers.keccak256(ethers.toUtf8Bytes(password));
+        }
+    </script>
 </head>
 <body>
     <!-- Create Gift Modal -->
@@ -911,8 +1005,9 @@
             <div id="app-subtitle" class="subtitle">Share the joy on Farcaster</div>
         </header>
         <div class="controls">
-            <!-- Top row: Mailbox + Record + Tip -->
+            <!-- Top row: Wallet + Mailbox + Record + Tip -->
             <div class="btn-row" id="top-btns">
+                <button id="wallet-btn" onclick="connectWallet()" class="btn-small" style="min-width:80px;">🔗 Connect</button>
                 <button id="mailbox-button" onclick="openMyGifts()" class="mailbox-btn btn-small" style="display:flex; align-items:center; justify-content:center;">📬</button>
                 <button onclick="openRecordModal()" class="btn-small">📋</button>
                 <button onclick="openTipModal()" class="btn-small">☕</button>
@@ -2148,7 +2243,7 @@
             document.getElementById('preview-info').textContent = info;
         }
 
-        // Create gift for plaza
+        // Create gift for plaza (with smart contract)
         async function createGift() {
             // Check if plaza is full
             const activeGifts = plazaGifts.filter(g => g.claimed < g.shares);
@@ -2162,53 +2257,126 @@
             const amount = document.getElementById('gift-amount').value;
             const shares = document.getElementById('gift-shares').value || '5';
             const requireCode = document.getElementById('require-code').checked;
-            const giftCode = document.getElementById('gift-code').value.trim();
+            const giftCode = document.getElementById('gift-code').value.trim() || 'XMAS2024';
             const requirePro = document.getElementById('require-pro').checked;
             const minScore = parseFloat(document.getElementById('min-score').value) || 0;
 
             if (!amount || parseFloat(amount) <= 0) { alert('Enter valid amount'); return; }
-            if (requireCode && !giftCode) { alert('Enter a secret code'); return; }
             if (!shares || parseInt(shares) < 1) { alert('Enter valid shares'); return; }
 
+            // Connect wallet if not connected
+            if (!connectedAddress) {
+                const connected = await connectWallet();
+                if (!connected) return;
+            }
+
             closeGiftModal();
-            showLoading('Creating plaza gift...');
+            showLoading('Creating gift on blockchain...');
 
-            // For demo, use a placeholder sender (in production, get from Farcaster SDK)
-            const sender = currentUser || {
-                fid: Date.now(),
-                username: 'anonymous',
-                pfp_url: 'https://i.imgur.com/HeIi0wU.png'
-            };
+            try {
+                const passwordHash = hashPassword(giftCode);
+                const giftTypeEnum = giftType === 'equal' ? 0 : 1; // 0 = EQUAL, 1 = LUCKY
+                const duration = 7 * 24 * 60 * 60; // 7 days
+                let tx, receipt, contractGiftId;
 
-            const giftId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-            const giftData = {
-                id: giftId,
-                title,
-                token,
-                amount,
-                shares: parseInt(shares),
-                type: giftType,
-                requireCode,
-                giftCode: requireCode ? giftCode : '',
-                requirePro,
-                minScore,
-                claimed: 0,
-                claimedBy: [],
-                sender: {
-                    fid: sender.fid,
-                    username: sender.username,
-                    pfp: sender.pfp_url
-                },
-                createdAt: Date.now()
-            };
+                if (token === 'ETH') {
+                    // Create ETH gift
+                    const amountWei = ethers.parseEther(amount);
+                    tx = await giftContract.createGiftETH(
+                        parseInt(shares),
+                        passwordHash,
+                        giftTypeEnum,
+                        requirePro,
+                        title,
+                        duration,
+                        { value: amountWei }
+                    );
+                } else {
+                    // Create token gift (USDC)
+                    const tokenAddress = USDC_CA;
+                    const tokenContract = new ethers.Contract(tokenAddress, ERC20_ABI, web3Signer);
+                    const decimals = await tokenContract.decimals();
+                    const amountUnits = ethers.parseUnits(amount, decimals);
+                    
+                    // Check and approve
+                    const allowance = await tokenContract.allowance(connectedAddress, CONTRACT_ADDRESS);
+                    if (allowance < amountUnits) {
+                        showLoading('Approving tokens...');
+                        const approveTx = await tokenContract.approve(CONTRACT_ADDRESS, amountUnits);
+                        await approveTx.wait();
+                    }
+                    
+                    showLoading('Creating gift...');
+                    tx = await giftContract.createGiftToken(
+                        tokenAddress,
+                        amountUnits,
+                        parseInt(shares),
+                        passwordHash,
+                        giftTypeEnum,
+                        requirePro,
+                        title,
+                        duration
+                    );
+                }
 
-            // Add to plaza gifts
-            plazaGifts.push(giftData);
-            localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+                showLoading('Confirming transaction...');
+                receipt = await tx.wait();
+                
+                // Get gift ID from event
+                const event = receipt.logs.find(log => {
+                    try {
+                        const parsed = giftContract.interface.parseLog(log);
+                        return parsed.name === 'GiftCreated';
+                    } catch { return false; }
+                });
+                
+                if (event) {
+                    const parsed = giftContract.interface.parseLog(event);
+                    contractGiftId = parsed.args[0].toString();
+                }
 
-            hideLoading();
-            renderPlaza();
-            alert('🎁 Gift added to plaza!\nYour avatar is now orbiting the tree.');
+                // For demo/UI, also store locally
+                const sender = currentUser || {
+                    fid: Date.now(),
+                    username: connectedAddress.slice(0, 8),
+                    pfp_url: 'https://i.imgur.com/HeIi0wU.png'
+                };
+
+                const giftData = {
+                    id: contractGiftId || Date.now().toString(),
+                    contractId: contractGiftId,
+                    title,
+                    token,
+                    amount,
+                    shares: parseInt(shares),
+                    type: giftType,
+                    requireCode,
+                    giftCode: giftCode,
+                    requirePro,
+                    minScore,
+                    claimed: 0,
+                    claimedBy: [],
+                    sender: {
+                        fid: sender.fid,
+                        username: sender.username,
+                        pfp: sender.pfp_url,
+                        address: connectedAddress
+                    },
+                    createdAt: Date.now(),
+                    txHash: receipt.hash
+                };
+
+                plazaGifts.push(giftData);
+                localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+
+                hideLoading();
+                renderPlaza();
+                alert(`🎁 Gift created on blockchain!\n\nGift ID: ${contractGiftId}\nTx: ${receipt.hash.slice(0, 10)}...\n\nShare the code "${giftCode}" with friends!`);
+            } catch (error) {
+                hideLoading();
+                console.error('Create gift error:', error);
+                alert('Failed to create gift: ' + (error.reason || error.message));
+            }
         }
 
         // Render orbiting avatars around the tree
@@ -2290,7 +2458,7 @@
             document.getElementById('claim-modal').classList.add('visible');
         }
 
-        // Claim gift
+        // Claim gift (with smart contract)
         async function claimGift() {
             const giftId = document.getElementById('claim-modal').dataset.giftId;
             const gift = plazaGifts.find(g => g.id === giftId);
@@ -2298,57 +2466,94 @@
             if (!gift) { alert('Gift not found'); return; }
             if (gift.claimed >= gift.shares) { alert('All shares claimed!'); return; }
 
-            // Verify code if required
-            if (gift.requireCode) {
-                const inputCode = document.getElementById('claim-password').value.trim();
-                if (inputCode !== gift.giftCode) {
-                    alert('Wrong code! Try again.');
-                    return;
+            // Get password
+            const password = document.getElementById('claim-password').value.trim() || gift.giftCode || 'XMAS2024';
+
+            // Verify code if required (for UI feedback)
+            if (gift.requireCode && password !== gift.giftCode) {
+                alert('Wrong code! Try again.');
+                return;
+            }
+
+            // Connect wallet if not connected
+            if (!connectedAddress) {
+                const connected = await connectWallet();
+                if (!connected) return;
+            }
+
+            // Check if already claimed on contract
+            if (gift.contractId) {
+                try {
+                    const hasClaimed = await giftContract.hasUserClaimed(gift.contractId, connectedAddress);
+                    if (hasClaimed) {
+                        alert('You have already claimed this gift!');
+                        return;
+                    }
+                } catch (e) {
+                    console.log('Error checking claim status:', e);
                 }
             }
 
-            // In production, verify user meets requirements via Farcaster SDK
-            if (gift.requirePro) {
-                console.log('FC Pro required - would verify via Farcaster');
-            }
-            if (gift.minScore > 0) {
-                console.log('Min score required:', gift.minScore);
-            }
-
             closeClaimModal();
-            showLoading('Claiming...');
+            showLoading('Claiming gift...');
             
             // Hide plaza and controls
             document.getElementById('gift-plaza').style.display = 'none';
             document.querySelector('.controls').style.display = 'none';
 
-            // TODO: In production, call smart contract here
-            // const password = document.getElementById('claim-password').value;
-            // await contract.claimGift(giftId, password, isPro);
-            
-            // Calculate claim amount (demo)
-            let claimAmount;
-            if (gift.type === 'equal') {
-                claimAmount = (parseFloat(gift.amount) / gift.shares).toFixed(6);
-            } else {
-                const remaining = gift.shares - gift.claimed;
-                const remainingAmount = parseFloat(gift.amount) - gift.claimedBy.reduce((sum, c) => sum + parseFloat(c.amount || 0), 0);
-                const maxAmount = remaining > 1 ? (remainingAmount * 2 / remaining) : remainingAmount;
-                claimAmount = (Math.random() * maxAmount).toFixed(6);
-            }
+            try {
+                let claimAmount;
+                
+                // If gift has contract ID, claim from contract
+                if (gift.contractId) {
+                    const isPro = gift.requirePro ? true : false;
+                    const tx = await giftContract.claimGift(gift.contractId, password, isPro);
+                    showLoading('Confirming transaction...');
+                    const receipt = await tx.wait();
+                    
+                    // Get claimed amount from event
+                    const event = receipt.logs.find(log => {
+                        try {
+                            const parsed = giftContract.interface.parseLog(log);
+                            return parsed.name === 'GiftClaimed';
+                        } catch { return false; }
+                    });
+                    
+                    if (event) {
+                        const parsed = giftContract.interface.parseLog(event);
+                        const amountWei = parsed.args[2];
+                        if (gift.token === 'ETH') {
+                            claimAmount = ethers.formatEther(amountWei);
+                        } else {
+                            claimAmount = ethers.formatUnits(amountWei, 6); // USDC has 6 decimals
+                        }
+                    } else {
+                        claimAmount = (parseFloat(gift.amount) / gift.shares).toFixed(6);
+                    }
+                } else {
+                    // Demo mode - calculate locally
+                    if (gift.type === 'equal') {
+                        claimAmount = (parseFloat(gift.amount) / gift.shares).toFixed(6);
+                    } else {
+                        const remaining = gift.shares - gift.claimed;
+                        const remainingAmount = parseFloat(gift.amount) - gift.claimedBy.reduce((sum, c) => sum + parseFloat(c.amount || 0), 0);
+                        const maxAmount = remaining > 1 ? (remainingAmount * 2 / remaining) : remainingAmount;
+                        claimAmount = (Math.random() * maxAmount).toFixed(6);
+                    }
+                }
 
-            // Update gift (demo - in production this comes from contract event)
-            gift.claimed++;
-            gift.claimedBy.push({
-                fid: currentUser?.fid || Date.now(),
-                username: currentUser?.username || 'guest',
-                pfp: currentUser?.pfp || 'https://i.imgur.com/HeIi0wU.png',
-                amount: claimAmount,
-                at: Date.now()
-            });
-            localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+                // Update local gift data
+                gift.claimed++;
+                gift.claimedBy.push({
+                    fid: currentUser?.fid || Date.now(),
+                    username: currentUser?.username || connectedAddress?.slice(0, 8) || 'guest',
+                    pfp: currentUser?.pfp || 'https://i.imgur.com/HeIi0wU.png',
+                    address: connectedAddress,
+                    amount: claimAmount,
+                    at: Date.now()
+                });
+                localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
 
-            setTimeout(() => {
                 hideLoading();
                 document.getElementById('success-amount').textContent = claimAmount + ' ' + gift.token;
                 document.getElementById('success-modal').classList.add('visible');
@@ -2358,8 +2563,13 @@
                     if (window.scatterTree) window.scatterTree();
                 }, 300);
                 
-                renderPlaza(); // Update plaza display
-            }, 800);
+                renderPlaza();
+            } catch (error) {
+                hideLoading();
+                document.querySelector('.controls').style.display = '';
+                console.error('Claim error:', error);
+                alert('Failed to claim: ' + (error.reason || error.message));
+            }
         }
 
         function startSnowfall() {
