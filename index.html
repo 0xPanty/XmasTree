@@ -383,6 +383,10 @@
             font-size: clamp(36px, 8vw, 90px);
             font-weight: bold;
             font-family: 'Brush Script MT', 'Segoe Script', cursive;
+        }
+        .banner-text .emoji {
+            font-size: 0.5em;
+            vertical-align: middle;
             color: #fff;
             text-shadow: 
                 0 0 10px rgba(255,255,255,0.8),
@@ -1908,6 +1912,11 @@
             }
             localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
             
+            // Trigger shooting stars for gift sent
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => createShootingStar(), i * 300);
+            }
+            
             // Create share text
             let shareText = links.length === 1 
                 ? `🎁 Gift for @${links[0].username}!\n\n${title}\n💰 ${amount} ${token}\n\n🔗 ${links[0].url}`
@@ -2165,9 +2174,12 @@
                 }
             }
             
+            // Wrap emojis in span for smaller size
+            const styledText = displayText.replace(/([\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}])/gu, '<span class="emoji">$1</span>');
+            
             container.innerHTML = `
                 <div class="fancy-banner">
-                    <div class="banner-text ${twoLines ? 'two-lines' : ''}">${displayText}</div>
+                    <div class="banner-text ${twoLines ? 'two-lines' : ''}">${styledText}</div>
                     <div class="banner-sender">@${banner.sender}</div>
                 </div>
             `;
@@ -2272,6 +2284,11 @@
             // Add to plaza gifts
             plazaGifts.push(giftData);
             localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+
+            // Trigger shooting stars for gift sent
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => createShootingStar(), i * 300);
+            }
 
             hideLoading();
             renderPlaza();
