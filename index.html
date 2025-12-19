@@ -392,6 +392,11 @@
                 2px 2px 4px rgba(0,0,0,0.3);
             animation: textGlow 3s ease-in-out infinite;
             letter-spacing: 2px;
+            line-height: 1.2;
+            max-width: 80vw;
+        }
+        .banner-text.two-lines {
+            font-size: clamp(32px, 7vw, 80px);
         }
         @keyframes textGlow {
             0%, 100% { 
@@ -453,6 +458,39 @@
         @keyframes snowFalling {
             0% { transform: translateY(-50px) rotate(0deg); opacity: 0.9; }
             100% { transform: translateY(100vh) rotate(360deg); opacity: 0.3; }
+        }
+        
+        /* Shooting star */
+        .shooting-star {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 6px 2px rgba(255,255,255,0.8), 0 0 12px 4px rgba(212,175,55,0.5);
+            animation: shootingStar 1.5s linear forwards;
+            pointer-events: none;
+            z-index: 50;
+        }
+        .shooting-star::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 100%;
+            width: 80px;
+            height: 2px;
+            background: linear-gradient(to left, rgba(255,255,255,0.8), transparent);
+            transform: translateY(-50%);
+        }
+        @keyframes shootingStar {
+            0% { 
+                opacity: 1;
+                transform: translate(0, 0) rotate(-35deg);
+            }
+            100% { 
+                opacity: 0;
+                transform: translate(-100vw, 70vh) rotate(-35deg);
+            }
         }
         .requirement-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
         .requirement-row label { flex: 1; color: rgba(255,255,255,0.7); font-size: 0.8rem; }
@@ -750,6 +788,15 @@
         </div>
         <button onclick="goHome()" style="position:fixed; bottom:40px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.6); border:2px solid var(--gold); color:var(--gold); width:60px; height:60px; border-radius:50%; font-size:2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 20px rgba(212,175,55,0.3);">↩</button>
     </div>
+    
+    <!-- My Gifts Record Modal -->
+    <div id="record-modal" class="custom-modal">
+        <div class="modal-box" style="max-width: 400px; max-height: 80vh; overflow-y: auto;">
+            <div class="modal-title">📋 My Gifts Record</div>
+            <div id="record-list" style="margin-top:12px;"></div>
+            <button class="btn-cancel" onclick="closeRecordModal()" style="margin-top:12px;">Close</button>
+        </div>
+    </div>
 
     <!-- Loading Modal -->
     <div id="loading-modal" class="custom-modal">
@@ -766,31 +813,44 @@
             <div style="color:rgba(255,255,255,0.6); font-size:0.8rem; margin-bottom:12px; text-align:center;">
                 Your message will shine above the tree!
             </div>
+            <div id="current-banner-info" style="display:none; background:rgba(0,0,0,0.3); padding:10px; border-radius:8px; margin-bottom:12px; text-align:center;">
+                <div style="color:rgba(255,255,255,0.5); font-size:0.75rem;">Current Banner Ends In</div>
+                <div id="banner-countdown" style="color:var(--gold); font-size:1.2rem; font-weight:bold;">--:--:--</div>
+            </div>
             <div class="form-group">
                 <label>Your Blessing</label>
-                <input type="text" id="banner-message" placeholder="Merry Christmas!" maxlength="20">
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="banner-message" placeholder="Merry Christmas!🔔" maxlength="20" style="flex:1;">
+                    <button type="button" onclick="toggleEmojiPicker()" style="padding:8px 12px; font-size:1.2rem;">🎄</button>
+                </div>
+                <div id="emoji-picker" style="display:none; flex-wrap:wrap; gap:8px; margin-top:8px; padding:8px; background:rgba(0,0,0,0.3); border-radius:8px;">
+                    <span onclick="addEmoji('🎄')" style="cursor:pointer; font-size:1.5rem;">🎄</span>
+                    <span onclick="addEmoji('🎅')" style="cursor:pointer; font-size:1.5rem;">🎅</span>
+                    <span onclick="addEmoji('🤶')" style="cursor:pointer; font-size:1.5rem;">🤶</span>
+                    <span onclick="addEmoji('🦌')" style="cursor:pointer; font-size:1.5rem;">🦌</span>
+                    <span onclick="addEmoji('⛄')" style="cursor:pointer; font-size:1.5rem;">⛄</span>
+                    <span onclick="addEmoji('❄️')" style="cursor:pointer; font-size:1.5rem;">❄️</span>
+                    <span onclick="addEmoji('🎁')" style="cursor:pointer; font-size:1.5rem;">🎁</span>
+                    <span onclick="addEmoji('🔔')" style="cursor:pointer; font-size:1.5rem;">🔔</span>
+                    <span onclick="addEmoji('⭐')" style="cursor:pointer; font-size:1.5rem;">⭐</span>
+                    <span onclick="addEmoji('✨')" style="cursor:pointer; font-size:1.5rem;">✨</span>
+                    <span onclick="addEmoji('🎉')" style="cursor:pointer; font-size:1.5rem;">🎉</span>
+                    <span onclick="addEmoji('🍪')" style="cursor:pointer; font-size:1.5rem;">🍪</span>
+                </div>
                 <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-top:4px;">Max 20 characters</div>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Token</label>
-                    <select id="banner-token">
-                        <option value="USDC">USDC</option>
-                        <option value="ETH">ETH</option>
-                    </select>
+                    <label>Hours</label>
+                    <input type="number" id="banner-hours" value="1" min="1" max="72" oninput="updateBannerTotal()">
                 </div>
                 <div class="form-group">
-                    <label>Price</label>
+                    <label>Total (USDC)</label>
                     <input type="number" id="banner-price" value="1" readonly style="background:rgba(0,0,0,0.3);">
                 </div>
             </div>
-            <div class="form-group">
-                <label>Duration</label>
-                <select id="banner-duration" onchange="updateBannerPrice()">
-                    <option value="60">1 Hour - 1 USDC</option>
-                    <option value="360">6 Hours - 5 USDC</option>
-                    <option value="1440">24 Hours - 15 USDC</option>
-                </select>
+            <div style="font-size:0.75rem; color:rgba(255,255,255,0.5); margin-bottom:12px; text-align:center;">
+                💡 1 Hour = 1 USDC (Max 72 hours)
             </div>
             <button class="btn-gift" onclick="createBanner()">✨ Create Banner</button>
             <button class="btn-cancel" onclick="closeBannerModal()">Cancel</button>
@@ -897,10 +957,11 @@
             <div id="app-subtitle" class="subtitle">The Gilded Emerald Edition</div>
         </header>
         <div class="controls">
-            <!-- Top row: Mailbox + Tip -->
+            <!-- Top row: Mailbox + Record + Tip -->
             <div class="btn-row" id="top-btns">
-                <button id="mailbox-button" onclick="openMyGifts()" class="mailbox-btn btn-small">📬</button>
-                <button onclick="openTipModal()" class="btn-small">☕ Tip</button>
+                <button id="mailbox-button" onclick="openMyGifts()" class="mailbox-btn btn-small" style="display:flex; align-items:center; justify-content:center;">📬</button>
+                <button onclick="openRecordModal()" class="btn-small">📋</button>
+                <button onclick="openTipModal()" class="btn-small">☕</button>
             </div>
             <!-- Plaza mode buttons -->
             <div class="btn-row" id="plaza-send-btn" style="display:none;">
@@ -912,7 +973,7 @@
                 <button onclick="openDirectGiftModal()" class="btn-small">🎁 Send to Friends</button>
             </div>
             <div class="btn-row">
-                <button id="plaza-btn" onclick="togglePlazaMode()" class="btn-small">🎄 Plaza</button>
+                <button id="plaza-btn" onclick="togglePlazaMode()" class="btn-small">🎄 Plaza Gift</button>
             </div>
         </div>
         
@@ -1503,8 +1564,8 @@
             const plazaSendBtn = document.getElementById('plaza-send-btn');
             const mainBtns = document.getElementById('main-btns');
             const topBtns = document.getElementById('top-btns');
-            const titleEl = document.querySelector('.title');
-            const subtitleEl = document.querySelector('.subtitle');
+            const titleEl = document.getElementById('app-title');
+            const subtitleEl = document.getElementById('app-subtitle');
             const bannerContainer = document.getElementById('banner-container');
             
             if (isPlazaMode) {
@@ -1513,22 +1574,24 @@
                 plazaSendBtn.style.display = 'flex';
                 mainBtns.style.display = 'none';
                 topBtns.style.display = 'none';
-                // Shrink title, show banner
-                if (titleEl) titleEl.classList.add('plaza-mode');
-                if (subtitleEl) subtitleEl.classList.add('plaza-mode');
+                // Hide title, show banner
+                if (titleEl) titleEl.style.display = 'none';
+                if (subtitleEl) subtitleEl.style.display = 'none';
+                stopShootingStars();
                 renderBanner();
                 renderPlaza();
             } else {
-                plazaBtn.textContent = '🎄 Plaza';
+                plazaBtn.textContent = '🎄 Plaza Gift';
                 plaza.style.display = 'none';
                 plazaSendBtn.style.display = 'none';
                 mainBtns.style.display = 'flex';
                 topBtns.style.display = 'flex';
-                // Restore title, hide banner and snow
-                if (titleEl) titleEl.classList.remove('plaza-mode');
-                if (subtitleEl) subtitleEl.classList.remove('plaza-mode');
+                // Show title, hide banner and snow
+                if (titleEl) titleEl.style.display = 'block';
+                if (subtitleEl) subtitleEl.style.display = 'block';
                 bannerContainer.classList.remove('active');
                 document.getElementById('snowfall-container').classList.remove('active');
+                startShootingStars();
             }
         }
 
@@ -1603,18 +1666,98 @@
             }, 1500);
         }
         
+        // Gift Record feature - show gifts sent and claimed
+        function openRecordModal() {
+            const myUsername = currentUser?.username || 'santa';
+            const myFid = currentUser?.fid;
+            
+            // Gifts I sent
+            const sentGifts = plazaGifts.filter(g => g.sender?.username === myUsername);
+            
+            // Gifts I claimed
+            const claimedGifts = plazaGifts.filter(g => 
+                g.claimedBy?.some(c => c.username === myUsername || c.fid === myFid)
+            );
+            
+            const recordList = document.getElementById('record-list');
+            let html = '';
+            
+            // Sent gifts section
+            html += '<div style="color:var(--gold); font-weight:bold; margin-bottom:8px;">🎁 Gifts I Sent</div>';
+            if (sentGifts.length === 0) {
+                html += '<div style="text-align:center; color:rgba(255,255,255,0.5); padding:12px; font-size:0.85rem;">No gifts sent yet</div>';
+            } else {
+                html += sentGifts.map(gift => {
+                    const claimers = gift.claimedBy || [];
+                    return `
+                        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid rgba(212,175,55,0.3);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                <span style="color:var(--gold); font-weight:bold;">${gift.title}</span>
+                                <span style="color:rgba(255,255,255,0.6); font-size:0.8rem;">${gift.claimed}/${gift.shares} claimed</span>
+                            </div>
+                            <div style="font-size:0.85rem; color:rgba(255,255,255,0.7);">${gift.amount} ${gift.token}</div>
+                            ${claimers.length > 0 ? `
+                                <div style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(255,255,255,0.1);">
+                                    <div style="font-size:0.75rem; color:rgba(255,255,255,0.5); margin-bottom:4px;">Claimed by:</div>
+                                    ${claimers.map(c => `
+                                        <div style="display:flex; align-items:center; gap:8px; padding:4px 0;">
+                                            <img src="${c.pfp || 'https://i.imgur.com/HeIi0wU.png'}" style="width:24px; height:24px; border-radius:50%; border:1px solid var(--gold);" onerror="this.src='https://i.imgur.com/HeIi0wU.png'">
+                                            <span style="font-size:0.8rem; color:rgba(255,255,255,0.8);">@${c.username || c.fid || 'anonymous'}</span>
+                                            <span style="font-size:0.8rem; color:var(--gold); margin-left:auto;">${c.amount || '?'} ${gift.token}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : '<div style="font-size:0.75rem; color:rgba(255,255,255,0.4); margin-top:8px;">No claims yet</div>'}
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            // Claimed gifts section
+            html += '<div style="color:var(--gold); font-weight:bold; margin:16px 0 8px;">📬 Gifts I Claimed</div>';
+            if (claimedGifts.length === 0) {
+                html += '<div style="text-align:center; color:rgba(255,255,255,0.5); padding:12px; font-size:0.85rem;">No gifts claimed yet</div>';
+            } else {
+                html += claimedGifts.map(gift => {
+                    const myClaim = gift.claimedBy?.find(c => c.username === myUsername || c.fid === myFid);
+                    return `
+                        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid rgba(212,175,55,0.3);">
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                                <img src="${gift.sender?.pfp || 'https://i.imgur.com/HeIi0wU.png'}" style="width:28px; height:28px; border-radius:50%; border:1px solid var(--gold);" onerror="this.src='https://i.imgur.com/HeIi0wU.png'">
+                                <div>
+                                    <div style="color:var(--gold); font-weight:bold;">${gift.title}</div>
+                                    <div style="font-size:0.75rem; color:rgba(255,255,255,0.5);">From @${gift.sender?.username || 'anonymous'}</div>
+                                </div>
+                            </div>
+                            <div style="font-size:0.85rem; color:var(--gold);">Received: ${myClaim?.amount || '?'} ${gift.token}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            
+            recordList.innerHTML = html;
+            document.getElementById('record-modal').classList.add('visible');
+        }
+        
+        function closeRecordModal() {
+            document.getElementById('record-modal').classList.remove('visible');
+        }
+        
         // Go back to home
         function goHome() {
             document.getElementById('success-modal').classList.remove('visible');
             document.getElementById('success-modal').querySelector('.modal-box').style.display = 'block';
             document.querySelector('.controls').style.display = 'flex';
             document.getElementById('gift-plaza').style.display = 'none';
-            document.getElementById('plaza-btn').textContent = '🎄 Plaza';
-            document.getElementById('main-btns').style.display = 'block';
-            document.getElementById('tip-btn').style.display = 'block';
+            document.getElementById('plaza-btn').textContent = '🎄 Plaza Gift';
+            document.getElementById('main-btns').style.display = 'flex';
+            document.getElementById('top-btns').style.display = 'flex';
             document.getElementById('plaza-send-btn').style.display = 'none';
             isPlazaMode = false;
-            if (window.assembleTree) window.assembleTree();
+            // Tree stays scattered - reassembles after 3 seconds
+            setTimeout(() => {
+                if (window.assembleTree) window.assembleTree();
+            }, 3000);
         }
         
         // Direct Gift (Send to Friends)
@@ -1844,25 +1987,27 @@
             showLoading('Opening gift...');
             document.querySelector('.controls').style.display = 'none';
             
+            // TODO: In production, call smart contract here
+            // await contract.claimGift(giftId, password, isPro);
+            
+            currentCardGift.claimed = 1;
+            currentCardGift.claimedBy.push(currentUser?.fid || 'guest');
+            localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+            
             setTimeout(() => {
-                // TODO: In production, call smart contract here
-                // await contract.claimGift(giftId, password, isPro);
-                
-                currentCardGift.claimed = 1;
-                currentCardGift.claimedBy.push(currentUser?.fid || 'guest');
-                localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
-                
                 hideLoading();
                 document.getElementById('success-amount').textContent = currentCardGift.amount + ' ' + currentCardGift.token;
                 document.getElementById('success-modal').classList.add('visible');
                 
                 // Scatter tree AFTER claim for impact
-                if (window.scatterTree) window.scatterTree();
+                setTimeout(() => {
+                    if (window.scatterTree) window.scatterTree();
+                }, 300);
                 
                 // Update mailbox status
                 checkMyGifts();
                 currentCardGift = null;
-            }, 1000);
+            }, 800);
         }
 
         function toggleCodeInput() {
@@ -1874,27 +2019,83 @@
         // Banner functions
         let activeBanners = JSON.parse(localStorage.getItem('blessing_banners') || '[]');
         
+        let bannerCountdownInterval = null;
+        
         function openBannerModal() {
             document.getElementById('banner-modal').classList.add('visible');
             document.getElementById('banner-message').value = '';
-            updateBannerPrice();
+            document.getElementById('emoji-picker').style.display = 'none';
+            document.getElementById('banner-hours').value = 1;
+            document.getElementById('banner-price').value = 1;
+            
+            // Show countdown if there's an active banner
+            const now = Date.now();
+            const activeBanner = activeBanners.find(b => b.expiresAt > now);
+            const infoDiv = document.getElementById('current-banner-info');
+            
+            if (activeBanner) {
+                infoDiv.style.display = 'block';
+                updateBannerCountdown(activeBanner.expiresAt);
+                bannerCountdownInterval = setInterval(() => updateBannerCountdown(activeBanner.expiresAt), 1000);
+            } else {
+                infoDiv.style.display = 'none';
+            }
+        }
+        
+        function updateBannerCountdown(expiresAt) {
+            const now = Date.now();
+            const remaining = expiresAt - now;
+            
+            if (remaining <= 0) {
+                document.getElementById('banner-countdown').textContent = 'Expired';
+                if (bannerCountdownInterval) clearInterval(bannerCountdownInterval);
+                return;
+            }
+            
+            const hours = Math.floor(remaining / (1000 * 60 * 60));
+            const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((remaining % (1000 * 60)) / 1000);
+            
+            document.getElementById('banner-countdown').textContent = 
+                `${hours.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
         }
         
         function closeBannerModal() {
             document.getElementById('banner-modal').classList.remove('visible');
+            if (bannerCountdownInterval) {
+                clearInterval(bannerCountdownInterval);
+                bannerCountdownInterval = null;
+            }
         }
         
-        function updateBannerPrice() {
-            const duration = document.getElementById('banner-duration').value;
-            const prices = { '60': 1, '360': 5, '1440': 15 };
-            document.getElementById('banner-price').value = prices[duration] || 1;
+        function toggleEmojiPicker() {
+            const picker = document.getElementById('emoji-picker');
+            picker.style.display = picker.style.display === 'none' ? 'flex' : 'none';
+        }
+        
+        function addEmoji(emoji) {
+            const input = document.getElementById('banner-message');
+            if (input.value.length < 20) {
+                input.value += emoji;
+            }
+        }
+        
+        function updateBannerTotal() {
+            let hours = parseInt(document.getElementById('banner-hours').value) || 1;
+            if (hours < 1) hours = 1;
+            if (hours > 72) hours = 72;
+            document.getElementById('banner-hours').value = hours;
+            document.getElementById('banner-price').value = hours;
         }
         
         function createBanner() {
             const message = document.getElementById('banner-message').value.trim();
             if (!message) { alert('Please enter a message'); return; }
             
-            const duration = parseInt(document.getElementById('banner-duration').value);
+            let hours = parseInt(document.getElementById('banner-hours').value) || 1;
+            if (hours < 1) hours = 1;
+            if (hours > 72) hours = 72;
+            const duration = hours * 60; // convert to minutes
             
             // TODO: Process payment via smart contract
             
@@ -1950,9 +2151,23 @@
             container.classList.add('active');
             snowContainer.classList.add('active');
             
+            // Auto format text - split into two lines if > 8 chars
+            let displayText = banner.message;
+            let twoLines = false;
+            if (banner.message.length > 8) {
+                twoLines = true;
+                const mid = Math.ceil(banner.message.length / 2);
+                const spaceIndex = banner.message.lastIndexOf(' ', mid);
+                if (spaceIndex > 2) {
+                    displayText = banner.message.substring(0, spaceIndex) + '<br>' + banner.message.substring(spaceIndex + 1);
+                } else {
+                    displayText = banner.message.substring(0, mid) + '<br>' + banner.message.substring(mid);
+                }
+            }
+            
             container.innerHTML = `
                 <div class="fancy-banner">
-                    <div class="banner-text">${banner.message}</div>
+                    <div class="banner-text ${twoLines ? 'two-lines' : ''}">${displayText}</div>
                     <div class="banner-sender">@${banner.sender}</div>
                 </div>
             `;
@@ -2005,7 +2220,7 @@
             // Check if plaza is full
             const activeGifts = plazaGifts.filter(g => g.claimed < g.shares);
             if (activeGifts.length >= MAX_PLAZA_GIFTS) {
-                alert('🎄 Plaza is full!\n\nMaximum 10 gifts can orbit the tree at once.\nPlease wait for some gifts to be claimed.');
+                alert('🎄 Plaza Gift is full!\n\nMaximum 10 gifts can orbit the tree at once.\nPlease wait for some gifts to be claimed.');
                 return;
             }
             
@@ -2193,6 +2408,8 @@
             gift.claimed++;
             gift.claimedBy.push({
                 fid: currentUser?.fid || Date.now(),
+                username: currentUser?.username || 'guest',
+                pfp: currentUser?.pfp || 'https://i.imgur.com/HeIi0wU.png',
                 amount: claimAmount,
                 at: Date.now()
             });
@@ -2204,11 +2421,48 @@
                 document.getElementById('success-modal').classList.add('visible');
                 
                 // Scatter tree AFTER claim for impact
-                if (window.scatterTree) window.scatterTree();
+                setTimeout(() => {
+                    if (window.scatterTree) window.scatterTree();
+                }, 300);
+                
                 renderPlaza(); // Update plaza display
-            }, 1000);
+            }, 800);
         }
 
+        // Shooting star effect
+        let shootingStarInterval = null;
+        
+        function createShootingStar() {
+            if (plazaMode) return;
+            
+            const star = document.createElement('div');
+            star.className = 'shooting-star';
+            star.style.top = (5 + Math.random() * 20) + '%';
+            star.style.right = (-5 + Math.random() * 10) + '%';
+            document.body.appendChild(star);
+            
+            setTimeout(() => star.remove(), 1500);
+        }
+        
+        function startShootingStars() {
+            if (shootingStarInterval) return;
+            function scheduleNext() {
+                const delay = 3000 + Math.random() * 5000;
+                shootingStarInterval = setTimeout(() => {
+                    createShootingStar();
+                    scheduleNext();
+                }, delay);
+            }
+            scheduleNext();
+        }
+        
+        function stopShootingStars() {
+            if (shootingStarInterval) {
+                clearTimeout(shootingStarInterval);
+                shootingStarInterval = null;
+            }
+        }
+        
         // Initialize
         window.addEventListener('DOMContentLoaded', () => {
             // Hide unused form fields
@@ -2256,11 +2510,14 @@
             // Check if user has gifts
             checkMyGifts();
             
+            // Start shooting stars effect
+            startShootingStars();
+            
             // TEST: Add demo banner
             if (activeBanners.length === 0) {
                 activeBanners = [{
                     id: 'demo1',
-                    message: 'Merry Christmas!',
+                    message: 'Merry Christmas!🔔',
                     sender: 'Santa',
                     expiresAt: Date.now() + 24 * 60 * 60 * 1000,
                     createdAt: Date.now()
