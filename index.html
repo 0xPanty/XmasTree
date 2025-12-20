@@ -440,7 +440,199 @@
         .requirement-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--gold); }
         .requirement-row input[type="number"] { width: 60px; padding: 4px 8px; }
         
-        /* Greeting Card Styles */
+        /* Gift Card Envelope (Cover) Styles */
+        .gift-envelope {
+            position: relative;
+            width: 320px;
+            max-width: 90vw;
+            background: linear-gradient(145deg, #8B0000 0%, #5c0000 50%, #8B0000 100%);
+            border: 4px solid #FFD700;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255,215,0,0.4), 0 10px 40px rgba(0,0,0,0.5), inset 0 0 60px rgba(0,0,0,0.3);
+            animation: envelopeAppear 0.6s ease-out;
+        }
+        @keyframes envelopeAppear { 
+            from { transform: scale(0.5) rotateY(-30deg); opacity: 0; } 
+            to { transform: scale(1) rotateY(0); opacity: 1; } 
+        }
+        .envelope-inner {
+            background: linear-gradient(145deg, #6B0000 0%, #4a0000 100%);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .envelope-tree {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 12px;
+            position: relative;
+        }
+        .envelope-tree svg {
+            width: 100%;
+            height: 100%;
+            stroke: #FFD700;
+            stroke-width: 1.5;
+            fill: none;
+        }
+        .envelope-star {
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #FFD700;
+            font-size: 20px;
+            animation: starTwinkle 1.5s ease-in-out infinite;
+        }
+        @keyframes starTwinkle {
+            0%, 100% { opacity: 0.7; transform: translateX(-50%) scale(1); }
+            50% { opacity: 1; transform: translateX(-50%) scale(1.2); }
+        }
+        .envelope-sender {
+            font-family: 'Great Vibes', 'Playfair Display', cursive, serif;
+            font-size: 2rem;
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255,215,0,0.5);
+            margin-bottom: 4px;
+        }
+        .envelope-gift-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            color: #FFD700;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            border-top: 1px solid rgba(255,215,0,0.3);
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+        .envelope-open-btn {
+            background: transparent;
+            border: none;
+            color: rgba(255,255,255,0.8);
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            letter-spacing: 0.15em;
+            cursor: pointer;
+            padding: 12px 24px;
+            transition: all 0.3s;
+        }
+        .envelope-open-btn:hover {
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255,215,0,0.5);
+        }
+        .envelope-dots {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #FFD700;
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+        .envelope-dots.top-left { top: 12px; left: 12px; }
+        .envelope-dots.top-right { top: 12px; right: 12px; }
+        .envelope-dots.bottom-left { bottom: 12px; left: 12px; }
+        .envelope-dots.bottom-right { bottom: 12px; right: 12px; }
+
+        /* AI Generated Card Content Styles */
+        .ai-card-content {
+            position: relative;
+            width: 340px;
+            max-width: 90vw;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+            border: 3px solid #FFD700;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(255,215,0,0.3), 0 15px 50px rgba(0,0,0,0.5);
+            animation: cardReveal 0.8s ease-out;
+        }
+        @keyframes cardReveal {
+            from { transform: scale(0.8) rotateY(90deg); opacity: 0; }
+            to { transform: scale(1) rotateY(0); opacity: 1; }
+        }
+        .ai-card-image {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        .ai-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .ai-card-loading {
+            color: #FFD700;
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+        .ai-card-loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255,215,0,0.2);
+            border-top-color: #FFD700;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .ai-card-avatars {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .ai-card-avatars img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 2px solid #FFD700;
+            box-shadow: 0 0 10px rgba(255,215,0,0.4);
+        }
+        .ai-card-greeting {
+            color: #fff;
+            font-size: 1rem;
+            line-height: 1.6;
+            font-style: italic;
+            padding: 12px;
+            background: rgba(255,215,0,0.1);
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+        .ai-card-amount {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            color: #FFD700;
+            margin-bottom: 16px;
+        }
+        .ai-card-claim-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border: none;
+            border-radius: 8px;
+            color: #1a1a2e;
+            font-family: 'Cinzel', serif;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .ai-card-claim-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255,215,0,0.4);
+        }
+
+        /* Greeting Card Styles (legacy) */
         .greeting-card {
             position: relative;
             background: linear-gradient(135deg, #1a472a 0%, #0d2818 50%, #1a472a 100%);
@@ -824,7 +1016,55 @@
         </div>
     </div>
 
-    <!-- Greeting Card Modal -->
+    <!-- Gift Envelope Modal (Cover) -->
+    <div id="envelope-modal" class="custom-modal">
+        <div class="gift-envelope">
+            <div class="envelope-dots top-left"></div>
+            <div class="envelope-dots top-right"></div>
+            <div class="envelope-dots bottom-left"></div>
+            <div class="envelope-dots bottom-right"></div>
+            <div class="envelope-inner">
+                <div class="envelope-tree">
+                    <div class="envelope-star">⭐</div>
+                    <svg viewBox="0 0 100 100">
+                        <polygon points="50,10 20,90 80,90" />
+                        <polygon points="50,25 25,70 75,70" />
+                        <polygon points="50,40 30,60 70,60" />
+                        <line x1="45" y1="90" x2="55" y2="90" stroke-width="8" />
+                        <circle cx="35" cy="55" r="3" fill="#FFD700" />
+                        <circle cx="55" cy="45" r="3" fill="#FFD700" />
+                        <circle cx="45" cy="70" r="3" fill="#FFD700" />
+                        <circle cx="60" cy="65" r="3" fill="#FFD700" />
+                    </svg>
+                </div>
+                <div class="envelope-sender" id="envelope-sender">Someone's</div>
+                <div class="envelope-gift-label">GIFT</div>
+            </div>
+            <button class="envelope-open-btn" onclick="openEnvelopeCard()">Tap to Open</button>
+        </div>
+    </div>
+
+    <!-- AI Generated Card Modal -->
+    <div id="ai-card-modal" class="custom-modal">
+        <div class="ai-card-content">
+            <div class="ai-card-avatars">
+                <img id="ai-card-sender-avatar" src="" alt="Sender">
+                <img id="ai-card-recipient-avatar" src="" alt="Recipient">
+            </div>
+            <div class="ai-card-image" id="ai-card-image">
+                <div class="ai-card-loading" id="ai-card-loading">
+                    <div class="spinner"></div>
+                    <div>Creating your magical Christmas card...</div>
+                </div>
+            </div>
+            <div class="ai-card-greeting" id="ai-card-greeting">Loading greeting...</div>
+            <div class="ai-card-amount" id="ai-card-amount">🎁 0.01 ETH</div>
+            <button class="ai-card-claim-btn" onclick="claimAICardGift()">Claim Gift</button>
+            <button style="background:transparent; border:1px solid rgba(255,215,0,0.3); color:#FFD700; padding:10px; margin-top:8px; cursor:pointer; width:100%; border-radius:8px;" onclick="closeAICardModal()">Close</button>
+        </div>
+    </div>
+
+    <!-- Legacy Greeting Card Modal (for fallback) -->
     <div id="card-modal" class="custom-modal">
         <div class="greeting-card">
             <div class="card-sparkles"></div>
@@ -2163,16 +2403,120 @@
             setTimeout(() => toast.remove(), 2000);
         }
         
+        // Show gift envelope (cover)
         function showGreetingCard(gift) {
             currentCardGift = gift;
-            document.getElementById('card-sender-pfp').src = gift.sender.pfp || 'https://i.imgur.com/HeIi0wU.png';
-            document.getElementById('card-sender-name').textContent = gift.sender.username;
-            document.getElementById('card-title').textContent = gift.title;
-            document.getElementById('card-message').textContent = gift.message || 'Wishing you a wonderful holiday season!';
-            document.getElementById('card-amount').textContent = gift.amount + ' ' + gift.token;
-            document.getElementById('card-modal').classList.add('visible');
+            // Show envelope cover with sender name
+            const senderName = gift.sender?.username || gift.sender?.displayName || 'Someone';
+            document.getElementById('envelope-sender').textContent = senderName + "'s";
+            document.getElementById('envelope-modal').classList.add('visible');
         }
         
+        // Open envelope and generate AI card
+        async function openEnvelopeCard() {
+            if (!currentCardGift) return;
+            
+            // Close envelope
+            document.getElementById('envelope-modal').classList.remove('visible');
+            
+            // Show AI card modal with loading state
+            document.getElementById('ai-card-modal').classList.add('visible');
+            document.getElementById('ai-card-loading').style.display = 'flex';
+            document.getElementById('ai-card-greeting').textContent = 'Generating your personalized greeting...';
+            document.getElementById('ai-card-amount').textContent = '🎁 ' + currentCardGift.amount + ' ' + currentCardGift.token;
+            
+            // Set avatars
+            const senderAvatar = currentCardGift.sender?.pfp || 'https://i.imgur.com/HeIi0wU.png';
+            const recipientAvatar = currentUser?.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
+            document.getElementById('ai-card-sender-avatar').src = senderAvatar;
+            document.getElementById('ai-card-recipient-avatar').src = recipientAvatar;
+            
+            // Generate AI card
+            try {
+                const response = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generateCard',
+                        senderName: currentCardGift.sender?.username || 'Friend',
+                        senderAvatar: senderAvatar,
+                        recipientName: currentUser?.username || 'Friend',
+                        recipientAvatar: recipientAvatar,
+                        message: currentCardGift.message || 'Merry Christmas!'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show generated image
+                    const imageContainer = document.getElementById('ai-card-image');
+                    if (data.image) {
+                        imageContainer.innerHTML = `<img src="data:image/png;base64,${data.image}" alt="Christmas Card">`;
+                    } else {
+                        // Fallback: show placeholder with scene description
+                        imageContainer.innerHTML = `
+                            <div style="padding:20px; color:#FFD700; font-size:0.9rem;">
+                                <div style="font-size:3rem; margin-bottom:12px;">🎄❄️🎅</div>
+                                <div>${data.scene || 'A magical Christmas moment'}</div>
+                            </div>
+                        `;
+                    }
+                    document.getElementById('ai-card-loading').style.display = 'none';
+                    
+                    // Show greeting
+                    document.getElementById('ai-card-greeting').textContent = data.greeting || currentCardGift.message || 'Merry Christmas!';
+                } else {
+                    throw new Error(data.error || 'Generation failed');
+                }
+            } catch (error) {
+                console.error('AI card generation error:', error);
+                // Fallback to static card
+                const imageContainer = document.getElementById('ai-card-image');
+                imageContainer.innerHTML = `
+                    <div style="padding:20px; color:#FFD700; font-size:0.9rem;">
+                        <div style="font-size:3rem; margin-bottom:12px;">🎄🎁❄️</div>
+                        <div>A special Christmas gift for you!</div>
+                    </div>
+                `;
+                document.getElementById('ai-card-loading').style.display = 'none';
+                document.getElementById('ai-card-greeting').textContent = currentCardGift.message || 'Wishing you a wonderful holiday season!';
+            }
+        }
+        
+        function closeAICardModal() {
+            document.getElementById('ai-card-modal').classList.remove('visible');
+            currentCardGift = null;
+        }
+        
+        function claimAICardGift() {
+            if (!currentCardGift) return;
+            
+            // Launch confetti
+            launchConfetti();
+            
+            showLoading('Claiming gift...');
+            document.querySelector('.controls').style.display = 'none';
+            
+            // Close AI card modal
+            document.getElementById('ai-card-modal').classList.remove('visible');
+            
+            // TODO: In production, call smart contract here
+            currentCardGift.claimed = 1;
+            currentCardGift.claimedBy.push(currentUser?.fid || 'guest');
+            localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+            
+            setTimeout(() => {
+                hideLoading();
+                document.getElementById('success-amount').textContent = currentCardGift.amount + ' ' + currentCardGift.token;
+                document.getElementById('success-modal').classList.add('visible');
+                
+                checkMyGifts();
+                currentCardGift = null;
+            }, 800);
+        }
+        
+        // Legacy claim function (for fallback)
         function claimCardGift() {
             if (!currentCardGift) return;
             
