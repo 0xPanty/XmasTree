@@ -1523,6 +1523,43 @@
         </div>
     </div>
 
+    <!-- Confirmation Modal (AI Preview before sending) -->
+    <div id="confirm-modal" class="custom-modal">
+        <div class="modal-box" style="max-width: 380px; background: rgba(0,26,10,0.95);">
+            <div class="modal-title" style="color: var(--gold); margin-bottom: 16px;">📮 确认发送你的圣诞贺卡</div>
+            
+            <!-- AI Generated Image Preview -->
+            <div style="width: 100%; aspect-ratio: 9/16; border-radius: 12px; overflow: hidden; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+                <img id="confirm-ai-image" src="" alt="Vintage Postcard" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
+            
+            <!-- Gift Info -->
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.2); border-radius: 8px; padding: 16px; margin-bottom: 16px; text-align: left;">
+                <div style="font-size: 1.1rem; color: var(--gold); margin-bottom: 8px;" id="confirm-title">Merry Christmas!</div>
+                <div style="font-size: 0.9rem; color: rgba(255,255,255,0.7); margin-bottom: 12px; font-style: italic;" id="confirm-message">Your message...</div>
+                <div style="font-size: 0.85rem; color: rgba(255,255,255,0.5); margin-bottom: 8px;">
+                    <strong style="color: var(--gold);">将发送给:</strong> <span id="confirm-recipients">@alice, @bob</span>
+                </div>
+                <div style="font-size: 0.85rem; color: rgba(255,255,255,0.5);">
+                    <strong style="color: var(--gold);">共<span id="confirm-count">2</span>人，每人:</strong> <span id="confirm-amount">0.5 USDC</span>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 12px;">
+                <button onclick="regeneratePostcard()" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #667eea, #764ba2); border: none; color: #fff; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                    🔄 重新生成
+                </button>
+                <button onclick="confirmSendGift()" style="flex: 1; padding: 12px; background: linear-gradient(135deg, #d4af37, #ffd700); border: none; color: #2c2c2c; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                    ✅ 确认发送
+                </button>
+            </div>
+            <button onclick="closeConfirmModal()" style="width: 100%; padding: 10px; margin-top: 12px; background: transparent; border: 1px solid rgba(255,215,0,0.3); color: var(--gold); border-radius: 8px; cursor: pointer;">
+                取消
+            </button>
+        </div>
+    </div>
+
     <!-- Success Modal -->
     <div id="success-modal" class="custom-modal" style="background: rgba(0,0,0,0.3); backdrop-filter: none;">
         <div class="modal-box" style="max-width: 300px; text-align: center; background: rgba(0,0,0,0.7); border-color: var(--gold);">
@@ -2653,7 +2690,7 @@
         // Direct Gift (Send to Friends)
         let selectedRecipients = [];
         let searchTimeout = null;
-        const MAX_RECIPIENTS = 10;
+        const MAX_RECIPIENTS = 5;
         
         function openDirectGiftModal() {
             document.getElementById('direct-gift-modal').classList.add('visible');
@@ -2798,6 +2835,10 @@
                 : 'Select recipient(s) above';
         }
         
+        // Store generated AI image for confirmation
+        let pendingGiftData = null;
+        let generatedAIImage = null;
+        
         async function createDirectGift() {
             const title = document.getElementById('direct-gift-title').value || 'Merry Christmas!';
             const message = document.getElementById('direct-gift-message').value || '';
@@ -2806,16 +2847,92 @@
             if (!amount || parseFloat(amount) <= 0) { alert('Enter valid amount'); return; }
             if (selectedRecipients.length === 0) { alert('Select at least one recipient'); return; }
             
-            closeDirectGiftModal();
-            showLoading('Creating gifts...');
+            // Store pending data
+            pendingGiftData = { title, message, token, amount };
             
-            // Create a gift for each recipient
+            closeDirectGiftModal();
+            showLoading('正在用您的头像生成复古明信片...');
+            
+            // Generate AI postcard first
+            await generateAIPostcard();
+        }
+        
+        async function generateAIPostcard() {
+            try {
+                const senderAvatar = currentUser?.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
+                const senderName = currentUser?.username || 'You';
+                
+                const response = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generateCard',
+                        senderAvatar,
+                        senderName,
+                        message: pendingGiftData.message
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.image) {
+                    generatedAIImage = data.image;
+                    hideLoading();
+                    showConfirmationModal();
+                } else {
+                    throw new Error(data.error || 'Generation failed');
+                }
+            } catch (error) {
+                console.error('AI generation error:', error);
+                hideLoading();
+                if (confirm('AI图片生成失败，是否继续发送（不包含AI图片）？')) {
+                    generatedAIImage = null;
+                    showConfirmationModal();
+                } else {
+                    openDirectGiftModal();
+                }
+            }
+        }
+        
+        function showConfirmationModal() {
+            // Show confirmation modal with preview
+            document.getElementById('confirm-ai-image').src = generatedAIImage 
+                ? `data:image/png;base64,${generatedAIImage}`
+                : 'https://via.placeholder.com/280x380?text=No+Image';
+            document.getElementById('confirm-title').textContent = pendingGiftData.title;
+            document.getElementById('confirm-message').textContent = pendingGiftData.message;
+            document.getElementById('confirm-recipients').textContent = selectedRecipients.map(u => '@' + u.username).join(', ');
+            document.getElementById('confirm-count').textContent = selectedRecipients.length;
+            document.getElementById('confirm-amount').textContent = `${pendingGiftData.amount} ${pendingGiftData.token}`;
+            document.getElementById('confirm-modal').classList.add('visible');
+        }
+        
+        function closeConfirmModal() {
+            document.getElementById('confirm-modal').classList.remove('visible');
+        }
+        
+        async function regeneratePostcard() {
+            closeConfirmModal();
+            showLoading('重新生成中...');
+            await generateAIPostcard();
+        }
+        
+        async function confirmSendGift() {
+            closeConfirmModal();
+            showLoading('正在创建礼物...');
+            
+            // Create a gift for each recipient with shared AI image
             const links = [];
             for (const r of selectedRecipients) {
                 const giftId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
                 const giftData = {
-                    id: giftId, title, message, token, amount,
+                    id: giftId,
+                    title: pendingGiftData.title,
+                    message: pendingGiftData.message,
+                    token: pendingGiftData.token,
+                    amount: pendingGiftData.amount,
                     cover: selectedCover,
+                    aiImage: generatedAIImage, // Store AI image
                     shares: 1, type: 'equal', mode: 'direct',
                     requirePro: false, minScore: 0,
                     claimed: 0, claimedBy: [],
@@ -2830,14 +2947,20 @@
             
             // Create share text
             let shareText = links.length === 1 
-                ? `🎁 Gift for @${links[0].username}!\n\n${title}\n💰 ${amount} ${token}\n\n🔗 ${links[0].url}`
-                : `🎁 Christmas Gifts!\n\n${title}\n💰 ${amount} ${token} each\n\n` + links.map(l => `→ @${l.username}: ${l.url}`).join('\n');
+                ? `🎁 Gift for @${links[0].username}!\n\n${pendingGiftData.title}\n💰 ${pendingGiftData.amount} ${pendingGiftData.token}\n\n🔗 ${links[0].url}`
+                : `🎁 Christmas Gifts!\n\n${pendingGiftData.title}\n💰 ${pendingGiftData.amount} ${pendingGiftData.token} each\n\n` + links.map(l => `→ @${l.username}: ${l.url}`).join('\n');
             
             hideLoading();
             if (navigator.clipboard) {
                 await navigator.clipboard.writeText(shareText);
                 alert(`Gift(s) created for ${selectedRecipients.length} friend(s)!\nLink(s) copied to clipboard!`);
             } else { alert(shareText); }
+            
+            // Reset
+            selectedRecipients = [];
+            renderSelectedUsers();
+            pendingGiftData = null;
+            generatedAIImage = null;
         }
         
         // Claim by code/link

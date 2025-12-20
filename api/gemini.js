@@ -58,17 +58,35 @@ export default async function handler(req, res) {
             let imageData = null;
             let imageError = null;
 
-            // Generate vintage Christmas postcard with sender's likeness
-            const imagePrompt = `Create a vintage New Year or Christmas greeting card using the provided photo as a reference for the person's appearance (preserve facial features and likeness).
-Inspired by classic illustrated New Year and Christmas postcards by Jenny Nyström, Anton Pieck, or Ellen Clapsaddle.
+            // Generate vintage Christmas postcard with intelligent element extraction
+            const imagePrompt = `Analyze the provided profile image and create a vintage Christmas postcard:
 
-Festive winter scene, snowy fairy-tale forest, decorated Christmas tree with warm glowing lights.
-Timeless vintage winter clothing, classic international postcard style.
-Cozy, joyful, nostalgic holiday mood.
-Hand-painted illustration look, muted colors, subtle vintage paper texture.
-Vertical format 9:16.
+1. DETECT IMAGE TYPE:
+   - If it's a HUMAN PHOTO: Preserve facial features, hairstyle, skin tone, and likeness
+   - If it's NON-HUMAN (logo/animal/object/landscape): Extract key characteristics
 
-REFERENCE PHOTO: Use this photo to preserve the person's facial features and likeness.`;
+2. FOR NON-HUMAN IMAGES, EXTRACT:
+   - Primary color palette (main colors and tones)
+   - Style characteristics (cute/elegant/modern/playful/natural)
+   - Visual elements (patterns/shapes/textures)
+
+3. GENERATE PERSON:
+   - If human: Use their actual appearance
+   - If non-human: Create a person that embodies the extracted elements
+     Examples:
+     • Orange cat avatar → Person in orange-toned vintage clothes, warm gentle expression
+     • Blue tech logo → Person in blue attire with modern elegant style
+     • Green plant → Person in green natural-style clothing with serene mood
+     • Red abstract → Person in red tones with bold artistic style
+
+STYLE: Vintage Christmas postcard inspired by Jenny Nyström, Anton Pieck, or Ellen Clapsaddle
+SCENE: Festive winter scene, snowy fairy-tale forest, decorated Christmas tree with warm glowing lights
+MOOD: Cozy, joyful, nostalgic holiday atmosphere
+FORMAT: Vertical 9:16, hand-painted illustration look, muted colors, subtle vintage paper texture
+
+The generated person MUST reflect the essence and character of the original image!
+
+REFERENCE IMAGE: Analyze this image to create the postcard.`;
 
             // Build the request with sender's image only
             const parts = [{ text: imagePrompt }];
