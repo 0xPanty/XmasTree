@@ -1728,8 +1728,9 @@
                     
                     <!-- Generate Button -->
                     <div id="ai-generate-section">
-                        <button type="button" id="generate-ai-btn" onclick="generateAIPostcard()" style="width:100%; padding:14px; background:linear-gradient(135deg, #667eea, #764ba2); border:none; color:#fff; border-radius:8px; cursor:pointer; font-weight:bold; font-size:1rem;">
-                            🎨 Generate AI Postcard
+                        <button type="button" id="generate-ai-btn" onclick="generateAIPostcard()" style="width:100%; padding:14px 20px; background:linear-gradient(135deg, #667eea, #764ba2); border:none; color:#fff; border-radius:8px; cursor:pointer; font-weight:bold; font-size:1rem; display:flex; align-items:center; justify-content:center; gap:8px;">
+                            <span style="font-size:1.2rem;">🎨</span>
+                            <span>Generate AI Postcard</span>
                         </button>
                         <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-top:6px; text-align:center;">First generation free</div>
                     </div>
@@ -2835,10 +2836,15 @@
             document.getElementById('selected-users').innerHTML = '';
             document.getElementById('user-results').style.display = 'none';
             document.getElementById('direct-gift-title').value = '';
-            document.getElementById('direct-gift-message').value = '';
             document.getElementById('direct-gift-amount').value = '0.5';
             document.getElementById('direct-gift-token').value = 'USDC';
             document.getElementById('custom-token-group').style.display = 'none';
+            
+            // Reset AI generation state
+            document.getElementById('ai-generate-section').style.display = 'block';
+            document.getElementById('ai-preview-section').style.display = 'none';
+            isAIGenerated = false;
+            aiGenerationCount = 0;
             document.getElementById('custom-token-ca').value = '';
             updateDirectPreview();
         }
@@ -3000,6 +3006,8 @@
                 const senderAvatar = currentUser?.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
                 const senderName = currentUser?.username || 'You';
                 
+                console.log('Generating AI postcard with:', { senderAvatar, senderName });
+                
                 const response = await fetch('/api/gemini', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -3011,7 +3019,16 @@
                     })
                 });
                 
+                console.log('API response status:', response.status);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('API error response:', errorText);
+                    throw new Error(`API returned ${response.status}: ${errorText}`);
+                }
+                
                 const data = await response.json();
+                console.log('API response data:', data);
                 
                 if (data.success && data.image) {
                     currentAIImage = data.image;
@@ -3029,13 +3046,14 @@
                     document.getElementById('ai-preview-image').src = `data:image/png;base64,${currentAIImage}`;
                     document.getElementById('ai-preview-greeting').textContent = currentAIGreeting;
                 } else {
-                    throw new Error(data.error || 'Generation failed');
+                    throw new Error(data.error || 'Generation failed - no image returned');
                 }
             } catch (error) {
                 console.error('AI generation error:', error);
-                alert('AI generation failed, please try again');
+                const errorMsg = error.message || 'Unknown error';
+                alert(`AI generation failed: ${errorMsg}\n\nPlease check console for details.`);
                 btn.disabled = false;
-                btn.innerHTML = '🎨 Generate AI Postcard';
+                btn.innerHTML = '<span style="font-size:1.2rem;">🎨</span><span>Generate AI Postcard</span>';
             }
         }
         
