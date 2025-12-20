@@ -19,6 +19,7 @@ export default async function handler(req, res) {
     }
 
     const { action, senderName, senderAvatar, recipientName, recipientAvatar, message } = req.body;
+    const displayRecipient = recipientName || 'dear friend';
 
     // Helper: fetch image and convert to base64
     async function imageUrlToBase64(url) {
@@ -168,23 +169,24 @@ REFERENCE IMAGE: Analyze this image to create the postcard.`;
             }
 
             // Generate personalized greeting based on scene analysis
-            const greetingPrompt = `You are writing a personalized Christmas greeting card from ${senderName}. Based on the profile image you analyzed earlier, write a warm, heartfelt message (50-100 words):
+            const greetingPrompt = `You are writing a heartfelt Christmas greeting card from ${senderName} to ${displayRecipient}. Based on the profile image, write a warm, personal message (80-150 words):
 
 Structure:
-- Opening: "Merry Christmas, dear friend!" or "Happy Holidays!" (warm greeting)
-- Middle: Share what you've been up to based on the scene you detected:
-  * Snow/winter scene → "I've been skiing/building snowmen in the mountains..."
-  * Travel photo → "Exploring [destination], discovering festive markets..."
-  * Family gathering → "Spending precious time with family, baking holiday treats..."
-  * Pet photo → "My furry companion and I are enjoying cozy winter days..."
-  * Indoor/cozy → "Curled up with hot cocoa by the fireplace..."
-  * Urban scene → "The city lights are magical this time of year..."
-  * Nature → "Hiking through snow-covered forests..."
-- Closing: "Warmest wishes, ${senderName}" or "With love, ${senderName}"
+- Opening: Address the recipient directly - "Dear ${displayRecipient}," or "Hey ${displayRecipient}!" followed by a warm holiday greeting
+- Main body (3-4 sentences): Share what you've been up to based on the detected scene:
+  * Snow/winter → "The mountains have been incredible this season! I've been skiing every weekend and building the most epic snowmen you've ever seen. The crisp air and sparkling snow make everything feel magical."
+  * Travel → "I'm currently exploring [destination] and it's absolutely breathtaking! The festive markets, twinkling lights, and local traditions have made this holiday season unforgettable. I wish you could be here to experience it with me."
+  * Family → "This holiday season has been all about family for me. We've been baking grandmother's secret recipes, decorating the entire house, and creating memories that will last forever. The house smells like cinnamon and joy."
+  * Pets → "My furry companion and I have been having the coziest winter! We spend our days by the fireplace, taking snowy walks, and he's been 'helping' me wrap presents (by which I mean sitting on the wrapping paper)."
+  * Indoor/cozy → "I've turned into a complete homebody this winter! Curled up with endless hot cocoa, good books, and the fireplace crackling away. It's been the perfect season for reflection and gratitude."
+  * Urban → "The city is absolutely magical right now! Every street corner has twinkling lights, holiday music fills the air, and there's this incredible energy that only happens this time of year. I love walking through it all."
+  * Nature → "I've been spending every free moment hiking through snow-covered forests and frozen lakes. Nature in winter is so peaceful and beautiful - it reminds me what's truly important in life."
+- Connection (1-2 sentences): Make it personal to the recipient - "I can't wait to catch up with you soon!" or "Hope you're staying warm and cozy!" or "Miss our adventures together!" or "Would love to share this experience with you!"
+- Closing: "Warmest wishes, ${senderName}" or "With love, ${senderName}" or "Cheers, ${senderName}"
 
-Tone: Warm, genuine, conversational (like a handwritten note from a friend)
-Length: 50-100 words
-Style: Natural and heartfelt, not overly formal
+Tone: Warm, genuine, storytelling (like a letter from a close friend sharing their life)
+Length: 80-150 words
+Style: Natural, heartfelt, with vivid details
 
 Write only the greeting text, nothing else:`;
 
