@@ -401,8 +401,87 @@
             0% { transform: translateY(-50px) rotate(0deg); opacity: 0.8; }
             100% { transform: translateY(100vh) rotate(360deg); opacity: 0.2; }
         }
-        
 
+        /* Shooting Star Effect */
+        .shooting-star-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+        .shooting-star {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            filter: drop-shadow(0 0 20px rgba(255,215,0,1)) drop-shadow(0 0 40px rgba(255,215,0,0.8));
+        }
+        .shooting-star::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #fff 0%, #FFD700 40%, #DAA520 100%);
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+            transform: translate(-50%, -50%);
+            animation: starPulse 0.3s ease-in-out infinite alternate;
+        }
+        @keyframes starPulse {
+            0% { transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
+            100% { transform: translate(-50%, -50%) scale(1.1); filter: brightness(1.3); }
+        }
+        .star-trail {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        .trail-particle {
+            position: absolute;
+            background: radial-gradient(circle, #fff 0%, #FFD700 50%, transparent 100%);
+            border-radius: 50%;
+            opacity: 0;
+            animation: trailFade 0.8s ease-out forwards;
+        }
+        @keyframes trailFade {
+            0% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.2); }
+        }
+        .landing-burst {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1001;
+        }
+        .burst-particle {
+            position: absolute;
+            background: radial-gradient(circle, #fff, #FFD700);
+            border-radius: 50%;
+            animation: burstOut 1s ease-out forwards;
+        }
+        @keyframes burstOut {
+            0% { opacity: 1; transform: translate(0, 0) scale(1); }
+            100% { opacity: 0; transform: translate(var(--tx), var(--ty)) scale(0); }
+        }
+        .final-glow {
+            position: fixed;
+            pointer-events: none;
+            z-index: 999;
+            background: radial-gradient(circle, rgba(255,215,0,0.6) 0%, rgba(255,215,0,0.2) 30%, transparent 60%);
+            border-radius: 50%;
+            animation: glowPulse 0.8s ease-out forwards;
+        }
+        @keyframes glowPulse {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            30% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); }
+        }
 
         
         .requirement-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
@@ -1548,9 +1627,157 @@
         let plazaGifts = JSON.parse(localStorage.getItem('plaza_gifts') || '[]');
         let isPlazaMode = false;
 
-        // Plaza transition animation (simplified - no comet)
+        // Plaza transition animation - shooting star orbits tree then lands on top
         function playPlazaTransition(callback) {
-            if (callback) callback();
+            const overlay = document.createElement('div');
+            overlay.className = 'shooting-star-overlay';
+            
+            // Create shooting star (same style as tree topper)
+            const star = document.createElement('div');
+            star.className = 'shooting-star';
+            
+            // Trail container for particles
+            const trail = document.createElement('div');
+            trail.className = 'star-trail';
+            star.appendChild(trail);
+            
+            overlay.appendChild(star);
+            document.body.appendChild(overlay);
+            
+            // Animation parameters
+            const duration = 3000;
+            const startTime = performance.now();
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight * 0.45;
+            const radiusX = window.innerWidth * 0.3;
+            const radiusY = window.innerHeight * 0.25;
+            const treeTopY = window.innerHeight * 0.18; // Tree top position
+            const orbits = 1.5; // Number of orbits before landing
+            
+            // Start position (top-right, off screen)
+            const startX = window.innerWidth + 50;
+            const startY = -50;
+            
+            let lastX = startX, lastY = startY;
+            let trailCounter = 0;
+            
+            function spawnTrailParticle(x, y) {
+                const particle = document.createElement('div');
+                particle.className = 'trail-particle';
+                const size = 4 + Math.random() * 8;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = (x - centerX + (Math.random() - 0.5) * 20) + 'px';
+                particle.style.top = (y - centerY + (Math.random() - 0.5) * 20) + 'px';
+                trail.appendChild(particle);
+                setTimeout(() => particle.remove(), 800);
+            }
+            
+            function createLandingBurst(x, y) {
+                const burst = document.createElement('div');
+                burst.className = 'landing-burst';
+                burst.style.left = x + 'px';
+                burst.style.top = y + 'px';
+                
+                // Create burst particles
+                for (let i = 0; i < 20; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'burst-particle';
+                    const angle = (i / 20) * Math.PI * 2;
+                    const distance = 50 + Math.random() * 80;
+                    const size = 4 + Math.random() * 8;
+                    particle.style.width = size + 'px';
+                    particle.style.height = size + 'px';
+                    particle.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
+                    particle.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
+                    burst.appendChild(particle);
+                }
+                
+                document.body.appendChild(burst);
+                setTimeout(() => burst.remove(), 1000);
+                
+                // Final glow effect
+                const glow = document.createElement('div');
+                glow.className = 'final-glow';
+                glow.style.left = x + 'px';
+                glow.style.top = y + 'px';
+                glow.style.width = '200px';
+                glow.style.height = '200px';
+                document.body.appendChild(glow);
+                setTimeout(() => glow.remove(), 800);
+            }
+            
+            function animateStar(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                let x, y, scale;
+                
+                if (progress < 0.15) {
+                    // Phase 1: Enter from top-right to orbit start
+                    const p = progress / 0.15;
+                    const ease = 1 - Math.pow(1 - p, 2);
+                    x = startX + (centerX + radiusX - startX) * ease;
+                    y = startY + (centerY - radiusY - startY) * ease;
+                    scale = 0.5 + ease * 0.5;
+                } else if (progress < 0.85) {
+                    // Phase 2: Orbit around tree
+                    const orbitProgress = (progress - 0.15) / 0.7;
+                    const angle = orbitProgress * Math.PI * 2 * orbits - Math.PI / 2;
+                    
+                    // 3D-like orbit (scale based on depth)
+                    const depth = Math.sin(angle);
+                    x = centerX + Math.cos(angle) * radiusX;
+                    y = centerY + Math.sin(angle) * radiusY * 0.6;
+                    scale = 0.8 + depth * 0.3;
+                    
+                    // Spawn trail particles
+                    trailCounter++;
+                    if (trailCounter % 2 === 0) {
+                        spawnTrailParticle(x, y);
+                    }
+                } else {
+                    // Phase 3: Land on tree top
+                    const landProgress = (progress - 0.85) / 0.15;
+                    const ease = 1 - Math.pow(1 - landProgress, 3);
+                    const orbitEndX = centerX;
+                    const orbitEndY = centerY - radiusY * 0.6;
+                    x = orbitEndX + (centerX - orbitEndX) * ease;
+                    y = orbitEndY + (treeTopY - orbitEndY) * ease;
+                    scale = 1.1 - ease * 0.3;
+                    
+                    // More particles during landing
+                    if (trailCounter % 1 === 0) {
+                        spawnTrailParticle(x, y);
+                    }
+                    trailCounter++;
+                }
+                
+                star.style.left = x + 'px';
+                star.style.top = y + 'px';
+                star.style.transform = `translate(-50%, -50%) scale(${scale}) rotate(${progress * 720}deg)`;
+                
+                lastX = x;
+                lastY = y;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animateStar);
+                } else {
+                    // Landing complete - create burst effect
+                    createLandingBurst(centerX, treeTopY);
+                    
+                    // Fade out star
+                    star.style.transition = 'opacity 0.3s';
+                    star.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        overlay.remove();
+                        if (callback) callback();
+                    }, 500);
+                }
+            }
+            
+            requestAnimationFrame(animateStar);
         }
         
         // Toggle Plaza Mode
