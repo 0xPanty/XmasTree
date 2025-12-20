@@ -107,8 +107,7 @@ REFERENCE IMAGE: Analyze this image to create the postcard.`;
                     body: JSON.stringify({
                         contents: [{ parts }],
                         generationConfig: {
-                            responseModalities: ["IMAGE"],
-                            aspectRatio: "9:16"
+                            responseModalities: ["IMAGE"]
                         }
                     })
                 }
