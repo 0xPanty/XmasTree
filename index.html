@@ -1503,27 +1503,7 @@
         </div>
     </div>
 
-    <!-- AI Card Preview Modal (for testing) -->
-    <div id="preview-card-modal" class="custom-modal">
-        <div class="ai-card-content">
-            <div class="ai-card-avatars">
-                <img id="preview-sender-avatar" src="" alt="You">
-                <span style="color:#FFD700; font-size:1.5rem;">💕</span>
-                <img id="preview-recipient-avatar" src="" alt="Friend">
-            </div>
-            <div class="ai-card-image" id="preview-card-image">
-                <div class="ai-card-loading" id="preview-card-loading">
-                    <div class="spinner"></div>
-                    <div>Generating AI Christmas card...</div>
-                </div>
-            </div>
-            <div class="ai-card-greeting" id="preview-card-greeting">Loading...</div>
-            <div style="display:flex; gap:8px; margin-top:16px;">
-                <button onclick="regeneratePreview()" style="flex:1; padding:10px; background:linear-gradient(135deg, #667eea, #764ba2); border:none; color:#fff; border-radius:8px; cursor:pointer;">🔄 Regenerate</button>
-                <button onclick="closePreviewModal()" style="flex:1; padding:10px; background:transparent; border:1px solid rgba(255,215,0,0.3); color:#FFD700; border-radius:8px; cursor:pointer;">Close</button>
-            </div>
-        </div>
-    </div>
+
 
     <!-- Legacy Greeting Card Modal (for fallback) -->
     <div id="card-modal" class="custom-modal">
@@ -1609,11 +1589,9 @@
                     <input type="text" id="direct-gift-title" placeholder="Merry Christmas!" maxlength="50">
                 </div>
                 <div class="form-group">
-                    <label style="display:flex; justify-content:space-between; align-items:center;">
-                        Message
-                        <button type="button" onclick="previewAICard()" style="padding:4px 10px; background:linear-gradient(135deg, #ff6b6b, #ee5a24); border:none; color:#fff; border-radius:12px; font-size:0.7rem; cursor:pointer;">🎨 Preview AI Card</button>
-                    </label>
+                    <label>Message</label>
                     <textarea id="direct-gift-message" placeholder="Write your heartfelt message here..." maxlength="200" style="width:100%; height:60px; resize:none; background:rgba(0,0,0,0.3); border:1px solid rgba(212,175,55,0.3); color:#fff; padding:8px; font-family:inherit;"></textarea>
+                    <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-top:4px;">💡 Recipients will see an AI-generated vintage Christmas postcard with your message</div>
                 </div>
                 <div class="form-group">
                     <label>Card Cover</label>
@@ -3044,94 +3022,7 @@
             currentCardGift = null;
         }
         
-        // Preview AI Card (for testing before sending)
-        let previewData = null;
-        
-        async function previewAICard() {
-            // Need at least one recipient
-            if (selectedRecipients.length === 0) {
-                alert('Please select at least one recipient first');
-                return;
-            }
-            
-            const recipient = selectedRecipients[0];
-            const message = document.getElementById('direct-gift-message').value || 'Merry Christmas!';
-            
-            // Use current user's avatar (or default for testing)
-            const senderAvatar = currentUser?.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
-            const senderName = currentUser?.username || 'You';
-            const recipientAvatar = recipient.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
-            const recipientName = recipient.username;
-            
-            // Store for regeneration
-            previewData = { senderAvatar, senderName, recipientAvatar, recipientName, message };
-            
-            // Show modal with loading
-            document.getElementById('preview-card-modal').classList.add('visible');
-            document.getElementById('preview-sender-avatar').src = senderAvatar;
-            document.getElementById('preview-recipient-avatar').src = recipientAvatar;
-            document.getElementById('preview-card-loading').style.display = 'flex';
-            document.getElementById('preview-card-image').querySelector('img')?.remove();
-            document.getElementById('preview-card-greeting').textContent = 'Generating...';
-            
-            await generatePreviewCard();
-        }
-        
-        async function generatePreviewCard() {
-            if (!previewData) return;
-            
-            try {
-                const response = await fetch('/api/gemini', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'generateCard',
-                        senderName: previewData.senderName,
-                        senderAvatar: previewData.senderAvatar,
-                        recipientName: previewData.recipientName,
-                        recipientAvatar: previewData.recipientAvatar,
-                        message: previewData.message
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    const imageContainer = document.getElementById('preview-card-image');
-                    if (data.image) {
-                        // Remove loading, add image
-                        document.getElementById('preview-card-loading').style.display = 'none';
-                        const img = document.createElement('img');
-                        img.src = `data:image/png;base64,${data.image}`;
-                        img.alt = 'AI Christmas Card';
-                        imageContainer.appendChild(img);
-                    } else {
-                        document.getElementById('preview-card-loading').style.display = 'none';
-                        imageContainer.innerHTML += `<div style="padding:20px; color:#FFD700;">🎄 ${data.scene || 'Christmas scene'}</div>`;
-                    }
-                    document.getElementById('preview-card-greeting').textContent = data.greeting || previewData.message;
-                } else {
-                    throw new Error(data.error);
-                }
-            } catch (error) {
-                console.error('Preview generation error:', error);
-                document.getElementById('preview-card-loading').style.display = 'none';
-                document.getElementById('preview-card-greeting').textContent = 'Generation failed. Try again!';
-            }
-        }
-        
-        function regeneratePreview() {
-            if (!previewData) return;
-            // Reset and regenerate
-            const imageContainer = document.getElementById('preview-card-image');
-            imageContainer.innerHTML = `<div class="ai-card-loading" id="preview-card-loading"><div class="spinner"></div><div>Regenerating...</div></div>`;
-            document.getElementById('preview-card-greeting').textContent = 'Generating new card...';
-            generatePreviewCard();
-        }
-        
-        function closePreviewModal() {
-            document.getElementById('preview-card-modal').classList.remove('visible');
-        }
+
         
         function claimAICardGift() {
             if (!currentCardGift) return;
