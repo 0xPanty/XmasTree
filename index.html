@@ -541,12 +541,13 @@
             flex-wrap: wrap;
         }
         .cover-option {
-            width: 48px;
-            height: 64px;
+            width: 52px;
+            height: 70px;
             border-radius: 6px;
             cursor: pointer;
             border: 2px solid transparent;
             transition: all 0.2s;
+            overflow: hidden;
         }
         .cover-option.selected {
             border-color: var(--gold);
@@ -557,21 +558,95 @@
             height: 100%;
             border-radius: 4px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            position: relative;
+            overflow: hidden;
         }
-        .cover-1 { background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%); }
-        .cover-2 { background: linear-gradient(135deg, #0d5c3f 0%, #064e35 100%); }
-        .cover-3 { background: linear-gradient(135deg, #c41e3a 0%, #ff6b6b 100%); }
-        .cover-4 { background: linear-gradient(135deg, #a8e6cf 0%, #88d8b0 100%); }
-        .cover-5 { background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%); }
-        .cover-6 { background: linear-gradient(135deg, #c41e3a 0%, #0d5c3f 50%, #c41e3a 100%); }
+        /* Cover 1: Red + Christmas Tree */
+        .cover-1 {
+            background: linear-gradient(180deg, #c41e3a 0%, #8b0000 100%);
+        }
+        .cover-1::before {
+            content: '';
+            position: absolute;
+            bottom: 15px;
+            width: 0; height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-bottom: 20px solid #0d5c3f;
+        }
+        .cover-1::after {
+            content: '★';
+            position: absolute;
+            top: 12px;
+            color: #ffd700;
+            font-size: 10px;
+        }
+        /* Cover 2: Green + Gold Dots */
+        .cover-2 {
+            background: #0d5c3f;
+            background-image: radial-gradient(#ffd700 2px, transparent 2px);
+            background-size: 10px 10px;
+        }
+        /* Cover 3: Mint + Window Tree */
+        .cover-3 {
+            background: #a8e6cf;
+        }
+        .cover-3::before {
+            content: '';
+            position: absolute;
+            width: 28px; height: 36px;
+            background: #fff;
+            border-radius: 14px 14px 0 0;
+            top: 10px;
+        }
+        .cover-3::after {
+            content: '';
+            position: absolute;
+            top: 18px;
+            width: 0; height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 14px solid #0d5c3f;
+        }
+        /* Cover 4: Red + Gold Star */
+        .cover-4 {
+            background: linear-gradient(180deg, #c41e3a 0%, #a01530 100%);
+        }
+        .cover-4::before {
+            content: '✦';
+            font-size: 32px;
+            color: #f5deb3;
+        }
+        /* Cover 5: Pink Stripes */
+        .cover-5 {
+            background: repeating-linear-gradient(90deg, #ff6b9d 0px, #ff6b9d 8px, #0d5c3f 8px, #0d5c3f 16px, #c41e3a 16px, #c41e3a 24px);
+        }
+        .cover-5::before {
+            content: '';
+            position: absolute;
+            width: 12px; height: 12px;
+            background: #ffd700;
+            border-radius: 50%;
+            top: 12px;
+        }
+        /* Cover 6: Red Green Diamond */
+        .cover-6 {
+            background: 
+                linear-gradient(135deg, #c41e3a 25%, transparent 25%),
+                linear-gradient(225deg, #c41e3a 25%, transparent 25%),
+                linear-gradient(45deg, #c41e3a 25%, transparent 25%),
+                linear-gradient(315deg, #c41e3a 25%, #0d5c3f 25%);
+            background-size: 20px 20px;
+            background-position: 10px 0, 10px 0, 0 0, 0 0;
+        }
 
-        /* Full Card Cover Styles */
+        /* Full Card Cover Display */
         .card-cover {
-            width: 300px;
-            height: 400px;
+            width: 280px;
+            height: 380px;
             border-radius: 16px;
             display: flex;
             flex-direction: column;
@@ -581,37 +656,226 @@
             text-align: center;
             cursor: pointer;
             transition: transform 0.3s;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
         }
         .card-cover:hover { transform: scale(1.02); }
+        
+        /* Full Cover 1: Red + Tree */
         .card-cover-1 {
-            background: linear-gradient(135deg, #c41e3a 0%, #8b0000 100%);
+            background: linear-gradient(180deg, #c41e3a 0%, #8b0000 100%);
             color: #ffd700;
         }
+        .card-cover-1 .cover-art {
+            width: 120px; height: 160px;
+            position: relative;
+        }
+        .card-cover-1 .cover-art::before {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+            border-bottom: 100px solid #0d5c3f;
+            filter: drop-shadow(0 0 10px rgba(0,100,0,0.3));
+        }
+        .card-cover-1 .cover-art::after {
+            content: '★';
+            position: absolute;
+            top: -10px; left: 50%;
+            transform: translateX(-50%);
+            font-size: 28px;
+            color: #ffd700;
+            text-shadow: 0 0 10px #ffd700;
+        }
+        
+        /* Full Cover 2: Green + Gold Dots */
         .card-cover-2 {
-            background: linear-gradient(135deg, #0d5c3f 0%, #064e35 100%);
+            background: #0d5c3f;
             color: #ffd700;
         }
-        .card-cover-3 {
-            background: linear-gradient(135deg, #c41e3a 0%, #ff6b6b 100%);
-            color: #fff5e6;
+        .card-cover-2::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(#ffd700 4px, transparent 4px);
+            background-size: 30px 30px;
+            opacity: 0.8;
         }
-        .card-cover-4 {
-            background: linear-gradient(135deg, #a8e6cf 0%, #88d8b0 100%);
+        
+        /* Full Cover 3: Mint + Arch Window */
+        .card-cover-3 {
+            background: #a8e6cf;
             color: #0d5c3f;
         }
+        .card-cover-3 .cover-art {
+            width: 140px; height: 180px;
+            background: #fff;
+            border-radius: 70px 70px 0 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+        .card-cover-3 .cover-art::before {
+            content: '';
+            position: absolute;
+            bottom: 20px;
+            width: 0; height: 0;
+            border-left: 40px solid transparent;
+            border-right: 40px solid transparent;
+            border-bottom: 70px solid #0d5c3f;
+        }
+        
+        /* Full Cover 4: Red + Big Star */
+        .card-cover-4 {
+            background: linear-gradient(180deg, #c41e3a 0%, #a01530 100%);
+            color: #f5deb3;
+        }
+        .card-cover-4 .cover-art {
+            font-size: 120px;
+            color: #f5deb3;
+            text-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            line-height: 1;
+        }
+        
+        /* Full Cover 5: Pink/Green Stripes */
         .card-cover-5 {
-            background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%);
+            background: repeating-linear-gradient(90deg, 
+                #ff6b9d 0px, #ff6b9d 30px, 
+                #0d5c3f 30px, #0d5c3f 60px, 
+                #c41e3a 60px, #c41e3a 90px);
             color: #fff;
         }
+        .card-cover-5::before {
+            content: '';
+            position: absolute;
+            width: 40px; height: 40px;
+            background: #ffd700;
+            border-radius: 50%;
+            top: 40px; right: 50px;
+            box-shadow: -60px 80px 0 30px #ffd700, 40px 120px 0 20px #90EE90;
+        }
+        
+        /* Full Cover 6: Diamond Pattern */
         .card-cover-6 {
-            background: linear-gradient(45deg, #c41e3a 25%, #0d5c3f 25%, #0d5c3f 50%, #c41e3a 50%, #c41e3a 75%, #0d5c3f 75%);
-            background-size: 40px 40px;
+            background-color: #c41e3a;
+            background-image: 
+                linear-gradient(135deg, #0d5c3f 25%, transparent 25%),
+                linear-gradient(225deg, #0d5c3f 25%, transparent 25%),
+                linear-gradient(45deg, #0d5c3f 25%, transparent 25%),
+                linear-gradient(315deg, #0d5c3f 25%, transparent 25%);
+            background-size: 60px 60px;
+            background-position: 30px 0, 30px 0, 0 0, 0 0;
             color: #ffd700;
         }
-        .card-cover-icon { font-size: 4rem; margin-bottom: 16px; }
-        .card-cover-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.3); }
-        .card-cover-from { font-size: 0.9rem; opacity: 0.9; }
-        .card-cover-tap { margin-top: 24px; font-size: 0.8rem; opacity: 0.7; animation: pulse 2s infinite; }
+        
+        .card-cover-title {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin: 16px 0 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            font-family: 'Georgia', serif;
+        }
+        .card-cover-from {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        .card-cover-tap {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            opacity: 0.7;
+            animation: pulse 2s infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Gift Card Container - 3D flip */
+        .gift-card-container {
+            width: 280px;
+            height: 380px;
+            position: relative;
+            perspective: 1000px;
+        }
+        .gift-card-container .card-cover {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            backface-visibility: hidden;
+            transition: transform 0.8s ease;
+            transform-style: preserve-3d;
+        }
+        .gift-card-container .card-inside {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            backface-visibility: hidden;
+            transform: rotateY(180deg);
+            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }
+        .gift-card-container.opened .card-cover {
+            transform: rotateY(-180deg);
+        }
+        .gift-card-container.opened .card-inside {
+            transform: rotateY(0deg);
+        }
+        
+        /* Card Inside Styles */
+        .card-inside-loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            color: #ffd700;
+        }
+        .card-inside img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        .card-inside-greeting {
+            color: #fff;
+            font-size: 0.95rem;
+            text-align: center;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            max-height: 60px;
+            overflow: hidden;
+        }
+        .card-inside-amount {
+            color: #ffd700;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+        .card-inside-claim {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+        }
 
         /* AI Generated Card Content Styles */
         .ai-card-content {
@@ -1095,13 +1359,28 @@
         </div>
     </div>
 
-    <!-- Gift Card Cover Modal -->
+    <!-- Gift Card with Cover + Inside -->
     <div id="envelope-modal" class="custom-modal">
-        <div id="card-cover-display" class="card-cover card-cover-1" onclick="openEnvelopeCard()">
-            <div class="card-cover-icon" id="cover-icon">🎄</div>
-            <div class="card-cover-title" id="cover-title">Merry Christmas!</div>
-            <div class="card-cover-from" id="cover-from">From @someone</div>
-            <div class="card-cover-tap">Tap to open your gift</div>
+        <div class="gift-card-container" id="gift-card-container">
+            <!-- Inside (AI generated content) -->
+            <div class="card-inside" id="card-inside">
+                <div class="card-inside-loading" id="card-inside-loading">
+                    <div class="spinner"></div>
+                    <div>Creating your card...</div>
+                </div>
+                <img id="card-inside-image" src="" alt="AI Card" style="display:none;">
+                <div class="card-inside-greeting" id="card-inside-greeting"></div>
+                <div class="card-inside-amount" id="card-inside-amount">🎁 0.5 USDC</div>
+                <button class="card-inside-claim" onclick="claimAICardGift()">Claim Gift</button>
+                <button onclick="closeCardModal()" style="width:100%; padding:10px; margin-top:8px; background:transparent; border:1px solid rgba(255,215,0,0.3); color:#ffd700; border-radius:8px; cursor:pointer;">Close</button>
+            </div>
+            <!-- Cover (front) -->
+            <div id="card-cover-display" class="card-cover card-cover-1" onclick="openEnvelopeCard()">
+                <div class="cover-art" id="cover-art">✦</div>
+                <div class="card-cover-title" id="cover-title">Merry Christmas!</div>
+                <div class="card-cover-from" id="cover-from">From @someone</div>
+                <div class="card-cover-tap">✨ Tap to open ✨</div>
+            </div>
         </div>
     </div>
 
@@ -1241,22 +1520,22 @@
                     <label>Card Cover</label>
                     <div class="cover-selector" id="cover-selector">
                         <div class="cover-option selected" data-cover="1" onclick="selectCover(1)">
-                            <div class="cover-preview cover-1">🎄</div>
+                            <div class="cover-preview cover-1"></div>
                         </div>
                         <div class="cover-option" data-cover="2" onclick="selectCover(2)">
-                            <div class="cover-preview cover-2">✨</div>
+                            <div class="cover-preview cover-2"></div>
                         </div>
                         <div class="cover-option" data-cover="3" onclick="selectCover(3)">
-                            <div class="cover-preview cover-3">⭐</div>
+                            <div class="cover-preview cover-3"></div>
                         </div>
                         <div class="cover-option" data-cover="4" onclick="selectCover(4)">
-                            <div class="cover-preview cover-4">🎁</div>
+                            <div class="cover-preview cover-4"></div>
                         </div>
                         <div class="cover-option" data-cover="5" onclick="selectCover(5)">
-                            <div class="cover-preview cover-5">❄️</div>
+                            <div class="cover-preview cover-5"></div>
                         </div>
                         <div class="cover-option" data-cover="6" onclick="selectCover(6)">
-                            <div class="cover-preview cover-6">🔔</div>
+                            <div class="cover-preview cover-6"></div>
                         </div>
                     </div>
                 </div>
@@ -2513,8 +2792,8 @@
             setTimeout(() => toast.remove(), 2000);
         }
         
-        // Cover icons mapping
-        const coverIcons = { 1: '🎄', 2: '✨', 3: '⭐', 4: '🎁', 5: '❄️', 6: '🔔' };
+        // Cover art content mapping
+        const coverArt = { 1: '', 2: '', 3: '', 4: '✦', 5: '', 6: '' };
         let selectedCover = 1;
         
         function selectCover(num) {
@@ -2529,34 +2808,39 @@
             const senderName = gift.sender?.username || gift.sender?.displayName || 'Someone';
             const coverNum = gift.cover || 1;
             const coverEl = document.getElementById('card-cover-display');
+            const container = document.getElementById('gift-card-container');
+            
+            // Reset state
+            container.classList.remove('opened');
+            document.getElementById('card-inside-loading').style.display = 'flex';
+            document.getElementById('card-inside-image').style.display = 'none';
+            document.getElementById('card-inside-greeting').textContent = '';
             
             // Set cover style
             coverEl.className = `card-cover card-cover-${coverNum}`;
-            document.getElementById('cover-icon').textContent = coverIcons[coverNum] || '🎄';
+            document.getElementById('cover-art').textContent = coverArt[coverNum] || '';
             document.getElementById('cover-title').textContent = gift.title || 'Merry Christmas!';
             document.getElementById('cover-from').textContent = `From @${senderName}`;
+            document.getElementById('card-inside-amount').textContent = '🎁 ' + gift.amount + ' ' + gift.token;
             
             document.getElementById('envelope-modal').classList.add('visible');
         }
         
-        // Open envelope and generate AI card
+        // Open card with flip animation and generate AI content
         async function openEnvelopeCard() {
             if (!currentCardGift) return;
             
-            // Close envelope
-            document.getElementById('envelope-modal').classList.remove('visible');
+            const container = document.getElementById('gift-card-container');
             
-            // Show AI card modal with loading state
-            document.getElementById('ai-card-modal').classList.add('visible');
-            document.getElementById('ai-card-loading').style.display = 'flex';
-            document.getElementById('ai-card-greeting').textContent = 'Generating your personalized greeting...';
-            document.getElementById('ai-card-amount').textContent = '🎁 ' + currentCardGift.amount + ' ' + currentCardGift.token;
+            // Flip the card open
+            container.classList.add('opened');
             
-            // Set avatars
+            // Set amount
+            document.getElementById('card-inside-amount').textContent = '🎁 ' + currentCardGift.amount + ' ' + currentCardGift.token;
+            
+            // Get avatars for AI generation
             const senderAvatar = currentCardGift.sender?.pfp || 'https://i.imgur.com/HeIi0wU.png';
             const recipientAvatar = currentUser?.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
-            document.getElementById('ai-card-sender-avatar').src = senderAvatar;
-            document.getElementById('ai-card-recipient-avatar').src = recipientAvatar;
             
             // Generate AI card
             try {
@@ -2576,43 +2860,36 @@
                 const data = await response.json();
                 
                 if (data.success) {
+                    // Hide loading
+                    document.getElementById('card-inside-loading').style.display = 'none';
+                    
                     // Show generated image
-                    const imageContainer = document.getElementById('ai-card-image');
+                    const imgEl = document.getElementById('card-inside-image');
                     if (data.image) {
-                        imageContainer.innerHTML = `<img src="data:image/png;base64,${data.image}" alt="Christmas Card">`;
-                    } else {
-                        // Fallback: show placeholder with scene description
-                        imageContainer.innerHTML = `
-                            <div style="padding:20px; color:#FFD700; font-size:0.9rem;">
-                                <div style="font-size:3rem; margin-bottom:12px;">🎄❄️🎅</div>
-                                <div>${data.scene || 'A magical Christmas moment'}</div>
-                            </div>
-                        `;
+                        imgEl.src = `data:image/png;base64,${data.image}`;
+                        imgEl.style.display = 'block';
                     }
-                    document.getElementById('ai-card-loading').style.display = 'none';
                     
                     // Show greeting
-                    document.getElementById('ai-card-greeting').textContent = data.greeting || currentCardGift.message || 'Merry Christmas!';
+                    document.getElementById('card-inside-greeting').textContent = data.greeting || currentCardGift.message || 'Merry Christmas!';
                 } else {
                     throw new Error(data.error || 'Generation failed');
                 }
             } catch (error) {
                 console.error('AI card generation error:', error);
-                // Fallback to static card
-                const imageContainer = document.getElementById('ai-card-image');
-                imageContainer.innerHTML = `
-                    <div style="padding:20px; color:#FFD700; font-size:0.9rem;">
+                // Fallback
+                document.getElementById('card-inside-loading').innerHTML = `
+                    <div style="color:#FFD700; font-size:0.9rem;">
                         <div style="font-size:3rem; margin-bottom:12px;">🎄🎁❄️</div>
-                        <div>A special Christmas gift for you!</div>
                     </div>
                 `;
-                document.getElementById('ai-card-loading').style.display = 'none';
-                document.getElementById('ai-card-greeting').textContent = currentCardGift.message || 'Wishing you a wonderful holiday season!';
+                document.getElementById('card-inside-greeting').textContent = currentCardGift.message || 'Wishing you a wonderful holiday season!';
             }
         }
         
-        function closeAICardModal() {
-            document.getElementById('ai-card-modal').classList.remove('visible');
+        function closeCardModal() {
+            document.getElementById('envelope-modal').classList.remove('visible');
+            document.getElementById('gift-card-container').classList.remove('opened');
             currentCardGift = null;
         }
         

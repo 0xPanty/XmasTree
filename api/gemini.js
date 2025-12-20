@@ -52,37 +52,36 @@ export default async function handler(req, res) {
             
             const randomScene = christmasScenes[Math.floor(Math.random() * christmasScenes.length)];
             
-            // Fetch both avatars and convert to base64
-            const [senderImg, recipientImg] = await Promise.all([
-                imageUrlToBase64(senderAvatar),
-                imageUrlToBase64(recipientAvatar)
-            ]);
+            // Fetch sender avatar and convert to base64
+            const senderImg = await imageUrlToBase64(senderAvatar);
 
             let imageData = null;
             let imageError = null;
 
-            // Use Gemini 2.0 Flash with image generation capability
-            // This model can take reference images and generate new images based on them
-            const imagePrompt = `Based on the two profile photos provided, create a beautiful Japanese anime illustration.
+            // Generate Q-style cartoon of sender giving Christmas blessing
+            const imagePrompt = `Based on the profile photo provided, create a cute Q-version (chibi) cartoon illustration.
 
-REFERENCE PHOTOS: The first photo is Person 1 (${senderName}), the second photo is Person 2 (${recipientName}).
+REFERENCE PHOTO: This is ${senderName}'s photo. Create a chibi cartoon version of this person.
 
-Create anime versions of these two people ${randomScene}.
+SCENE: The character is wearing a red Santa hat, smiling warmly, and sending Christmas blessings. They could be:
+- Waving hello with a warm smile
+- Holding a gift box or Christmas ornament
+- Making a heart gesture
+- Surrounded by sparkles and snowflakes
 
 CRITICAL STYLE REQUIREMENTS:
-- Japanese shoujo manga / anime art style (NOT chibi, normal body proportions)
-- Beautiful large expressive anime eyes with detailed highlights
-- Elegant facial features, soft shading on skin
-- MUST match their actual features from photos: hair color, hair length, hair style, face shape
-- Warm, soft color palette with beautiful lighting
-- Richly detailed background with depth
-- Characters should look happy and natural together
-- High quality illustration like a professional anime scene
-- Similar style to slice-of-life anime artwork
+- Q-version/Chibi style (big head, small cute body, 2-3 head proportions)
+- Big sparkly anime eyes, rosy cheeks, warm happy expression
+- MUST keep their actual features: hair color, hair style, skin tone, any distinctive features
+- Wearing a cute red Santa hat with white fur trim
+- Christmas color palette: red, green, white, gold accents
+- Soft pastel background with snowflakes or sparkles
+- Warm, festive, heartwarming feeling
+- High quality cute illustration
 
-The characters MUST clearly resemble the people in the reference photos while being drawn in anime style.`;
+The chibi character MUST resemble the person in the reference photo!`;
 
-            // Build the request with reference images
+            // Build the request with sender's image only
             const parts = [{ text: imagePrompt }];
             
             if (senderImg) {
@@ -90,15 +89,6 @@ The characters MUST clearly resemble the people in the reference photos while be
                     inlineData: {
                         mimeType: senderImg.mimeType,
                         data: senderImg.base64
-                    }
-                });
-            }
-            
-            if (recipientImg) {
-                parts.push({
-                    inlineData: {
-                        mimeType: recipientImg.mimeType,
-                        data: recipientImg.base64
                     }
                 });
             }
@@ -141,7 +131,7 @@ The characters MUST clearly resemble the people in the reference photos while be
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             instances: [{ 
-                                prompt: `Create a beautiful Japanese anime illustration of two young women ${randomScene}. Style: Shoujo manga art style, normal body proportions (not chibi), large expressive anime eyes, elegant features, warm soft colors, detailed background, professional anime quality, slice-of-life aesthetic.`
+                                prompt: `Create a cute Q-version chibi cartoon character wearing a red Santa hat, smiling warmly and sending Christmas blessings. Style: Big head small body (2-3 head proportions), big sparkly anime eyes, rosy cheeks, Christmas colors (red, green, white, gold), soft pastel snowy background with sparkles, warm festive feeling.`
                             }],
                             parameters: {
                                 sampleCount: 1,
@@ -161,16 +151,14 @@ The characters MUST clearly resemble the people in the reference photos while be
                 }
             }
 
-            // Generate greeting based on scene using Gemini text
-            const greetingPrompt = `You are creating a heartfelt Christmas greeting card message.
-Scene: Two friends named ${senderName} and ${recipientName} are ${randomScene}.
-User's original message: "${message || 'Merry Christmas!'}"
+            // Generate greeting based on sender's message
+            const greetingPrompt = `You are writing a Christmas greeting card message from ${senderName} to ${recipientName}.
+Original message: "${message || 'Merry Christmas!'}"
 
-Write a short, warm, and creative Christmas greeting (2-3 sentences max) that:
-1. References the festive scene naturally
-2. Incorporates the spirit of the user's message
-3. Feels personal and heartwarming
-4. Uses festive but not overly cheesy language
+Write a short, warm Christmas greeting (2-3 sentences max) that:
+1. Feels personal and heartwarming
+2. Incorporates the sender's message
+3. Adds a festive Christmas touch
 
 Only respond with the greeting text, nothing else.`;
 
