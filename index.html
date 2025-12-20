@@ -1622,7 +1622,7 @@
             <div class="form-group">
                 <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                     <input type="checkbox" id="reply-include-gift" style="width:18px; height:18px; cursor:pointer;">
-                    <span>附加回礼 (Include Return Gift)</span>
+                    <span>Include Return Gift</span>
                 </label>
             </div>
             
@@ -1717,7 +1717,6 @@
     <div id="direct-gift-modal" class="custom-modal">
         <div class="modal-box" style="max-width: 400px;">
             <div class="modal-title">🎁 Send to Friends</div>
-            <div class="mode-hint">Search and select up to 10 Farcaster users</div>
             <div class="gift-form">
                 <div class="form-group">
                     <label>Gift Title</label>
@@ -1730,9 +1729,9 @@
                     <!-- Generate Button -->
                     <div id="ai-generate-section">
                         <button type="button" id="generate-ai-btn" onclick="generateAIPostcard()" style="width:100%; padding:14px; background:linear-gradient(135deg, #667eea, #764ba2); border:none; color:#fff; border-radius:8px; cursor:pointer; font-weight:bold; font-size:1rem;">
-                            🎨 生成AI明信片预览
+                            🎨 Generate AI Postcard
                         </button>
-                        <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-top:6px; text-align:center;">首次生成免费</div>
+                        <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-top:6px; text-align:center;">First generation free</div>
                     </div>
                     
                     <!-- AI Generated Preview -->
@@ -1750,7 +1749,7 @@
                             <div id="ai-preview-greeting" style="font-family:'Dancing Script', cursive; font-size:0.9rem; color:#ffd700; line-height:1.6; max-height:120px; overflow-y:auto;">Loading...</div>
                         </div>
                         <button type="button" id="regenerate-ai-btn" onclick="regenerateAIPostcard()" style="width:100%; padding:12px; background:linear-gradient(135deg, #f093fb, #f5576c); border:none; color:#fff; border-radius:8px; cursor:pointer; font-weight:bold;">
-                            🔄 重新生成 (0.1 USDC)
+                            🔄 Regenerate (0.1 USDC)
                         </button>
                     </div>
                 </div>
@@ -1758,7 +1757,7 @@
                 <div class="form-group">
                     <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
                         <input type="checkbox" id="include-gift-money" onchange="toggleGiftMoney()" checked style="width:18px; height:18px; cursor:pointer;">
-                        <span>附加礼金 (Include Gift Money)</span>
+                        <span>Include Gift Money</span>
                     </label>
                 </div>
                 
@@ -2989,13 +2988,13 @@
         
         async function generateAIPostcard() {
             if (aiGenerationCount > 0) {
-                alert('请使用"重新生成"按钮');
+                alert('Please use "Regenerate" button');
                 return;
             }
             
             const btn = document.getElementById('generate-ai-btn');
             btn.disabled = true;
-            btn.innerHTML = '⏳ AI生成中...';
+            btn.innerHTML = '⏳ Generating AI...';
             
             try {
                 const senderAvatar = currentUser?.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
@@ -3034,30 +3033,30 @@
                 }
             } catch (error) {
                 console.error('AI generation error:', error);
-                alert('AI图片生成失败，请重试');
+                alert('AI generation failed, please try again');
                 btn.disabled = false;
-                btn.innerHTML = '🎨 生成AI明信片预览';
+                btn.innerHTML = '🎨 Generate AI Postcard';
             }
         }
         
         async function regenerateAIPostcard() {
             // Payment confirmation
-            if (!confirm(`重新生成需要支付 ${REGENERATE_COST} USDC\n\n将转账到: ${PAYMENT_ADDRESS}\n\n确认继续？`)) {
+            if (!confirm(`Regeneration costs ${REGENERATE_COST} USDC\n\nTransfer to: ${PAYMENT_ADDRESS}\n\nContinue?`)) {
                 return;
             }
             
             const btn = document.getElementById('regenerate-ai-btn');
             btn.disabled = true;
-            btn.innerHTML = '💰 请完成支付...';
+            btn.innerHTML = '💰 Complete payment...';
             
             // TODO: Implement actual payment verification
             // For now, simulate payment
             await new Promise(resolve => setTimeout(resolve, 2000));
             
             // Show payment reminder
-            alert(`请手动转账 ${REGENERATE_COST} USDC 到:\n${PAYMENT_ADDRESS}\n\n转账完成后点击确认继续生成`);
+            alert(`Please transfer ${REGENERATE_COST} USDC to:\n${PAYMENT_ADDRESS}\n\nClick OK after transfer to continue`);
             
-            btn.innerHTML = '⏳ 重新生成中...';
+            btn.innerHTML = '⏳ Regenerating...';
             
             try {
                 const senderAvatar = currentUser?.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
@@ -3090,15 +3089,15 @@
                     document.getElementById('ai-preview-greeting').textContent = currentAIGreeting;
                     
                     btn.disabled = false;
-                    btn.innerHTML = '🔄 重新生成 (0.1 USDC)';
+                    btn.innerHTML = '🔄 Regenerate (0.1 USDC)';
                 } else {
                     throw new Error(data.error || 'Regeneration failed');
                 }
             } catch (error) {
                 console.error('AI regeneration error:', error);
-                alert('重新生成失败，请重试（不会重复扣费）');
+                alert('Regeneration failed, please try again (no duplicate charge)');
                 btn.disabled = false;
-                btn.innerHTML = '🔄 重新生成 (0.1 USDC)';
+                btn.innerHTML = '🔄 Regenerate (0.1 USDC)';
             }
         }
         
@@ -3111,12 +3110,12 @@
             if (includeGift && (!amount || parseFloat(amount) <= 0)) { alert('Enter valid amount'); return; }
             if (selectedRecipients.length === 0) { alert('Select at least one recipient'); return; }
             if (!isAIGenerated) { 
-                alert('请先生成AI明信片预览！'); 
+                alert('Please generate AI postcard first!'); 
                 return; 
             }
             
             closeDirectGiftModal();
-            showLoading('正在创建礼物...');
+            showLoading('Creating gifts...');
             
             // Create a gift for each recipient with shared AI image
             const links = [];
@@ -3174,7 +3173,7 @@
             document.getElementById('ai-generate-section').style.display = 'block';
             document.getElementById('ai-preview-section').style.display = 'none';
             document.getElementById('generate-ai-btn').disabled = false;
-            document.getElementById('generate-ai-btn').innerHTML = '🎨 生成AI明信片预览';
+            document.getElementById('generate-ai-btn').innerHTML = '🎨 Generate AI Postcard';
         }
         
         // Claim by code/link
@@ -4033,7 +4032,7 @@ Write as if from ${replyFrom}:`;
             
             closeReplyModal();
             closeCardModal();
-            showLoading('正在生成回复贺卡...');
+            showLoading('Generating reply card...');
             
             const includeGift = document.getElementById('reply-include-gift').checked;
             const token = includeGift ? document.getElementById('reply-gift-token').value : null;
