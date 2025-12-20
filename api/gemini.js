@@ -58,33 +58,28 @@ export default async function handler(req, res) {
             let imageData = null;
             let imageError = null;
 
-            // Generate vintage Christmas postcard with intelligent element extraction
+            // Generate vintage Christmas postcard with intelligent scene analysis
             const imagePrompt = `Analyze the provided profile image and create a vintage Christmas postcard:
 
-1. DETECT IMAGE TYPE:
-   - If it's a HUMAN PHOTO: Preserve facial features, hairstyle, skin tone, and likeness
-   - If it's NON-HUMAN (logo/animal/object/landscape): Extract key characteristics
+STEP 1 - SCENE DETECTION:
+Identify the scene/context in the photo:
+- Human portrait → Preserve facial features, hairstyle, clothing style
+- Non-human (logo/animal/object) → Extract color palette, visual style, mood
+- Winter/snow scene → Skiing, snowman building, snow play
+- Travel photo → Traveling in [location], exploring cities
+- Family gathering → Family reunion, decorating Christmas tree
+- Pet photo → Spending holidays with pet
+- Indoor/cozy → By the fireplace, hot chocolate, reading
+- Beach/summer → Winter vacation in warm place
+- Urban/city → City lights, holiday shopping
+- Nature/outdoor → Hiking in winter forest
 
-2. FOR NON-HUMAN IMAGES, EXTRACT:
-   - Primary color palette (main colors and tones)
-   - Style characteristics (cute/elegant/modern/playful/natural)
-   - Visual elements (patterns/shapes/textures)
-
-3. GENERATE PERSON:
-   - If human: Use their actual appearance
-   - If non-human: Create a person that embodies the extracted elements
-     Examples:
-     • Orange cat avatar → Person in orange-toned vintage clothes, warm gentle expression
-     • Blue tech logo → Person in blue attire with modern elegant style
-     • Green plant → Person in green natural-style clothing with serene mood
-     • Red abstract → Person in red tones with bold artistic style
-
-STYLE: Vintage Christmas postcard inspired by Jenny Nyström, Anton Pieck, or Ellen Clapsaddle
-SCENE: Festive winter scene, snowy fairy-tale forest, decorated Christmas tree with warm glowing lights
-MOOD: Cozy, joyful, nostalgic holiday atmosphere
-FORMAT: Vertical 9:16, hand-painted illustration look, muted colors, subtle vintage paper texture
-
-The generated person MUST reflect the essence and character of the original image!
+STEP 2 - GENERATE IMAGE:
+Style: Vintage Christmas postcard inspired by Jenny Nyström, Anton Pieck, Ellen Clapsaddle
+Scene: Match the detected scene with festive winter atmosphere
+Character: Based on the photo analysis (preserve likeness or embody extracted elements)
+Format: Vertical 9:16, hand-painted illustration, muted colors, vintage paper texture
+Mood: Warm, nostalgic, cozy holiday feeling
 
 REFERENCE IMAGE: Analyze this image to create the postcard.`;
 
@@ -159,16 +154,26 @@ REFERENCE IMAGE: Analyze this image to create the postcard.`;
                 }
             }
 
-            // Generate greeting based on sender's message
-            const greetingPrompt = `You are writing a Christmas greeting card message from ${senderName} to ${recipientName}.
-Original message: "${message || 'Merry Christmas!'}"
+            // Generate personalized greeting based on scene analysis
+            const greetingPrompt = `You are writing a personalized Christmas greeting card from ${senderName}. Based on the profile image you analyzed earlier, write a warm, heartfelt message (50-100 words):
 
-Write a short, warm Christmas greeting (2-3 sentences max) that:
-1. Feels personal and heartwarming
-2. Incorporates the sender's message
-3. Adds a festive Christmas touch
+Structure:
+- Opening: "Merry Christmas, dear friend!" or "Happy Holidays!" (warm greeting)
+- Middle: Share what you've been up to based on the scene you detected:
+  * Snow/winter scene → "I've been skiing/building snowmen in the mountains..."
+  * Travel photo → "Exploring [destination], discovering festive markets..."
+  * Family gathering → "Spending precious time with family, baking holiday treats..."
+  * Pet photo → "My furry companion and I are enjoying cozy winter days..."
+  * Indoor/cozy → "Curled up with hot cocoa by the fireplace..."
+  * Urban scene → "The city lights are magical this time of year..."
+  * Nature → "Hiking through snow-covered forests..."
+- Closing: "Warmest wishes, ${senderName}" or "With love, ${senderName}"
 
-Only respond with the greeting text, nothing else.`;
+Tone: Warm, genuine, conversational (like a handwritten note from a friend)
+Length: 50-100 words
+Style: Natural and heartfelt, not overly formal
+
+Write only the greeting text, nothing else:`;
 
             const textResponse = await fetch(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
