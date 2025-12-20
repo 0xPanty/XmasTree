@@ -95,12 +95,12 @@ REFERENCE IMAGE: Analyze this image to create the postcard.`;
                 });
             }
 
-            // Use Gemini 2.5 Pro (most stable) for image generation with reference images
-            console.log('🎨 Attempting image generation with Gemini 2.5 Pro...');
+            // Use Gemini 2.5 Flash Image for image generation
+            console.log('🎨 Attempting image generation with Gemini 2.5 Flash Image...');
             console.log('Parts:', JSON.stringify(parts, null, 2));
             
             const imageResponse = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-002:generateContent?key=${GEMINI_API_KEY}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${GEMINI_API_KEY}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
