@@ -410,35 +410,28 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 2;
+            z-index: 100;
             overflow: hidden;
         }
         .bg-meteor {
             position: absolute;
-            width: 4px;
-            height: 4px;
-            background: #fff;
+            width: var(--size, 4px);
+            height: var(--size, 4px);
+            background: radial-gradient(circle, #fff 0%, rgba(255,250,220,0.9) 40%, rgba(255,215,0,0.4) 70%, transparent 100%);
             border-radius: 50%;
-            box-shadow: 0 0 6px 2px rgba(255,255,255,0.8), 0 0 12px 4px rgba(255,215,0,0.5);
             opacity: 0;
-            animation: meteorFly var(--duration, 1.2s) ease-out forwards;
-        }
-        .bg-meteor::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            right: 0;
-            width: var(--tail-length, 80px);
-            height: 2px;
-            background: linear-gradient(to left, rgba(255,255,255,0.9), rgba(255,215,0,0.6) 30%, transparent);
-            transform: translateY(-50%);
-            border-radius: 2px;
+            box-shadow: 0 0 6px 2px rgba(255,255,255,0.8), 0 0 12px 4px rgba(255,215,0,0.5);
+            animation: meteorFly var(--duration, 1s) linear forwards, meteorTwinkle 0.1s ease-in-out infinite;
         }
         @keyframes meteorFly {
-            0% { opacity: 0; transform: translate(0, 0) rotate(-35deg); }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { opacity: 0; transform: translate(calc(-100vw - 100px), calc(100vh + 100px)) rotate(-35deg); }
+            0% { opacity: 0; transform: translate(0, 0) scale(1); }
+            5% { opacity: 1; }
+            85% { opacity: 0.9; }
+            100% { opacity: 0; transform: translate(var(--travel-x, -120vw), var(--travel-y, 80vh)) scale(0.5); }
+        }
+        @keyframes meteorTwinkle {
+            0%, 100% { box-shadow: 0 0 6px 2px rgba(255,255,255,0.8), 0 0 12px 4px rgba(255,215,0,0.5); }
+            50% { box-shadow: 0 0 10px 4px rgba(255,255,255,1), 0 0 20px 8px rgba(255,215,0,0.8); }
         }
 
         
@@ -977,9 +970,8 @@
             <div id="app-subtitle" class="subtitle">Share the joy on Farcaster</div>
         </header>
         <div class="controls">
-            <!-- Top row: Wallet + Mailbox + Record + Tip -->
+            <!-- Top row: Mailbox + Record + Tip -->
             <div class="btn-row" id="top-btns">
-                <button id="wallet-btn" onclick="connectWallet()" class="btn-small" style="font-size:1.5rem !important; padding:8px 16px !important;">👛</button>
                 <button id="mailbox-button" onclick="openMyGifts()" class="btn-small" style="font-size:1.5rem !important; padding:8px 16px !important;">📬</button>
                 <button onclick="openRecordModal()" class="btn-small" style="font-size:1.5rem !important; padding:8px 16px !important;">📋</button>
                 <button onclick="openTipModal()" class="btn-small" style="font-size:1.5rem !important; padding:8px 16px !important;">☕</button>
@@ -1466,7 +1458,14 @@
                 <>
                     <PerspectiveCamera makeDefault position={[0, 25, 0.1]} fov={50} />
                     <CameraController viewMode={viewMode} />
-                    <OrbitControls enablePan={false} minDistance={10} maxDistance={50} maxPolarAngle={Math.PI / 1.5} autoRotate={true} autoRotateSpeed={viewMode === 'top' ? 1.5 : 0.5} />
+                    <OrbitControls 
+                        enablePan={false} 
+                        minDistance={viewMode === 'side' ? 8 : 10} 
+                        maxDistance={viewMode === 'side' ? 20 : 50} 
+                        maxPolarAngle={Math.PI / 1.5} 
+                        autoRotate={true} 
+                        autoRotateSpeed={viewMode === 'top' ? 1.5 : 0.5} 
+                    />
                     <Environment preset="city" blur={1} background={false} />
                     <ambientLight intensity={0.2} color="#002b16" />
                     <spotLight position={[10, 20, 10]} angle={0.3} penumbra={1} intensity={2} castShadow color="#F7E7CE" />
@@ -1592,7 +1591,6 @@
         
         // Background meteor effect - random shooting stars
         let meteorContainer = null;
-        let meteorInterval = null;
         
         function initMeteorEffect() {
             if (meteorContainer) return;
@@ -1602,14 +1600,13 @@
             document.body.appendChild(meteorContainer);
             
             // Start spawning meteors
-            spawnMeteor();
             scheduleMeteor();
         }
         
         function scheduleMeteor() {
-            // Random interval: 8-18 seconds
-            const delay = 8000 + Math.random() * 10000;
-            meteorInterval = setTimeout(() => {
+            // Random interval: 10-20 seconds
+            const delay = 10000 + Math.random() * 10000;
+            setTimeout(() => {
                 spawnMeteor();
                 scheduleMeteor();
             }, delay);
@@ -1621,20 +1618,30 @@
             const meteor = document.createElement('div');
             meteor.className = 'bg-meteor';
             
-            // Random start position (top-right area)
-            const startX = window.innerWidth * (0.5 + Math.random() * 0.6);
-            const startY = -20 + Math.random() * window.innerHeight * 0.3;
+            // Random start position (scattered across top-right)
+            const startX = window.innerWidth * (0.3 + Math.random() * 0.8);
+            const startY = -30 - Math.random() * 50;
             
-            // Random size and speed
-            const size = 2 + Math.random() * 4;
-            const tailLength = 60 + Math.random() * 80;
-            const duration = 0.8 + Math.random() * 0.8;
+            // Varied angle (30-50 degrees)
+            const angle = 30 + Math.random() * 20;
+            const radians = angle * Math.PI / 180;
+            
+            // Random size
+            const size = 3 + Math.random() * 3;
+            
+            // Travel distance
+            const travelDistance = window.innerWidth * 1.2 + Math.random() * 200;
+            const travelX = -Math.cos(radians) * travelDistance;
+            const travelY = Math.sin(radians) * travelDistance;
+            
+            // Duration based on distance (faster = more dramatic)
+            const duration = 0.6 + Math.random() * 0.5;
             
             meteor.style.left = startX + 'px';
             meteor.style.top = startY + 'px';
-            meteor.style.width = size + 'px';
-            meteor.style.height = size + 'px';
-            meteor.style.setProperty('--tail-length', tailLength + 'px');
+            meteor.style.setProperty('--size', size + 'px');
+            meteor.style.setProperty('--travel-x', travelX + 'px');
+            meteor.style.setProperty('--travel-y', travelY + 'px');
             meteor.style.setProperty('--duration', duration + 's');
             
             meteorContainer.appendChild(meteor);
@@ -1644,7 +1651,7 @@
         }
         
         // Start meteor effect on page load
-        setTimeout(initMeteorEffect, 2000);
+        setTimeout(initMeteorEffect, 3000);
         
         // Toggle Plaza Mode
         function togglePlazaMode() {
@@ -1732,14 +1739,9 @@
         function hideLoading() { document.getElementById('loading-modal').classList.remove('visible'); }
         function closeSuccessModal() { 
             document.getElementById('success-modal').querySelector('.modal-box').style.display = 'none';
-            // Scatter tree after closing modal
-            setTimeout(() => {
-                if (window.scatterTree) window.scatterTree();
-                // Reassemble after 1.5s
-                setTimeout(() => {
-                    if (window.assembleTree) window.assembleTree();
-                }, 1500);
-            }, 100);
+            // Keep tree scattered - user can zoom in/out
+            // Tree will reassemble when user clicks goHome button
+            if (window.scatterTree) window.scatterTree();
         }
         
         // Tip Author functions
@@ -1894,10 +1896,9 @@
             document.getElementById('top-btns').style.display = 'flex';
             document.getElementById('plaza-send-btn').style.display = 'none';
             isPlazaMode = false;
-            // Tree stays scattered - reassembles after 3 seconds
-            setTimeout(() => {
-                if (window.assembleTree) window.assembleTree();
-            }, 3000);
+            // Reassemble tree when returning home
+            if (window.assembleTree) window.assembleTree();
+            if (window.setTopView) window.setTopView();
         }
         
         // Direct Gift (Send to Friends)
