@@ -58,28 +58,17 @@ export default async function handler(req, res) {
             let imageData = null;
             let imageError = null;
 
-            // Generate Q-style cartoon of sender giving Christmas blessing
-            const imagePrompt = `Based on the profile photo provided, create a cute Q-version (chibi) cartoon illustration.
+            // Generate vintage Christmas postcard with sender's likeness
+            const imagePrompt = `Create a vintage New Year or Christmas greeting card using the provided photo as a reference for the person's appearance (preserve facial features and likeness).
+Inspired by classic illustrated New Year and Christmas postcards by Jenny Nyström, Anton Pieck, or Ellen Clapsaddle.
 
-REFERENCE PHOTO: This is ${senderName}'s photo. Create a chibi cartoon version of this person.
+Festive winter scene, snowy fairy-tale forest, decorated Christmas tree with warm glowing lights.
+Timeless vintage winter clothing, classic international postcard style.
+Cozy, joyful, nostalgic holiday mood.
+Hand-painted illustration look, muted colors, subtle vintage paper texture.
+Vertical format 9:16.
 
-SCENE: The character is wearing a red Santa hat, smiling warmly, and sending Christmas blessings. They could be:
-- Waving hello with a warm smile
-- Holding a gift box or Christmas ornament
-- Making a heart gesture
-- Surrounded by sparkles and snowflakes
-
-CRITICAL STYLE REQUIREMENTS:
-- Q-version/Chibi style (big head, small cute body, 2-3 head proportions)
-- Big sparkly anime eyes, rosy cheeks, warm happy expression
-- MUST keep their actual features: hair color, hair style, skin tone, any distinctive features
-- Wearing a cute red Santa hat with white fur trim
-- Christmas color palette: red, green, white, gold accents
-- Soft pastel background with snowflakes or sparkles
-- Warm, festive, heartwarming feeling
-- High quality cute illustration
-
-The chibi character MUST resemble the person in the reference photo!`;
+REFERENCE PHOTO: Use this photo to preserve the person's facial features and likeness.`;
 
             // Build the request with sender's image only
             const parts = [{ text: imagePrompt }];
@@ -93,16 +82,17 @@ The chibi character MUST resemble the person in the reference photo!`;
                 });
             }
 
-            // Try Gemini 2.0 Flash for image generation with reference images
+            // Use Gemini 2.5 Pro (most stable) for image generation with reference images
             const imageResponse = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${GEMINI_API_KEY}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro-002:generateContent?key=${GEMINI_API_KEY}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         contents: [{ parts }],
                         generationConfig: {
-                            responseModalities: ["TEXT", "IMAGE"]
+                            responseModalities: ["IMAGE"],
+                            aspectRatio: "9:16"
                         }
                     })
                 }
@@ -123,7 +113,7 @@ The chibi character MUST resemble the person in the reference photo!`;
                 imageError = await imageResponse.text();
                 console.error('Image generation failed:', imageError);
                 
-                // Fallback to Imagen 3 without reference images
+                // Fallback to Imagen 3 with vintage postcard style
                 const fallbackResponse = await fetch(
                     `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${GEMINI_API_KEY}`,
                     {
@@ -131,11 +121,11 @@ The chibi character MUST resemble the person in the reference photo!`;
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             instances: [{ 
-                                prompt: `Create a cute Q-version chibi cartoon character wearing a red Santa hat, smiling warmly and sending Christmas blessings. Style: Big head small body (2-3 head proportions), big sparkly anime eyes, rosy cheeks, Christmas colors (red, green, white, gold), soft pastel snowy background with sparkles, warm festive feeling.`
+                                prompt: `Create a vintage New Year or Christmas greeting card. Inspired by classic illustrated New Year and Christmas postcards by Jenny Nyström, Anton Pieck, or Ellen Clapsaddle. Festive winter scene, snowy fairy-tale forest, decorated Christmas tree with warm glowing lights. Timeless vintage winter clothing, classic international postcard style. Cozy, joyful, nostalgic holiday mood. Hand-painted illustration look, muted colors, subtle vintage paper texture.`
                             }],
                             parameters: {
                                 sampleCount: 1,
-                                aspectRatio: '1:1',
+                                aspectRatio: '9:16',
                                 safetyFilterLevel: 'block_few',
                                 personGeneration: 'allow_adult'
                             }

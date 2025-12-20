@@ -13,7 +13,7 @@
     <!-- Farcaster Mini App -->
     <meta name="fc:miniapp" content='{"version":"1","imageUrl":"https://xmas-tree-opal.vercel.app/preview.svg","button":{"title":"🎁 Open","action":{"type":"launch_frame","name":"Jingle Gift","splashImageUrl":"https://xmas-tree-opal.vercel.app/icon.svg","splashBackgroundColor":"#0a1a0a"}}}' />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;1,400&family=Dancing+Script:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;1,400&display=swap');
 
         :root {
             --emerald-dark: #001a10;
@@ -662,60 +662,34 @@
         }
         .card-cover:hover { transform: scale(1.02); }
         
-        /* Full Cover - Postcard Front with AI Image */
-        .card-cover-1, .card-cover-2, .card-cover-3, .card-cover-4, .card-cover-5, .card-cover-6 {
-            background: #fff;
-            padding: 0;
+        /* Full Cover 1: Red + Tree */
+        .card-cover-1 {
+            background: linear-gradient(180deg, #c41e3a 0%, #8b0000 100%);
+            color: #ffd700;
+        }
+        .card-cover-1 .cover-art {
+            width: 120px; height: 160px;
             position: relative;
-            overflow: hidden;
         }
-        
-        .card-cover-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        
-        /* Postcard Stamp Style */
-        .postcard-stamp {
+        .card-cover-1 .cover-art::before {
+            content: '';
             position: absolute;
-            top: 16px;
-            right: 16px;
-            width: 50px;
-            height: 60px;
-            background: linear-gradient(135deg, #fff 0%, #f5f5f5 100%);
-            border: 2px dashed rgba(0,0,0,0.3);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            padding: 4px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            transform: rotate(5deg);
+            bottom: 0; left: 50%;
+            transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 60px solid transparent;
+            border-right: 60px solid transparent;
+            border-bottom: 100px solid #0d5c3f;
+            filter: drop-shadow(0 0 10px rgba(0,100,0,0.3));
         }
-        
-        .postcard-stamp::after {
-            content: '⚘';
-            font-size: 0.7rem;
-            color: #c41e3a;
-            margin-top: 4px;
-        }
-        
-        /* From Label on Front */
-        .postcard-from-label {
+        .card-cover-1 .cover-art::after {
+            content: '★';
             position: absolute;
-            bottom: 16px;
-            right: 16px;
-            background: rgba(255,255,255,0.95);
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-size: 0.85rem;
-            color: #333;
-            font-family: 'Courier New', monospace;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            border-left: 3px solid #c41e3a;
+            top: -10px; left: 50%;
+            transform: translateX(-50%);
+            font-size: 28px;
+            color: #ffd700;
+            text-shadow: 0 0 10px #ffd700;
         }
         
         /* Full Cover 2: Green + Gold Dots */
@@ -861,81 +835,29 @@
             transform: rotateY(0deg);
         }
         
-        /* Card Inside - Postcard Back Style */
-        .card-inside {
-            background: linear-gradient(135deg, 
-                #f9f6f0 0%, 
-                #f5f0e8 50%, 
-                #f0ead9 100%) !important;
-            padding: 24px !important;
-            position: relative;
-        }
-        
-        /* Vintage Paper Texture */
-        .card-inside::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image: 
-                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px),
-                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(0,0,0,0.02) 2px, rgba(0,0,0,0.02) 4px);
-            pointer-events: none;
-            opacity: 0.5;
-        }
-        
+        /* Card Inside Styles */
         .card-inside-loading {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 12px;
-            color: #8b4513;
+            color: #ffd700;
         }
-        
-        /* Hide image on back, only show on front */
-        .card-content-row {
-            display: none !important;
+        .card-inside img {
+            width: 100%;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 12px;
         }
-        
-        /* Postcard Back Header */
-        .postcard-header {
-            font-family: 'Courier New', monospace;
-            font-size: 0.8rem;
-            color: #666;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
-        }
-        
-        /* Handwritten Style Message */
         .card-inside-greeting {
-            font-family: 'Dancing Script', cursive, 'Georgia', serif;
-            font-size: 1.1rem;
-            line-height: 2;
-            color: #2c2c2c;
-            text-align: left;
-            padding: 20px;
-            background: transparent;
-            border: none;
-            margin-bottom: 24px;
-            min-height: 120px;
-            position: relative;
-            z-index: 1;
-        }
-        
-        /* Handwritten lines effect */
-        .card-inside-greeting::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: repeating-linear-gradient(
-                transparent,
-                transparent 38px,
-                rgba(200,180,150,0.3) 38px,
-                rgba(200,180,150,0.3) 40px
-            );
+            color: #fff;
+            font-size: 0.95rem;
+            text-align: center;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            max-height: 60px;
+            overflow: hidden;
         }
         .card-inside-amount {
             color: #ffd700;
@@ -1441,44 +1363,24 @@
     <!-- Gift Card with Cover + Inside -->
     <div id="envelope-modal" class="custom-modal">
         <div class="gift-card-container" id="gift-card-container">
-            <!-- Inside (Postcard Back) -->
+            <!-- Inside (AI generated content) -->
             <div class="card-inside" id="card-inside">
                 <div class="card-inside-loading" id="card-inside-loading">
                     <div class="spinner"></div>
-                    <div>Creating your vintage postcard...</div>
+                    <div>Creating your card...</div>
                 </div>
-                <!-- Postcard Back Header -->
-                <div class="postcard-header" id="postcard-header" style="display:none;">
-                    <div>POSTCARD</div>
-                    <div style="margin-top:4px;">To: <span id="card-recipient-name">You</span></div>
-                </div>
-                <!-- Hidden row (not used in postcard back) -->
-                <div class="card-content-row" id="card-content-row" style="display:none;">
-                    <img id="card-inside-image" src="" alt="AI Card">
-                    <div class="card-inside-greeting-old" id="card-inside-greeting-old"></div>
-                </div>
-                <!-- Handwritten Message -->
+                <img id="card-inside-image" src="" alt="AI Card" style="display:none;">
                 <div class="card-inside-greeting" id="card-inside-greeting"></div>
-                <!-- Gift Amount -->
-                <div class="card-inside-amount" id="card-inside-amount" style="background: linear-gradient(135deg, #c41e3a, #8b0000); color: #fff; padding: 16px; border-radius: 8px; text-align: center; font-size: 1.1rem; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">🎁 0.5 USDC</div>
-                <button class="card-inside-claim" onclick="claimAICardGift()" style="width:100%; padding: 14px; background: linear-gradient(135deg, #d4af37, #ffd700); border: none; border-radius: 8px; color: #2c2c2c; font-weight: bold; cursor: pointer; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">Open Gift</button>
-                <button onclick="closeCardModal()" style="width:100%; padding:10px; margin-top:8px; background:transparent; border:1px solid rgba(139,69,19,0.3); color:#8b4513; border-radius:8px; cursor:pointer; font-family: 'Courier New', monospace;">Close</button>
+                <div class="card-inside-amount" id="card-inside-amount">🎁 0.5 USDC</div>
+                <button class="card-inside-claim" onclick="claimAICardGift()">Claim Gift</button>
+                <button onclick="closeCardModal()" style="width:100%; padding:10px; margin-top:8px; background:transparent; border:1px solid rgba(255,215,0,0.3); color:#ffd700; border-radius:8px; cursor:pointer;">Close</button>
             </div>
-            <!-- Cover (Postcard Front with AI Image) -->
+            <!-- Cover (front) -->
             <div id="card-cover-display" class="card-cover card-cover-1" onclick="openEnvelopeCard()">
-                <!-- AI Generated Vintage Image -->
-                <img id="card-cover-ai-image" class="card-cover-image" src="" alt="Vintage Christmas" style="display:none;">
-                <!-- Loading state for cover -->
-                <div id="card-cover-loading" style="display:flex; align-items:center; justify-content:center; height:100%; background: linear-gradient(135deg, #f5deb3, #daa520);">
-                    <div style="text-align:center; color:#8b4513;">
-                        <div style="font-size:3rem; margin-bottom:12px;">🎄</div>
-                        <div style="font-family: 'Cinzel', serif; font-size:0.9rem;">Tap to open</div>
-                    </div>
-                </div>
-                <!-- Postcard Stamp -->
-                <div class="postcard-stamp">🎄</div>
-                <!-- From Label -->
-                <div class="postcard-from-label" id="postcard-from-label">From: @someone</div>
+                <div class="cover-art" id="cover-art">✦</div>
+                <div class="card-cover-title" id="cover-title">Merry Christmas!</div>
+                <div class="card-cover-from" id="cover-from">From @someone</div>
+                <div class="card-cover-tap">✨ Tap to open ✨</div>
             </div>
         </div>
     </div>
@@ -2956,7 +2858,7 @@
             // Reset state
             container.classList.remove('opened');
             document.getElementById('card-inside-loading').style.display = 'flex';
-            document.getElementById('card-content-row').style.display = 'none';
+            document.getElementById('card-inside-image').style.display = 'none';
             document.getElementById('card-inside-greeting').textContent = '';
             
             // Set cover style
@@ -3006,16 +2908,11 @@
                     // Hide loading
                     document.getElementById('card-inside-loading').style.display = 'none';
                     
-                    // Show content row with image and greeting
-                    document.getElementById('card-content-row').style.display = 'flex';
-                    
-                    // Set generated image
+                    // Show generated image
                     const imgEl = document.getElementById('card-inside-image');
                     if (data.image) {
                         imgEl.src = `data:image/png;base64,${data.image}`;
-                    } else {
-                        // Fallback: hide image if generation failed
-                        imgEl.style.display = 'none';
+                        imgEl.style.display = 'block';
                     }
                     
                     // Show greeting
@@ -3025,16 +2922,13 @@
                 }
             } catch (error) {
                 console.error('AI card generation error:', error);
-                // Fallback - show message only without image
-                document.getElementById('card-inside-loading').style.display = 'none';
-                document.getElementById('card-content-row').style.display = 'flex';
-                document.getElementById('card-inside-image').style.display = 'none';
-                document.getElementById('card-inside-greeting').innerHTML = `
-                    <div style="text-align:center;">
-                        <div style="font-size:2rem; margin-bottom:12px;">🎄🎁❄️</div>
-                        <div>${currentCardGift.message || 'Wishing you a wonderful holiday season!'}</div>
+                // Fallback
+                document.getElementById('card-inside-loading').innerHTML = `
+                    <div style="color:#FFD700; font-size:0.9rem;">
+                        <div style="font-size:3rem; margin-bottom:12px;">🎄🎁❄️</div>
                     </div>
                 `;
+                document.getElementById('card-inside-greeting').textContent = currentCardGift.message || 'Wishing you a wonderful holiday season!';
             }
         }
         
