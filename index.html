@@ -1483,9 +1483,19 @@
                 </div>
                 <!-- Handwritten Message -->
                 <div class="card-inside-greeting" id="card-inside-greeting"></div>
-                <!-- Gift Amount -->
-                <div class="card-inside-amount" id="card-inside-amount" style="background: linear-gradient(135deg, #c41e3a, #8b0000); color: #fff; padding: 16px; border-radius: 8px; text-align: center; font-size: 1.1rem; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">🎁 0.5 USDC</div>
-                <button class="card-inside-claim" onclick="claimAICardGift()" style="width:100%; padding: 14px; background: linear-gradient(135deg, #d4af37, #ffd700); border: none; border-radius: 8px; color: #2c2c2c; font-weight: bold; cursor: pointer; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">Open Gift</button>
+                
+                <!-- Gift Icon (clickable to reveal amount) -->
+                <div id="gift-icon-wrapper" style="display:none; text-align:center; padding:24px 0; cursor:pointer;" onclick="revealGift()">
+                    <div style="font-size:4rem; animation:pulse 2s infinite;">🎁</div>
+                    <div style="font-size:0.9rem; color:#8b4513; margin-top:8px;">Tap to see your gift</div>
+                </div>
+                
+                <!-- Gift Details (hidden initially) -->
+                <div id="gift-details-wrapper" style="display:none;">
+                    <div class="card-inside-amount" id="card-inside-amount" style="background: linear-gradient(135deg, #c41e3a, #8b0000); color: #fff; padding: 16px; border-radius: 8px; text-align: center; font-size: 1.1rem; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">🎁 0.5 USDC</div>
+                    <button class="card-inside-claim" onclick="claimAICardGift()" style="width:100%; padding: 14px; background: linear-gradient(135deg, #d4af37, #ffd700); border: none; border-radius: 8px; color: #2c2c2c; font-weight: bold; cursor: pointer; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">Open Gift</button>
+                </div>
+                
                 <button onclick="closeCardModal()" style="width:100%; padding:10px; margin-top:8px; background:transparent; border:1px solid rgba(139,69,19,0.3); color:#8b4513; border-radius:8px; cursor:pointer; font-family: 'Courier New', monospace;">Close</button>
             </div>
             <!-- Cover (Postcard Front with AI Image) -->
@@ -1680,6 +1690,36 @@
                         </button>
                     </div>
                 </div>
+                <!-- Gift Money Option -->
+                <div class="form-group">
+                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                        <input type="checkbox" id="include-gift-money" onchange="toggleGiftMoney()" checked style="width:18px; height:18px; cursor:pointer;">
+                        <span>附加礼金 (Include Gift Money)</span>
+                    </label>
+                </div>
+                
+                <!-- Token and Amount (conditional) -->
+                <div id="gift-money-section">
+                    <div style="display:flex; gap:12px;">
+                        <div class="form-group" style="flex:1;">
+                            <label>Token</label>
+                            <select id="direct-gift-token" onchange="toggleCustomToken(); updateDirectPreview();" style="width:100%;">
+                                <option value="USDC">USDC</option>
+                                <option value="ETH">ETH</option>
+                                <option value="CUSTOM">Custom</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex:1;">
+                            <label>Amount Each</label>
+                            <input type="number" id="direct-gift-amount" value="0.5" min="0.1" step="0.1" oninput="validateDirectAmount(); updateDirectPreview();">
+                        </div>
+                    </div>
+                    <div id="custom-token-group" class="form-group" style="display:none;">
+                        <label>Custom Token Address</label>
+                        <input type="text" id="custom-token-address" placeholder="0x...">
+                    </div>
+                </div>
+                
                 <!-- Removed Card Cover selection - AI image is the cover -->
                 <div class="form-group" style="display:none;">
                     <label>Card Cover</label>
@@ -1705,31 +1745,13 @@
                     </div>
                 </div>
                 <div class="form-group" style="position:relative;">
-                    <label>Recipients (max 10)</label>
+                    <label>Recipients (max 5)</label>
                     <div style="display:flex; gap:8px; margin-bottom:8px;">
                         <input type="text" id="user-search" placeholder="Search Farcaster username..." oninput="searchUsers(this.value)" style="flex:3; min-width:0;">
                         <button type="button" onclick="fetchTopFriends()" style="flex:1; padding:6px 8px; background:rgba(212,175,55,0.2); border:1px solid var(--gold); color:var(--gold); cursor:pointer; white-space:nowrap; font-size:0.7rem;">👥</button>
                     </div>
                     <div id="user-results" class="user-search-results" style="display:none;"></div>
                     <div id="selected-users"></div>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Token</label>
-                        <select id="direct-gift-token" onchange="toggleCustomToken()">
-                            <option value="ETH">ETH</option>
-                            <option value="USDC">USDC</option>
-                            <option value="CUSTOM">Custom Token</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Amount Each</label>
-                        <input type="number" id="direct-gift-amount" value="0.5" step="0.1" min="0.1" oninput="validateDirectAmount(); updateDirectPreview()">
-                    </div>
-                </div>
-                <div class="form-group" id="custom-token-group" style="display:none;">
-                    <label>Token Contract Address (Base)</label>
-                    <input type="text" id="custom-token-ca" placeholder="0x..." style="font-size:0.8rem;">
                 </div>
                 <div class="gift-preview">
                     <div class="preview-amount" id="direct-preview-amount">0 ETH</div>
@@ -2863,6 +2885,12 @@
         
         function removeUser(index) { selectedRecipients.splice(index, 1); renderSelectedUsers(); updateDirectPreview(); }
         
+        function toggleGiftMoney() {
+            const includeGift = document.getElementById('include-gift-money').checked;
+            document.getElementById('gift-money-section').style.display = includeGift ? 'block' : 'none';
+            updateDirectPreview();
+        }
+        
         function toggleCustomToken() {
             const token = document.getElementById('direct-gift-token').value;
             document.getElementById('custom-token-group').style.display = token === 'CUSTOM' ? 'block' : 'none';
@@ -3003,10 +3031,11 @@
         
         async function createDirectGift() {
             const title = document.getElementById('direct-gift-title').value || 'Merry Christmas!';
-            const token = document.getElementById('direct-gift-token').value;
-            const amount = document.getElementById('direct-gift-amount').value;
+            const includeGift = document.getElementById('include-gift-money').checked;
+            const token = includeGift ? document.getElementById('direct-gift-token').value : null;
+            const amount = includeGift ? document.getElementById('direct-gift-amount').value : '0';
             
-            if (!amount || parseFloat(amount) <= 0) { alert('Enter valid amount'); return; }
+            if (includeGift && (!amount || parseFloat(amount) <= 0)) { alert('Enter valid amount'); return; }
             if (selectedRecipients.length === 0) { alert('Select at least one recipient'); return; }
             if (!isAIGenerated) { 
                 alert('请先生成AI明信片预览！'); 
@@ -3024,6 +3053,7 @@
                     id: giftId,
                     title: title,
                     message: currentAIGreeting, // Use AI generated greeting
+                    hasGift: includeGift, // Whether includes money
                     token: token,
                     amount: amount,
                     cover: selectedCover,
@@ -3041,9 +3071,16 @@
             localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
             
             // Create share text
-            let shareText = links.length === 1 
-                ? `🎁 Gift for @${links[0].username}!\n\n${title}\n💰 ${amount} ${token}\n\n🔗 ${links[0].url}`
-                : `🎁 Christmas Gifts!\n\n${title}\n💰 ${amount} ${token} each\n\n` + links.map(l => `→ @${l.username}: ${l.url}`).join('\n');
+            let shareText;
+            if (includeGift) {
+                shareText = links.length === 1 
+                    ? `🎁 Gift for @${links[0].username}!\n\n${title}\n💰 ${amount} ${token}\n\n🔗 ${links[0].url}`
+                    : `🎁 Christmas Gifts!\n\n${title}\n💰 ${amount} ${token} each\n\n` + links.map(l => `→ @${l.username}: ${l.url}`).join('\n');
+            } else {
+                shareText = links.length === 1 
+                    ? `💌 Christmas Card for @${links[0].username}!\n\n${title}\n\n🔗 ${links[0].url}`
+                    : `💌 Christmas Cards!\n\n${title}\n\n` + links.map(l => `→ @${l.username}: ${l.url}`).join('\n');
+            }
             
             hideLoading();
             if (navigator.clipboard) {
@@ -3160,18 +3197,30 @@
             document.getElementById('card-inside-loading').style.display = 'flex';
             document.getElementById('card-content-row').style.display = 'none';
             document.getElementById('card-inside-greeting').textContent = '';
+            document.getElementById('gift-icon-wrapper').style.display = 'none';
+            document.getElementById('gift-details-wrapper').style.display = 'none';
             
             // Set cover style
             coverEl.className = `card-cover card-cover-${coverNum}`;
             document.getElementById('cover-art').textContent = coverArt[coverNum] || '';
             document.getElementById('cover-title').textContent = gift.title || 'Merry Christmas!';
             document.getElementById('cover-from').textContent = `From @${senderName}`;
-            document.getElementById('card-inside-amount').textContent = '🎁 ' + gift.amount + ' ' + gift.token;
+            
+            // Set gift amount if present
+            if (gift.hasGift) {
+                document.getElementById('card-inside-amount').textContent = '🎁 ' + gift.amount + ' ' + gift.token;
+            }
             
             document.getElementById('envelope-modal').classList.add('visible');
         }
         
-        // Open card with flip animation and generate AI content
+        // Reveal gift amount and claim button
+        function revealGift() {
+            document.getElementById('gift-icon-wrapper').style.display = 'none';
+            document.getElementById('gift-details-wrapper').style.display = 'block';
+        }
+        
+        // Open card with flip animation and show AI content
         async function openEnvelopeCard() {
             if (!currentCardGift) return;
             
@@ -3180,8 +3229,28 @@
             // Flip the card open
             container.classList.add('opened');
             
-            // Set amount
-            document.getElementById('card-inside-amount').textContent = '🎁 ' + currentCardGift.amount + ' ' + currentCardGift.token;
+            // Check if has AI image already generated
+            if (currentCardGift.aiImage) {
+                // Use pre-generated AI image and greeting
+                document.getElementById('card-inside-loading').style.display = 'none';
+                document.getElementById('card-inside-greeting').textContent = currentCardGift.message || 'Merry Christmas!';
+                
+                // Show gift icon or details based on hasGift
+                if (currentCardGift.hasGift) {
+                    document.getElementById('card-inside-amount').textContent = '🎁 ' + currentCardGift.amount + ' ' + currentCardGift.token;
+                    document.getElementById('gift-icon-wrapper').style.display = 'block';
+                } else {
+                    document.getElementById('gift-icon-wrapper').style.display = 'none';
+                    document.getElementById('gift-details-wrapper').style.display = 'none';
+                }
+                
+                return;
+            }
+            
+            // Legacy: Set amount for old gifts
+            if (currentCardGift.hasGift) {
+                document.getElementById('card-inside-amount').textContent = '🎁 ' + currentCardGift.amount + ' ' + currentCardGift.token;
+            }
             
             // Get avatars for AI generation
             const senderAvatar = currentCardGift.sender?.pfp || 'https://i.imgur.com/HeIi0wU.png';
