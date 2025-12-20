@@ -191,6 +191,8 @@ Write only the greeting text, nothing else:`;
             );
 
             let greeting = message || 'Merry Christmas!';
+            let sceneType = 'general';
+            let sceneDescription = 'holiday celebration';
             
             if (textResponse.ok) {
                 const textResult = await textResponse.json();
@@ -198,13 +200,37 @@ Write only the greeting text, nothing else:`;
                     greeting = textResult.candidates[0].content.parts[0].text.trim();
                 }
             }
+            
+            // Extract scene info from greeting for reply context
+            const greetingLower = greeting.toLowerCase();
+            if (greetingLower.includes('ski') || greetingLower.includes('snow') || greetingLower.includes('mountain')) {
+                sceneType = 'skiing';
+                sceneDescription = 'skiing in snowy mountains';
+            } else if (greetingLower.includes('travel') || greetingLower.includes('exploring') || greetingLower.includes('city')) {
+                sceneType = 'travel';
+                sceneDescription = 'traveling and exploring new places';
+            } else if (greetingLower.includes('family') || greetingLower.includes('gathering') || greetingLower.includes('together')) {
+                sceneType = 'family';
+                sceneDescription = 'spending time with family';
+            } else if (greetingLower.includes('pet') || greetingLower.includes('dog') || greetingLower.includes('cat')) {
+                sceneType = 'pet';
+                sceneDescription = 'enjoying cozy moments with pet';
+            } else if (greetingLower.includes('fireplace') || greetingLower.includes('cocoa') || greetingLower.includes('cozy')) {
+                sceneType = 'indoor';
+                sceneDescription = 'relaxing by the fireplace';
+            } else if (greetingLower.includes('beach') || greetingLower.includes('warm') || greetingLower.includes('vacation')) {
+                sceneType = 'beach';
+                sceneDescription = 'enjoying warm holiday vacation';
+            }
 
             return res.status(200).json({
                 success: true,
                 scene: randomScene,
                 greeting: greeting,
                 image: imageData,
-                imageError: imageError
+                imageError: imageError,
+                sceneType: sceneType,
+                sceneDescription: sceneDescription
             });
         }
 

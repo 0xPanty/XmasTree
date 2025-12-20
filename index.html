@@ -1496,6 +1496,11 @@
                     <button class="card-inside-claim" onclick="claimAICardGift()" style="width:100%; padding: 14px; background: linear-gradient(135deg, #d4af37, #ffd700); border: none; border-radius: 8px; color: #2c2c2c; font-weight: bold; cursor: pointer; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.05em;">Open Gift</button>
                 </div>
                 
+                <!-- Reply Button -->
+                <button id="reply-card-btn" onclick="openReplyModal()" style="width:100%; padding:12px; margin-top:8px; background:linear-gradient(135deg, #8b4513, #a0522d); border:none; color:#fff; border-radius:8px; cursor:pointer; font-weight:bold; display:none;">
+                    💌 Reply Card
+                </button>
+                
                 <button onclick="closeCardModal()" style="width:100%; padding:10px; margin-top:8px; background:transparent; border:1px solid rgba(139,69,19,0.3); color:#8b4513; border-radius:8px; cursor:pointer; font-family: 'Courier New', monospace;">Close</button>
             </div>
             <!-- Cover (Postcard Front with AI Image) -->
@@ -1590,6 +1595,65 @@
             </div>
             <button onclick="closeConfirmModal()" style="width: 100%; padding: 10px; margin-top: 12px; background: transparent; border: 1px solid rgba(255,215,0,0.3); color: var(--gold); border-radius: 8px; cursor: pointer;">
                 取消
+            </button>
+        </div>
+    </div>
+
+    <!-- Reply Modal -->
+    <div id="reply-modal" class="custom-modal">
+        <div class="modal-box" style="max-width: 420px; background: rgba(0,26,10,0.95);">
+            <div class="modal-title" style="color: var(--gold); margin-bottom: 16px;">💌 Reply to <span id="reply-to-name">@sender</span></div>
+            
+            <!-- Original Message Context -->
+            <div style="background: rgba(0,0,0,0.3); border-left: 3px solid var(--gold); padding: 12px; margin-bottom: 16px; border-radius: 4px;">
+                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 6px;">Original message:</div>
+                <div id="reply-original-message" style="font-size: 0.85rem; color: rgba(255,255,255,0.8); font-style: italic;"></div>
+            </div>
+            
+            <!-- AI Generated Reply Preview -->
+            <div style="background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.2); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-bottom: 8px;">💬 AI Generated Reply:</div>
+                <div id="reply-generated-text" style="font-family:'Dancing Script', cursive; font-size: 1rem; color:#ffd700; line-height: 1.8; min-height: 80px;">
+                    Generating your reply...
+                </div>
+            </div>
+            
+            <!-- Gift Money Option for Reply -->
+            <div class="form-group">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="reply-include-gift" style="width:18px; height:18px; cursor:pointer;">
+                    <span>附加回礼 (Include Return Gift)</span>
+                </label>
+            </div>
+            
+            <!-- Reply Gift Amount (conditional) -->
+            <div id="reply-gift-section" style="display:none; margin-bottom: 16px;">
+                <div style="display:flex; gap:12px;">
+                    <div class="form-group" style="flex:1;">
+                        <label>Token</label>
+                        <select id="reply-gift-token" style="width:100%;">
+                            <option value="USDC">USDC</option>
+                            <option value="ETH">ETH</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Amount</label>
+                        <input type="number" id="reply-gift-amount" value="0.5" min="0.1" step="0.1" style="width:100%;">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 12px;">
+                <button onclick="regenerateReply()" style="flex: 1; padding: 12px; background: rgba(102,126,234,0.2); border: 1px solid #667eea; color: #667eea; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                    🔄 Regenerate
+                </button>
+                <button onclick="confirmSendReply()" style="flex: 2; padding: 12px; background: linear-gradient(135deg, #d4af37, #ffd700); border: none; color: #2c2c2c; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                    ✅ Send Reply (FREE)
+                </button>
+            </div>
+            <button onclick="closeReplyModal()" style="width: 100%; padding: 10px; margin-top: 12px; background: transparent; border: 1px solid rgba(255,215,0,0.3); color: var(--gold); border-radius: 8px; cursor: pointer;">
+                Cancel
             </button>
         </div>
     </div>
@@ -2918,6 +2982,7 @@
         let aiGenerationCount = 0;
         let currentAIImage = null;
         let currentAIGreeting = null;
+        let currentAIScene = null;
         let isAIGenerated = false;
         const REGENERATE_COST = 0.1;
         const PAYMENT_ADDRESS = '0x0f540466695cf91203ed8cbca3065fe7232154b9';
@@ -2952,6 +3017,10 @@
                 if (data.success && data.image) {
                     currentAIImage = data.image;
                     currentAIGreeting = data.greeting || 'Merry Christmas!';
+                    currentAIScene = {
+                        type: data.sceneType || 'general',
+                        description: data.sceneDescription || 'holiday celebration'
+                    };
                     isAIGenerated = true;
                     aiGenerationCount++;
                     
@@ -3010,6 +3079,10 @@
                 if (data.success && data.image) {
                     currentAIImage = data.image;
                     currentAIGreeting = data.greeting || 'Merry Christmas!';
+                    currentAIScene = {
+                        type: data.sceneType || 'general',
+                        description: data.sceneDescription || 'holiday celebration'
+                    };
                     aiGenerationCount++;
                     
                     // Update preview
@@ -3058,6 +3131,8 @@
                     amount: amount,
                     cover: selectedCover,
                     aiImage: currentAIImage, // Store AI image
+                    sceneType: currentAIScene?.type || 'general', // Store scene for reply
+                    sceneDescription: currentAIScene?.description || 'holiday celebration',
                     shares: 1, type: 'equal', mode: 'direct',
                     requirePro: false, minScore: 0,
                     claimed: 0, claimedBy: [],
@@ -3094,6 +3169,7 @@
             isAIGenerated = false;
             currentAIImage = null;
             currentAIGreeting = null;
+            currentAIScene = null;
             aiGenerationCount = 0;
             document.getElementById('ai-generate-section').style.display = 'block';
             document.getElementById('ai-preview-section').style.display = 'none';
@@ -3243,6 +3319,9 @@
                     document.getElementById('gift-icon-wrapper').style.display = 'none';
                     document.getElementById('gift-details-wrapper').style.display = 'none';
                 }
+                
+                // Show reply button (can reply to sender)
+                document.getElementById('reply-card-btn').style.display = 'block';
                 
                 return;
             }
@@ -3870,6 +3949,170 @@
                     }
                 }, 500);
             }
+        });
+        
+        // ========== Reply Card Functions ==========
+        
+        let pendingReply = null;
+        let generatedReplyText = '';
+        
+        async function openReplyModal() {
+            if (!currentCardGift) return;
+            
+            pendingReply = {
+                originalGift: currentCardGift,
+                toUser: currentCardGift.sender
+            };
+            
+            // Show modal and set context
+            document.getElementById('reply-to-name').textContent = '@' + (currentCardGift.sender?.username || 'sender');
+            document.getElementById('reply-original-message').textContent = currentCardGift.message || 'Merry Christmas!';
+            document.getElementById('reply-generated-text').textContent = 'Generating your reply...';
+            document.getElementById('reply-modal').classList.add('visible');
+            
+            // Generate AI reply
+            await generateReplyText();
+        }
+        
+        async function generateReplyText() {
+            try {
+                const sceneDesc = pendingReply.originalGift.sceneDescription || 'holiday celebration';
+                const originalMsg = pendingReply.originalGift.message || 'Merry Christmas!';
+                const replyFrom = currentUser?.username || 'You';
+                
+                const replyPrompt = `The sender sent you a Christmas card with this scene: "${sceneDesc}".
+Their message was: "${originalMsg}".
+
+Generate a warm, grateful reply (50-100 words) that:
+- Thanks them sincerely
+- Refers to their scene (e.g., if skiing: "Wishing you wonderful moments on the slopes!")
+- Reciprocates holiday wishes
+- Ends with warm signature
+
+Tone: Warm, grateful, personal  
+Format: Just the reply text, nothing else
+Write as if from ${replyFrom}:`;
+
+                const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + (window.GEMINI_API_KEY || 'YOUR_API_KEY'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: replyPrompt }] }],
+                        generationConfig: { temperature: 0.8, maxOutputTokens: 200 }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+                    generatedReplyText = data.candidates[0].content.parts[0].text.trim();
+                    document.getElementById('reply-generated-text').textContent = generatedReplyText;
+                } else {
+                    throw new Error('Reply generation failed');
+                }
+            } catch (error) {
+                console.error('Reply generation error:', error);
+                generatedReplyText = `Thank you so much for the wonderful Christmas card! Wishing you joy and happiness this holiday season!\n\nWith gratitude,\n${currentUser?.username || 'Friend'}`;
+                document.getElementById('reply-generated-text').textContent = generatedReplyText;
+            }
+        }
+        
+        async function regenerateReply() {
+            document.getElementById('reply-generated-text').textContent = 'Regenerating...';
+            await generateReplyText();
+        }
+        
+        function closeReplyModal() {
+            document.getElementById('reply-modal').classList.remove('visible');
+            pendingReply = null;
+            generatedReplyText = '';
+        }
+        
+        async function confirmSendReply() {
+            if (!pendingReply) return;
+            
+            closeReplyModal();
+            closeCardModal();
+            showLoading('正在生成回复贺卡...');
+            
+            const includeGift = document.getElementById('reply-include-gift').checked;
+            const token = includeGift ? document.getElementById('reply-gift-token').value : null;
+            const amount = includeGift ? document.getElementById('reply-gift-amount').value : '0';
+            
+            try {
+                // Generate AI image for reply
+                const replyAvatar = currentUser?.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
+                const replyName = currentUser?.username || 'You';
+                
+                const response = await fetch('/api/gemini', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'generateCard',
+                        senderAvatar: replyAvatar,
+                        senderName: replyName,
+                        message: ''
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.image) {
+                    // Create reply gift
+                    const giftId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                    const replyGiftData = {
+                        id: giftId,
+                        title: 'Christmas Reply Card',
+                        message: generatedReplyText,
+                        hasGift: includeGift,
+                        token: token,
+                        amount: amount,
+                        cover: 1,
+                        aiImage: data.image,
+                        sceneType: data.sceneType || 'general',
+                        sceneDescription: data.sceneDescription || 'holiday celebration',
+                        shares: 1, type: 'equal', mode: 'direct',
+                        requirePro: false, minScore: 0,
+                        claimed: 0, claimedBy: [],
+                        recipient: pendingReply.toUser,
+                        sender: currentUser || { fid: 0, username: 'anonymous', pfp: '' },
+                        isReply: true,
+                        replyTo: pendingReply.originalGift.id,
+                        createdAt: Date.now()
+                    };
+                    
+                    plazaGifts.push(replyGiftData);
+                    localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+                    
+                    const replyUrl = location.origin + location.pathname + '?gift=' + giftId;
+                    const shareText = includeGift
+                        ? `💌 Reply Card with Gift!\n\n${generatedReplyText.substring(0, 50)}...\n💰 ${amount} ${token}\n\n🔗 ${replyUrl}`
+                        : `💌 Reply Card!\n\n${generatedReplyText.substring(0, 50)}...\n\n🔗 ${replyUrl}`;
+                    
+                    hideLoading();
+                    
+                    if (navigator.clipboard) {
+                        await navigator.clipboard.writeText(shareText);
+                        alert('✅ Reply card created (FREE)!\n\nLink copied to clipboard!\nSend it to @' + (pendingReply.toUser.username || 'sender'));
+                    } else {
+                        alert(shareText);
+                    }
+                } else {
+                    throw new Error('Reply image generation failed');
+                }
+            } catch (error) {
+                console.error('Reply send error:', error);
+                hideLoading();
+                alert('Failed to generate reply card. Please try again.');
+            }
+            
+            pendingReply = null;
+            generatedReplyText = '';
+        }
+        
+        // Toggle reply gift section
+        document.getElementById('reply-include-gift')?.addEventListener('change', function() {
+            document.getElementById('reply-gift-section').style.display = this.checked ? 'block' : 'none';
         });
     </script>
 </body>
