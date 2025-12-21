@@ -259,7 +259,7 @@
             height: 100px;
             object-fit: contain;
             border-radius: 8px;
-            background: rgba(2, 48, 32, 0.95);
+            background: rgba(0,0,0,0.3);
             padding: 8px;
         }
 
@@ -1783,13 +1783,13 @@
     </div>
 
     <!-- Stamp Preview Modal -->
-    <div id="stamp-preview-modal" class="custom-modal" style="background: rgba(2, 48, 32, 0.98);">
+    <div id="stamp-preview-modal" class="custom-modal" style="background: rgba(0, 26, 16, 0.98);">
         <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 500px; text-align: center;">
             <!-- Close button -->
             <button onclick="closeStampPreview()" style="position: absolute; top: -50px; right: 0; background: transparent; border: 2px solid var(--gold); color: var(--gold); width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
             
             <!-- Stamp large image -->
-            <div style="background: rgba(2, 48, 32, 0.95); border-radius: 16px; padding: 30px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
+            <div style="background: #001a10; border-radius: 16px; padding: 30px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
                 <img id="stamp-preview-image" src="" alt="Stamp Preview" style="width: 100%; max-width: 300px; height: auto; object-fit: contain; margin: 0 auto; display: block;">
             </div>
             
@@ -1865,7 +1865,7 @@
             <div class="modal-title">🎁 Send to Friends</div>
             
             <!-- Stamp Selection Section (at top) -->
-            <div id="stamp-section" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.3); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+            <div id="stamp-section" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.3); border-radius: 12px; padding: 16px; margin-bottom: 20px; --stamp-bg: rgba(0,0,0,0.3);">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                     <div style="font-weight: bold; color: var(--gold); font-size: 0.95rem;">📮 Choose Your Stamp</div>
                     <div id="stamp-status-indicator" style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Loading...</div>
@@ -3111,7 +3111,7 @@
                     border: ${selectedStamp === stamp.id ? '3px solid var(--gold)' : 'none'};
                     transition: all 0.3s ease;
                     opacity: ${isOwned ? '1' : '0.6'};
-                    background: rgba(2, 48, 32, 0.95);
+                    background: rgba(0,0,0,0.3);
                 `;
                 
                 // Click to select (if owned) or preview
