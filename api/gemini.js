@@ -239,12 +239,12 @@ REFERENCE IMAGE:`;
                 });
             }
 
-            // Use Gemini 2.5 Flash Image for image generation
-            console.log('🎨 Attempting image generation with Gemini 2.5 Flash Image...');
+            // Use Gemini 2.5 Flash for image generation (official supported model)
+            console.log('🎨 Attempting image generation with Gemini 2.5 Flash...');
             console.log('Parts:', JSON.stringify(parts, null, 2));
             
             const imageResponse = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${GEMINI_API_KEY}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
