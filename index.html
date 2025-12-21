@@ -3283,12 +3283,14 @@
                                 'background: linear-gradient(135deg, #d4af37, #ffd700); color: #2c2c2c;'
                             }
                         `;
-                        // Different prices per stamp
-                        const prices = {
-                            neynar: '0.1 USDC',
-                            farcaster: '0.37 USDC',
-                            warplet: '0.5 USDC'
+                        // Stamp quantities per purchase
+                        const stampQuantities = {
+                            neynar: { price: '0.1', quantity: 1 },
+                            farcaster: { price: '0.37', quantity: 5 },
+                            warplet: { price: '0.5', quantity: 5 }
                         };
+                        
+                        const config = stampQuantities[stamp.id];
                         
                         // Warplet can't be purchased without NFT
                         if (stamp.id === 'warplet' && !isEligible) {
@@ -3299,31 +3301,68 @@
                                 e.stopPropagation();
                                 alert('🚫 Warplet stamp is exclusive to Warplet NFT holders.\n\nThis special stamp allows your Warplet to appear in postcards!\n\nGet your Warplet at warplet.xyz');
                             };
-                        } else {
-                            actionBtn.textContent = isEligible ? 'Free Claim' : `Buy ${prices[stamp.id] || '0.2 USDC'}`;
+                        } else if (isEligible) {
+                            // Free claim with quantity
+                            actionBtn.innerHTML = `
+                                <div style="font-size: 0.65rem; color: rgba(255,255,255,0.7);">Free Claim</div>
+                                <div style="font-size: 0.55rem; margin-top: 2px;">Get ${config.quantity} stamp${config.quantity > 1 ? 's' : ''} 🎫</div>
+                            `;
                             actionBtn.onclick = (e) => {
                                 e.stopPropagation();
-                                if (isEligible) {
-                                    claimStampInline(stamp.id);
-                                } else {
-                                    buyStampInline(stamp.id);
-                                }
+                                claimStampInline(stamp.id);
+                            };
+                        } else {
+                            // Purchase with price and quantity
+                            actionBtn.innerHTML = `
+                                <div style="font-size: 0.7rem; font-weight: bold;">${config.price} USDC</div>
+                                <div style="font-size: 0.55rem; margin-top: 2px;">→ ${config.quantity} stamp${config.quantity > 1 ? 's' : ''} 🎫</div>
+                            `;
+                            actionBtn.onclick = (e) => {
+                                e.stopPropagation();
+                                buyStampInline(stamp.id);
                             };
                         }
                         stampWrapper.appendChild(actionBtn);
                     }
                 } else {
-                    // Owned indicator
-                    const ownedLine = document.createElement('div');
-                    ownedLine.style.cssText = `
-                        text-align: center;
-                        font-size: 0.65rem;
-                        color: #4ade80;
-                        font-weight: bold;
-                        margin-top: 6px;
-                    `;
-                    ownedLine.textContent = '✓ Owned';
-                    stampWrapper.appendChild(ownedLine);
+                    // Owned - show quantity
+                    const quantity = userStamps[stamp.id]?.quantity || 0;
+                    
+                    if (stamp.id === 'based' && userStamps.based?.permanent) {
+                        // Based unlimited
+                        const unlimitedBadge = document.createElement('div');
+                        unlimitedBadge.style.cssText = `
+                            text-align: center;
+                            font-size: 0.65rem;
+                            margin-top: 6px;
+                            padding: 6px 8px;
+                            background: linear-gradient(135deg, rgba(74,222,128,0.2), rgba(34,197,94,0.2));
+                            border: 1px solid rgba(74,222,128,0.5);
+                            border-radius: 6px;
+                            color: #4ade80;
+                            font-weight: bold;
+                        `;
+                        unlimitedBadge.innerHTML = '♾️ Unlimited';
+                        stampWrapper.appendChild(unlimitedBadge);
+                    } else {
+                        // Regular stamps with quantity
+                        const quantityDisplay = document.createElement('div');
+                        quantityDisplay.style.cssText = `
+                            text-align: center;
+                            margin-top: 6px;
+                            padding: 6px 8px;
+                            background: rgba(74,222,128,0.15);
+                            border: 1px solid rgba(74,222,128,0.4);
+                            border-radius: 6px;
+                        `;
+                        quantityDisplay.innerHTML = `
+                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.6); margin-bottom: 2px;">Owned</div>
+                            <div style="font-size: 0.75rem; color: #4ade80; font-weight: bold;">
+                                ${quantity} stamp${quantity !== 1 ? 's' : ''} 🎫
+                            </div>
+                        `;
+                        stampWrapper.appendChild(quantityDisplay);
+                    }
                 }
                 
                 stampGrid.appendChild(stampWrapper);
@@ -3378,10 +3417,20 @@
         // Claim stamp inline
         function claimStampInline(stampId) {
             const userFid = window.currentUser?.fid || 3;
+            
+            // Stamp quantities: Neynar=1, others=5
+            const quantities = {
+                neynar: 1,
+                farcaster: 5,
+                warplet: 5
+            };
+            
             userStamps[stampId] = {
                 owned: true,
+                quantity: quantities[stampId] || 1,
                 acquired_method: 'free',
-                acquired_at: new Date().toISOString()
+                acquired_at: new Date().toISOString(),
+                first_free_claimed: true
             };
             saveUserStamps(userFid);
             
@@ -3389,6 +3438,8 @@
             if (userStamps.neynar?.owned && userStamps.farcaster?.owned && userStamps.warplet?.owned && !userStamps.based?.owned) {
                 userStamps.based = {
                     owned: true,
+                    quantity: Infinity,
+                    permanent: true,
                     acquired_method: 'achievement',
                     acquired_at: new Date().toISOString()
                 };
@@ -3418,7 +3469,26 @@
         
         // Buy stamp inline
         function buyStampInline(stampId) {
-            alert(`Payment for ${stampId} stamp (0.2 USDC) - Coming soon!`);
+            const quantities = {
+                neynar: 1,
+                farcaster: 5,
+                warplet: 5
+            };
+            
+            const prices = {
+                neynar: '0.1',
+                farcaster: '0.37',
+                warplet: '0.5'
+            };
+            
+            const qty = quantities[stampId] || 1;
+            const price = prices[stampId] || '0.2';
+            
+            alert(`💰 Payment Required\n\nPurchase: ${qty} stamp${qty > 1 ? 's' : ''} 🎫\nPrice: ${price} USDC\n\nPayment integration coming soon!`);
+            
+            // TODO: Implement payment flow
+            // After payment verified:
+            // userStamps[stampId] = { owned: true, quantity: qty, acquired_method: 'purchase', ... };
         }
         
         // Show stamp preview modal
