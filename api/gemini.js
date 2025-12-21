@@ -190,28 +190,42 @@ module.exports = async function handler(req, res) {
             const randomScene = diverseScenes[Math.floor(Math.random() * diverseScenes.length)];
             console.log('🎲 Selected scene:', randomScene);
             
-            const imagePrompt = `Create a vintage Christmas postcard illustration:
+            const imagePrompt = `Create a vintage New Year or Christmas greeting card illustration using the provided photo as reference for the person's appearance.
 
 SCENE: ${randomScene}
 
-CHARACTER DESIGN:
-- Analyze the provided reference image
-- If PERSON: Preserve their facial features, hair color/style, approximate age, clothing style
-- If NOT person (logo/object): Extract dominant colors and visual mood, create a character embodying those traits
+STYLE - CRITICAL (This is a POSTCARD ILLUSTRATION, NOT a painting or photo):
+- Inspired by classic illustrated postcards by Jenny Nyström, Anton Pieck, and Ellen Clapsaddle
+- FLAT illustration style with simplified forms and shapes
+- Hand-drawn look with visible pen/ink linework
+- Watercolor-like soft color washes, NOT oil painting texture
+- Muted vintage colors: dusty red, sage green, mustard yellow, cream, soft brown
+- Simple shading with limited color palette (4-6 main colors)
+- Vintage paper texture with subtle grain
+- Slight sepia tone or aged paper effect
 
-STYLE REQUIREMENTS:
-- Vintage 1950s painted postcard aesthetic (Norman Rockwell / Coca-Cola ads style)
-- Warm nostalgic colors: burgundy red, forest green, golden yellow, cream, warm brown
-- Soft painted brushstrokes, NOT photorealistic - illustration style
-- Rich detail and Christmas decorations: lights, garlands, ornaments, wreaths
-- Vertical 9:16 portrait format
-- Warm golden lighting with slight vignette effect
-- Vintage paper texture overlay
-- Joyful, magical holiday atmosphere
+CHARACTER from reference photo:
+- Preserve general facial features and hair style
+- Simplify to illustration form (not photorealistic)
+- Classic timeless winter clothing appropriate for the scene
+- International/universal style (not overly American)
 
-IMPORTANT: Make the scene dynamic and engaging! Show action, emotion, movement. Capture the JOY of the activity.
+SCENE COMPOSITION:
+- Festive winter atmosphere: snow, decorated trees, warm lights
+- Cozy, joyful, nostalgic holiday mood
+- Clear focal point with simple background elements
+- Vertical 9:16 format like traditional postcards
 
-REFERENCE IMAGE for character design:`;
+AVOID:
+- Oil painting texture or realistic brush strokes
+- Photorealistic rendering
+- Modern digital art look
+- Overly detailed or busy composition
+- Dark or dramatic lighting
+
+Think: Classic vintage greeting card from 1920s-1950s European tradition.
+
+REFERENCE IMAGE:`;
 
             // Build the request with sender's image only
             const parts = [{ text: imagePrompt }];
