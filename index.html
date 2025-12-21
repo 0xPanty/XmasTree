@@ -1835,50 +1835,33 @@
         </div>
     </div>
 
-    <!-- Stamp Loading Modal -->
-    <div id="stamp-loading-modal" class="custom-modal" style="z-index: 1000;">
-        <div class="modal-box" style="max-width: 360px; text-align: center; padding: 40px 30px;">
-            <div class="stamp-loading-spinner"></div>
-            <div style="margin-top: 24px; font-size: 1rem; color: var(--gold); font-weight: 600;">Checking eligibility...</div>
-            <div style="margin-top: 8px; font-size: 0.85rem; color: rgba(255,255,255,0.6);" id="stamp-loading-text">Scanning Neynar Score</div>
-        </div>
-    </div>
-
-    <!-- Stamp Shop Modal -->
-    <div id="stamp-shop-modal" class="custom-modal">
-        <div class="modal-box" style="max-width: 500px;">
-            <div class="modal-title">🎫 Get Your Stamp</div>
-            <div style="color: rgba(255,255,255,0.7); margin-bottom: 20px; font-size: 0.9rem;">Choose at least one stamp to continue</div>
-            <div id="stamp-shop-content" class="stamp-shop-grid"></div>
-            <button onclick="closeStampShop()" style="width: 100%; padding: 12px; margin-top: 16px; background: transparent; border: 1px solid rgba(212,175,55,0.3); color: var(--gold); border-radius: 8px; cursor: pointer;">Cancel</button>
-        </div>
-    </div>
-
-    <!-- Stamp Selector Modal (for users who already have stamps) -->
-    <div id="stamp-selector-modal" class="custom-modal">
-        <div class="modal-box" style="max-width: 420px;">
-            <div class="modal-title">🎨 Choose Your Stamp</div>
-            <div style="color: rgba(255,255,255,0.7); margin-bottom: 20px; font-size: 0.9rem;">Select which stamp to use</div>
-            <div id="stamp-selector-content"></div>
-            <button onclick="confirmStampSelection()" style="width: 100%; padding: 14px; margin-top: 16px; background: linear-gradient(135deg, #d4af37, #ffd700); border: none; color: #2c2c2c; border-radius: 8px; cursor: pointer; font-weight: bold;">Continue →</button>
-        </div>
-    </div>
-
-    <!-- Based Unlock Celebration Modal -->
-    <div id="based-unlock-modal" class="custom-modal">
-        <div class="modal-box" style="max-width: 400px; text-align: center; padding: 40px;">
-            <div style="font-size: 4rem; margin-bottom: 16px;">🎊</div>
-            <div style="font-size: 1.5rem; font-weight: bold; color: var(--gold); margin-bottom: 12px;">CONGRATULATIONS!</div>
-            <div style="font-size: 1rem; color: rgba(255,255,255,0.9); margin-bottom: 8px;">You've collected all 3 stamps!</div>
-            <div style="font-size: 1.3rem; font-weight: bold; color: #ffd700; margin: 20px 0;">🌟 BASED STAMP UNLOCKED! 🌟</div>
-            <button onclick="closeBasedUnlock()" style="width: 100%; padding: 14px; margin-top: 20px; background: linear-gradient(135deg, #d4af37, #ffd700); border: none; color: #2c2c2c; border-radius: 8px; cursor: pointer; font-weight: bold;">Awesome! 🎉</button>
-        </div>
-    </div>
-
     <!-- Direct Gift Modal (Send to Friends) -->
     <div id="direct-gift-modal" class="custom-modal">
-        <div class="modal-box" style="max-width: 400px;">
+        <div class="modal-box" style="max-width: 500px;">
             <div class="modal-title">🎁 Send to Friends</div>
+            
+            <!-- Stamp Selection Section (at top) -->
+            <div id="stamp-section" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.3); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <div style="font-weight: bold; color: var(--gold); font-size: 0.95rem;">📮 Choose Your Stamp</div>
+                    <div id="stamp-status-indicator" style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Loading...</div>
+                </div>
+                
+                <!-- Loading State -->
+                <div id="stamp-loading-inline" style="display: none; text-align: center; padding: 20px;">
+                    <div class="stamp-loading-spinner" style="margin: 0 auto;"></div>
+                    <div style="margin-top: 12px; font-size: 0.85rem; color: var(--gold);" id="stamp-loading-inline-text">Checking eligibility...</div>
+                </div>
+                
+                <!-- Stamp Grid -->
+                <div id="stamp-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px;"></div>
+                
+                <!-- No Stamp Warning -->
+                <div id="no-stamp-warning" style="display: none; color: #ff6b6b; font-size: 0.85rem; margin-top: 8px; text-align: center;">
+                    ⚠️ You need at least one stamp to generate cards
+                </div>
+            </div>
+            
             <div class="gift-form">
                 <div class="form-group">
                     <label>Gift Title</label>
@@ -2995,28 +2978,38 @@
         let stampEligibility = {}; // Store eligibility check results
         let selectedStamp = null; // Currently selected stamp for generation
         
-        // Check stamps and show appropriate modal
+        // Open direct gift modal and load stamps inline
         async function openDirectGiftModal() {
-            // First, check if user has any stamps
-            await checkStampEligibility();
+            // Open modal first
+            openOriginalDirectGiftModal();
+            
+            // Then load stamps inline
+            await checkStampEligibilityInline();
         }
         
-        // Check stamp eligibility with loading animation
-        async function checkStampEligibility() {
-            // Show loading modal
-            document.getElementById('stamp-loading-modal').classList.add('visible');
-            const loadingText = document.getElementById('stamp-loading-text');
+        // Check stamp eligibility inline (inside the modal)
+        async function checkStampEligibilityInline() {
+            const loadingDiv = document.getElementById('stamp-loading-inline');
+            const stampGrid = document.getElementById('stamp-grid');
+            const statusIndicator = document.getElementById('stamp-status-indicator');
+            const loadingText = document.getElementById('stamp-loading-inline-text');
+            const noStampWarning = document.getElementById('no-stamp-warning');
+            
+            // Show loading
+            loadingDiv.style.display = 'block';
+            stampGrid.style.display = 'none';
+            noStampWarning.style.display = 'none';
+            statusIndicator.textContent = 'Checking...';
             
             try {
-                // Get user's FID (assuming we have currentUser from SDK)
-                const userFid = window.currentUser?.fid || 3; // Fallback to test FID
+                const userFid = window.currentUser?.fid || 3;
                 
                 // Animate loading text
                 loadingText.textContent = 'Scanning Neynar Score...';
-                await new Promise(r => setTimeout(r, 500));
+                await new Promise(r => setTimeout(r, 400));
                 
                 loadingText.textContent = 'Checking Power Badge...';
-                await new Promise(r => setTimeout(r, 500));
+                await new Promise(r => setTimeout(r, 400));
                 
                 loadingText.textContent = 'Verifying Warplet NFT...';
                 
@@ -3025,30 +3018,172 @@
                 const data = await response.json();
                 
                 stampEligibility = data.stamps;
-                
-                // Load user's owned stamps from localStorage
                 loadUserStamps(userFid);
                 
-                // Close loading modal
-                await new Promise(r => setTimeout(r, 500));
-                document.getElementById('stamp-loading-modal').classList.remove('visible');
+                await new Promise(r => setTimeout(r, 400));
                 
-                // Decide which modal to show
-                const ownedStamps = Object.keys(userStamps).filter(k => userStamps[k]?.owned);
+                // Hide loading, show stamps
+                loadingDiv.style.display = 'none';
+                stampGrid.style.display = 'grid';
                 
-                if (ownedStamps.length === 0) {
-                    // No stamps - show shop
-                    showStampShop();
+                // Render stamp grid
+                renderStampGrid();
+                
+                // Update status indicator
+                const ownedCount = Object.keys(userStamps).filter(k => userStamps[k]?.owned).length;
+                if (ownedCount === 0) {
+                    statusIndicator.innerHTML = '<span style="color: #ff6b6b;">⚠️ No stamps</span>';
+                    noStampWarning.style.display = 'block';
+                } else if (ownedCount === 4) {
+                    statusIndicator.innerHTML = '<span style="color: #ffd700;">✨ Based Collector</span>';
                 } else {
-                    // Has stamps - show selector
-                    showStampSelector();
+                    statusIndicator.innerHTML = `<span style="color: #4ade80;">✓ ${ownedCount} stamp${ownedCount > 1 ? 's' : ''}</span>`;
                 }
                 
             } catch (error) {
                 console.error('Error checking stamps:', error);
-                document.getElementById('stamp-loading-modal').classList.remove('visible');
-                alert('Failed to check stamp eligibility. Please try again.');
+                loadingDiv.style.display = 'none';
+                statusIndicator.innerHTML = '<span style="color: #ff6b6b;">Error loading</span>';
+                alert('Failed to check stamps. Please try again.');
             }
+        }
+        
+        // Render stamp grid inline
+        function renderStampGrid() {
+            const stampGrid = document.getElementById('stamp-grid');
+            stampGrid.innerHTML = '';
+            
+            const stamps = [
+                { id: 'neynar', icon: '🟣', name: 'Neynar', img: '/stamp/neynar.png' },
+                { id: 'farcaster', icon: '🟪', name: 'Farcaster', img: '/stamp/farcaster.png' },
+                { id: 'warplet', icon: '🎨', name: 'Warplet', img: '/stamp/warplet.png' },
+                { id: 'based', icon: '🌟', name: 'Based', img: '/stamp/based.png' }
+            ];
+            
+            stamps.forEach(stamp => {
+                const isOwned = userStamps[stamp.id]?.owned;
+                const eligibility = stampEligibility[stamp.id];
+                const isEligible = eligibility?.eligible;
+                
+                // Skip Based if not unlocked
+                if (stamp.id === 'based' && !isOwned) return;
+                
+                const stampCard = document.createElement('div');
+                stampCard.style.cssText = `
+                    position: relative;
+                    aspect-ratio: 4/5;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    cursor: ${isOwned ? 'pointer' : 'default'};
+                    border: 2px solid ${selectedStamp === stamp.id ? 'var(--gold)' : 'rgba(212,175,55,0.3)'};
+                    transition: all 0.3s ease;
+                    opacity: ${isOwned ? '1' : '0.5'};
+                `;
+                
+                if (isOwned) {
+                    stampCard.onclick = () => {
+                        selectedStamp = stamp.id;
+                        renderStampGrid(); // Re-render to update selection
+                    };
+                }
+                
+                stampCard.innerHTML = `
+                    <img src="${stamp.img}" style="width: 100%; height: 100%; object-fit: cover;">
+                    ${isOwned ? 
+                        `<div style="position: absolute; top: 4px; right: 4px; background: rgba(74,222,128,0.9); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;">✓</div>` :
+                        (isEligible ?
+                            `<div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(74,222,128,0.95); color: white; padding: 4px; font-size: 0.7rem; text-align: center; cursor: pointer;" onclick="claimStampInline('${stamp.id}')">FREE - Claim</div>` :
+                            `<div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(212,175,55,0.95); color: #2c2c2c; padding: 4px; font-size: 0.7rem; text-align: center; font-weight: bold; cursor: pointer;" onclick="buyStampInline('${stamp.id}')">0.2 USDC</div>`
+                        )
+                    }
+                    ${selectedStamp === stamp.id ? 
+                        `<div style="position: absolute; top: 4px; left: 4px; background: var(--gold); color: #2c2c2c; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;">SELECTED</div>` : 
+                        ''
+                    }
+                `;
+                
+                stampGrid.appendChild(stampCard);
+            });
+            
+            // Show tooltip for non-owned stamps
+            const nonOwnedStamps = stamps.filter(s => s.id !== 'based' && !userStamps[s.id]?.owned);
+            if (nonOwnedStamps.length > 0 && nonOwnedStamps.length < 3) {
+                const tooltip = document.createElement('div');
+                tooltip.style.cssText = 'margin-top: 8px; font-size: 0.75rem; color: rgba(255,255,255,0.6); text-align: center;';
+                tooltip.innerHTML = '💡 Collect all 3 to unlock Based stamp';
+                stampGrid.appendChild(tooltip);
+            }
+        }
+        
+        // Claim stamp inline
+        function claimStampInline(stampId) {
+            const userFid = window.currentUser?.fid || 3;
+            userStamps[stampId] = {
+                owned: true,
+                acquired_method: 'free',
+                acquired_at: new Date().toISOString()
+            };
+            saveUserStamps(userFid);
+            
+            // Check if Based unlocked
+            if (userStamps.neynar?.owned && userStamps.farcaster?.owned && userStamps.warplet?.owned && !userStamps.based?.owned) {
+                userStamps.based = {
+                    owned: true,
+                    acquired_method: 'achievement',
+                    acquired_at: new Date().toISOString()
+                };
+                saveUserStamps(userFid);
+                showBasedUnlockToast();
+            }
+            
+            // Auto-select if first stamp
+            if (!selectedStamp) {
+                selectedStamp = stampId;
+            }
+            
+            // Re-render
+            renderStampGrid();
+            
+            // Update status
+            const ownedCount = Object.keys(userStamps).filter(k => userStamps[k]?.owned).length;
+            const statusIndicator = document.getElementById('stamp-status-indicator');
+            if (ownedCount === 4) {
+                statusIndicator.innerHTML = '<span style="color: #ffd700;">✨ Based Collector</span>';
+            } else {
+                statusIndicator.innerHTML = `<span style="color: #4ade80;">✓ ${ownedCount} stamp${ownedCount > 1 ? 's' : ''}</span>`;
+            }
+            document.getElementById('no-stamp-warning').style.display = 'none';
+        }
+        
+        // Buy stamp inline
+        function buyStampInline(stampId) {
+            alert(`Payment for ${stampId} stamp (0.2 USDC) - Coming soon!`);
+        }
+        
+        // Show Based unlock toast
+        function showBasedUnlockToast() {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #d4af37, #ffd700);
+                color: #2c2c2c;
+                padding: 16px 24px;
+                border-radius: 12px;
+                font-weight: bold;
+                z-index: 10000;
+                box-shadow: 0 4px 20px rgba(212,175,55,0.5);
+                animation: slideDown 0.5s ease;
+            `;
+            toast.innerHTML = '🎊 BASED STAMP UNLOCKED! 🌟';
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'slideUp 0.5s ease';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
         }
         
         // Load user's stamps from localStorage
@@ -3081,153 +3216,6 @@
         function saveUserStamps(fid) {
             const key = `stamps_${fid}`;
             localStorage.setItem(key, JSON.stringify(userStamps));
-        }
-        
-        // Show stamp shop
-        function showStampShop() {
-            const shopContent = document.getElementById('stamp-shop-content');
-            shopContent.innerHTML = '';
-            
-            const stamps = [
-                { id: 'neynar', icon: '🟣', name: 'Neynar Stamp', img: '/stamp/neynar.png' },
-                { id: 'farcaster', icon: '🟪', name: 'Farcaster Stamp', img: '/stamp/farcaster.png' },
-                { id: 'warplet', icon: '🎨', name: 'Warplet Stamp', img: '/stamp/warplet.png' }
-            ];
-            
-            stamps.forEach(stamp => {
-                const eligibility = stampEligibility[stamp.id];
-                const isEligible = eligibility?.eligible;
-                const isOwned = userStamps[stamp.id]?.owned;
-                
-                const card = document.createElement('div');
-                card.className = 'stamp-card';
-                card.innerHTML = `
-                    <img src="${stamp.img}" alt="${stamp.name}">
-                    <div class="stamp-card-info">
-                        <div class="stamp-card-title">${stamp.icon} ${stamp.name}</div>
-                        <div class="stamp-card-status ${isOwned ? 'owned' : (isEligible ? 'eligible' : 'locked')}">
-                            ${isOwned ? '✅ Owned' : (isEligible ? '✨ FREE - Eligible!' : '💰 0.2 USDC')}
-                        </div>
-                        <div class="stamp-card-reason">${eligibility?.reason || 'Loading...'}</div>
-                        ${isOwned ? 
-                            `<button class="owned">✓ Already Owned</button>` :
-                            (isEligible ? 
-                                `<button class="claim" onclick="claimStamp('${stamp.id}')">✅ Claim Free Stamp</button>` :
-                                `<button class="buy" onclick="buyStamp('${stamp.id}')">💰 Buy for 0.2 USDC</button>`
-                            )
-                        }
-                    </div>
-                `;
-                shopContent.appendChild(card);
-            });
-            
-            document.getElementById('stamp-shop-modal').classList.add('visible');
-        }
-        
-        // Show stamp selector
-        function showStampSelector() {
-            const selectorContent = document.getElementById('stamp-selector-content');
-            selectorContent.innerHTML = '';
-            
-            const stamps = [
-                { id: 'neynar', icon: '🟣', name: 'Neynar', img: '/stamp/neynar.png' },
-                { id: 'farcaster', icon: '🟪', name: 'Farcaster', img: '/stamp/farcaster.png' },
-                { id: 'warplet', icon: '🎨', name: 'Warplet', img: '/stamp/warplet.png' },
-                { id: 'based', icon: '🌟', name: 'Based', img: '/stamp/based.png' }
-            ];
-            
-            stamps.forEach(stamp => {
-                if (userStamps[stamp.id]?.owned) {
-                    const option = document.createElement('div');
-                    option.className = 'stamp-card';
-                    option.style.cursor = 'pointer';
-                    option.onclick = () => {
-                        document.querySelectorAll('.stamp-card').forEach(c => c.style.border = '1px solid rgba(212, 175, 55, 0.3)');
-                        option.style.border = '2px solid var(--gold)';
-                        selectedStamp = stamp.id;
-                    };
-                    option.innerHTML = `
-                        <img src="${stamp.img}" alt="${stamp.name}">
-                        <div class="stamp-card-info">
-                            <div class="stamp-card-title">${stamp.icon} ${stamp.name} Stamp</div>
-                            <div class="stamp-card-status eligible">✅ Owned</div>
-                        </div>
-                    `;
-                    selectorContent.appendChild(option);
-                    
-                    // Auto-select first stamp
-                    if (!selectedStamp) {
-                        selectedStamp = stamp.id;
-                        option.style.border = '2px solid var(--gold)';
-                    }
-                }
-            });
-            
-            document.getElementById('stamp-selector-modal').classList.add('visible');
-        }
-        
-        // Claim free stamp
-        function claimStamp(stampId) {
-            const userFid = window.currentUser?.fid || 3;
-            userStamps[stampId] = {
-                owned: true,
-                acquired_method: 'free',
-                acquired_at: new Date().toISOString()
-            };
-            saveUserStamps(userFid);
-            
-            // Reload shop to show updated state
-            showStampShop();
-            
-            // Check if Based unlocked
-            if (userStamps.neynar?.owned && userStamps.farcaster?.owned && userStamps.warplet?.owned && !userStamps.based?.owned) {
-                setTimeout(() => {
-                    closeStampShop();
-                    showBasedUnlock();
-                }, 500);
-            }
-        }
-        
-        // Buy stamp (placeholder - implement payment later)
-        async function buyStamp(stampId) {
-            // TODO: Implement actual payment flow with Farcaster Frames
-            alert(`Payment flow for ${stampId} stamp (0.2 USDC) - Coming soon!`);
-        }
-        
-        // Confirm stamp selection and proceed to gift form
-        function confirmStampSelection() {
-            if (!selectedStamp) {
-                alert('Please select a stamp');
-                return;
-            }
-            
-            document.getElementById('stamp-selector-modal').classList.remove('visible');
-            
-            // Now open the actual gift modal
-            openOriginalDirectGiftModal();
-        }
-        
-        // Show Based unlock celebration
-        function showBasedUnlock() {
-            const userFid = window.currentUser?.fid || 3;
-            userStamps.based = {
-                owned: true,
-                acquired_method: 'achievement',
-                acquired_at: new Date().toISOString()
-            };
-            saveUserStamps(userFid);
-            document.getElementById('based-unlock-modal').classList.add('visible');
-        }
-        
-        // Close modals
-        function closeStampShop() {
-            document.getElementById('stamp-shop-modal').classList.remove('visible');
-        }
-        
-        function closeBasedUnlock() {
-            document.getElementById('based-unlock-modal').classList.remove('visible');
-            // Show selector again with Based stamp available
-            showStampSelector();
         }
         
         // Original direct gift modal (renamed)
