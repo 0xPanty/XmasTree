@@ -3218,7 +3218,7 @@
                 
                 // Status and details
                 if (!isOwned) {
-                    // For Based stamp - show progress
+                    // For Based stamp - show progress and mint button
                     if (stamp.id === 'based') {
                         const basedProgress = document.createElement('div');
                         basedProgress.style.cssText = `
@@ -3233,6 +3233,38 @@
                         `;
                         basedProgress.id = 'based-progress-inline';
                         stampWrapper.appendChild(basedProgress);
+                        
+                        // Check if eligible to mint (all 3 stamps owned)
+                        const canMint = eligibility?.neynar?.eligible && 
+                                       eligibility?.farcaster?.eligible && 
+                                       eligibility?.warplet?.eligible;
+                        
+                        if (canMint) {
+                            // Mint button
+                            const mintBtn = document.createElement('button');
+                            mintBtn.style.cssText = `
+                                width: 100%;
+                                padding: 8px 4px;
+                                border: none;
+                                border-radius: 4px;
+                                font-size: 0.7rem;
+                                font-weight: bold;
+                                cursor: pointer;
+                                transition: all 0.2s;
+                                margin-top: 6px;
+                                background: linear-gradient(135deg, #ffd700, #ffed4e);
+                                color: #2c2c2c;
+                            `;
+                            mintBtn.innerHTML = `
+                                <div style="font-size: 0.75rem;">🎖️ Mint Based NFT</div>
+                                <div style="font-size: 0.55rem; margin-top: 2px; opacity: 0.8;">0.99 USDC</div>
+                            `;
+                            mintBtn.onclick = (e) => {
+                                e.stopPropagation();
+                                mintBasedNFT();
+                            };
+                            stampWrapper.appendChild(mintBtn);
+                        }
                     } else {
                         // Status container for regular stamps
                         const statusContainer = document.createElement('div');
@@ -3388,7 +3420,7 @@
             
             progressDiv.innerHTML = `
                 <div style="font-weight: bold; margin-bottom: 6px; font-size: 0.65rem;">
-                    ${allCompleted ? '🏆 Unlocked!' : `🎯 Progress: ${completedCount}/3`}
+                    ${allCompleted ? '✅ Ready to Mint!' : `🎯 Progress: ${completedCount}/3`}
                 </div>
                 <div style="display: flex; gap: 3px; margin-bottom: 8px;">
                     ${checks.map(c => `
@@ -3403,12 +3435,12 @@
                     `).join('')}
                 </div>
                 ${allCompleted ? `
-                    <div style="margin-top: 6px; font-size: 0.55rem; color: #4ade80; font-weight: bold;">
-                        ♾️ Unlimited sending
+                    <div style="margin-top: 6px; font-size: 0.5rem; color: #ffd700;">
+                        🎖️ Mint NFT for ♾️ unlimited
                     </div>
                 ` : `
                     <div style="margin-top: 6px; font-size: 0.5rem; color: rgba(255,255,255,0.5);">
-                        Complete all 3 → Unlimited
+                        Complete all 3 → Mint Based NFT
                     </div>
                 `}
             `;
@@ -3434,18 +3466,8 @@
             };
             saveUserStamps(userFid);
             
-            // Check if Based unlocked
-            if (userStamps.neynar?.owned && userStamps.farcaster?.owned && userStamps.warplet?.owned && !userStamps.based?.owned) {
-                userStamps.based = {
-                    owned: true,
-                    quantity: Infinity,
-                    permanent: true,
-                    acquired_method: 'achievement',
-                    acquired_at: new Date().toISOString()
-                };
-                saveUserStamps(userFid);
-                showBasedUnlockToast();
-            }
+            // Based is now mint-only, not auto-unlocked
+            // Users need to mint it after meeting requirements
             
             // Auto-select if first stamp
             if (!selectedStamp) {
@@ -3569,7 +3591,79 @@
             closeStampPreview();
         }
         
-        // Show Based unlock toast
+        // Mint Based NFT (0.99 USDC)
+        async function mintBasedNFT() {
+            const confirmed = confirm(
+                '🎖️ Mint Based NFT\n\n' +
+                'This is your ultimate achievement badge!\n\n' +
+                '💎 Benefits:\n' +
+                '• ♾️ Unlimited postcard sending forever\n' +
+                '• 🏆 Exclusive Based collector status\n' +
+                '• 🔗 On-chain proof of your Farcaster journey\n\n' +
+                'Price: 0.99 USDC\n\n' +
+                'Proceed with mint?'
+            );
+            
+            if (!confirmed) return;
+            
+            // TODO: Implement actual minting + payment
+            // For now, simulate success
+            const userFid = window.currentUser?.fid || 3;
+            
+            userStamps.based = {
+                owned: true,
+                quantity: Infinity,
+                permanent: true,
+                acquired_method: 'minted',
+                acquired_at: new Date().toISOString(),
+                mint_price: '0.99',
+                nft_minted: true
+            };
+            
+            saveUserStamps(userFid);
+            renderStampGrid();
+            
+            showBasedMintSuccessToast();
+        }
+        
+        // Show Based mint success toast
+        function showBasedMintSuccessToast() {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, #ffd700, #ffed4e);
+                color: #2c2c2c;
+                padding: 32px 40px;
+                border-radius: 16px;
+                box-shadow: 0 8px 32px rgba(255,215,0,0.4);
+                z-index: 10000;
+                text-align: center;
+                animation: scaleIn 0.3s ease-out;
+                max-width: 400px;
+            `;
+            
+            toast.innerHTML = `
+                <div style="font-size: 4rem; margin-bottom: 16px;">🎖️</div>
+                <div style="font-size: 1.5rem; font-weight: bold; margin-bottom: 12px;">Based NFT Minted!</div>
+                <div style="font-size: 1rem; margin-bottom: 8px; opacity: 0.8;">Congratulations!</div>
+                <div style="font-size: 0.9rem; opacity: 0.7;">
+                    You now have ♾️ unlimited postcard sending<br>
+                    Your achievement is forever on-chain 🔗
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.animation = 'scaleOut 0.3s ease-in';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+        
+        // Show Based unlock toast (legacy - kept for backwards compatibility)
         function showBasedUnlockToast() {
             const toast = document.createElement('div');
             toast.style.cssText = `
