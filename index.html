@@ -1920,11 +1920,7 @@
                         <b>Buy Stamps:</b><br>
                         • Neynar: 0.1 USDC = 1 stamp 🎫<br>
                         • Farcaster: 0.37 USDC = 5 stamps 🎫🎫🎫🎫🎫<br>
-                        • Warplet: 0.5 USDC = 5 stamps (NFT holders only)<br>
-                        <br>
-                        <b>Send Postcards:</b><br>
-                        • 1 stamp consumed per friend 🎫 → 👤<br>
-                        • Same postcard → send to multiple people
+                        • Warplet: 0.5 USDC = 5 stamps (NFT holders only)
                     </div>
                 </div>
                 
@@ -4181,6 +4177,56 @@
             if (!isAIGenerated) { 
                 alert('Please generate AI postcard first!'); 
                 return; 
+            }
+            
+            // ===== STAMP CONSUMPTION LOGIC =====
+            // Check if user has selected a stamp and has enough quantity
+            if (!selectedStamp) {
+                alert('⚠️ Please select a stamp first!\n\nStamps are required to send postcards.');
+                return;
+            }
+            
+            const stamp = userStamps[selectedStamp];
+            
+            // Check if user owns this stamp
+            if (!stamp || !stamp.owned) {
+                alert('⚠️ You don\'t own this stamp!\n\nPlease claim or purchase stamps first.');
+                return;
+            }
+            
+            // Based stamp has unlimited quantity
+            if (selectedStamp === 'based' && stamp.permanent) {
+                // Unlimited - proceed without consumption
+            } else {
+                // Check quantity for regular stamps
+                const requiredStamps = selectedRecipients.length; // 1 stamp per friend
+                const availableStamps = stamp.quantity || 0;
+                
+                if (availableStamps < requiredStamps) {
+                    alert(
+                        `⚠️ Not enough stamps!\n\n` +
+                        `Sending to ${requiredStamps} friend${requiredStamps > 1 ? 's' : ''} requires ${requiredStamps} stamp${requiredStamps > 1 ? 's' : ''} 🎫\n` +
+                        `You have: ${availableStamps} stamp${availableStamps !== 1 ? 's' : ''}\n\n` +
+                        `Please purchase more stamps or reduce recipients.`
+                    );
+                    return;
+                }
+                
+                // Confirm consumption
+                const confirmed = confirm(
+                    `📮 Confirm Send\n\n` +
+                    `Recipients: ${requiredStamps} friend${requiredStamps > 1 ? 's' : ''}\n` +
+                    `Cost: ${requiredStamps} stamp${requiredStamps > 1 ? 's' : ''} 🎫\n` +
+                    `Remaining after send: ${availableStamps - requiredStamps} stamp${availableStamps - requiredStamps !== 1 ? 's' : ''}\n\n` +
+                    `Continue?`
+                );
+                
+                if (!confirmed) return;
+                
+                // Consume stamps
+                stamp.quantity -= requiredStamps;
+                const userFid = window.currentUser?.fid || 3;
+                saveUserStamps(userFid);
             }
             
             closeDirectGiftModal();
