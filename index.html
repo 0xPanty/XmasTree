@@ -1914,13 +1914,17 @@
                 <!-- Quick Rules Card (below stamps) -->
                 <div style="margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px;">
                     <div style="font-size: 0.75rem; font-weight: bold; color: var(--gold); margin-bottom: 12px; text-align: center;">
-                        📖 Quick Rules
+                        📖 How It Works
                     </div>
                     <div style="font-size: 0.7rem; color: rgba(255,255,255,0.7); line-height: 1.8;">
-                        • <b>Generate:</b> 1st time free, then 0.1 USDC<br>
-                        • <b>Send:</b> 1 stamp per friend 🎫<br>
-                        • <b>Reuse:</b> Same card → send to many people<br>
-                        • <b>Prices:</b> Neynar 0.1 | Farcaster 0.37 | Warplet 0.5 USDC
+                        <b>Buy Stamps:</b><br>
+                        • Neynar: 0.1 USDC = 1 stamp 🎫<br>
+                        • Farcaster: 0.37 USDC = 5 stamps 🎫🎫🎫🎫🎫<br>
+                        • Warplet: 0.5 USDC = 5 stamps (NFT holders only)<br>
+                        <br>
+                        <b>Send Postcards:</b><br>
+                        • 1 stamp consumed per friend 🎫 → 👤<br>
+                        • Same postcard → send to multiple people
                     </div>
                 </div>
                 
@@ -3249,15 +3253,17 @@
                         statusLine.textContent = isEligible ? '✓ Eligible' : '✗ Not Eligible';
                         statusContainer.appendChild(statusLine);
                         
-                        // Reason line - ALWAYS show score/reason
-                        const reasonLine = document.createElement('div');
-                        reasonLine.style.cssText = `
-                            color: rgba(255,255,255,0.7);
-                            font-size: 0.55rem;
-                            margin-bottom: 4px;
-                        `;
-                        reasonLine.textContent = eligibility?.reason || '';
-                        statusContainer.appendChild(reasonLine);
+                        // Reason line - show score/reason (but not for Warplet when not eligible, button already shows it)
+                        if (!(stamp.id === 'warplet' && !isEligible)) {
+                            const reasonLine = document.createElement('div');
+                            reasonLine.style.cssText = `
+                                color: rgba(255,255,255,0.7);
+                                font-size: 0.55rem;
+                                margin-bottom: 4px;
+                            `;
+                            reasonLine.textContent = eligibility?.reason || '';
+                            statusContainer.appendChild(reasonLine);
+                        }
                         
                         stampWrapper.appendChild(statusContainer);
                         
