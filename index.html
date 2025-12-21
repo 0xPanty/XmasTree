@@ -3148,25 +3148,53 @@
                     }
                 `;
                 
-                // Price/action button (below stamp)
+                stampWrapper.appendChild(stampCard);
+                
+                // Eligibility status (below stamp)
                 if (!isOwned) {
-                    const priceBtn = document.createElement('button');
-                    priceBtn.style.cssText = `
+                    const statusDiv = document.createElement('div');
+                    statusDiv.style.cssText = `
+                        text-align: center;
+                        font-size: 0.7rem;
+                        line-height: 1.4;
+                        margin-top: 4px;
+                        padding: 6px 8px;
+                        border-radius: 6px;
+                        background: rgba(0,0,0,0.3);
+                    `;
+                    
+                    if (isEligible) {
+                        statusDiv.innerHTML = `
+                            <div style="color: #4ade80; font-weight: bold; margin-bottom: 2px;">✓ 符合资格</div>
+                            <div style="color: rgba(255,255,255,0.7); font-size: 0.65rem;">${eligibility?.reason || ''}</div>
+                        `;
+                    } else {
+                        statusDiv.innerHTML = `
+                            <div style="color: #ff6b6b; font-weight: bold; margin-bottom: 2px;">✗ 不符合资格</div>
+                            <div style="color: rgba(255,255,255,0.7); font-size: 0.65rem;">${eligibility?.reason || ''}</div>
+                        `;
+                    }
+                    stampWrapper.appendChild(statusDiv);
+                    
+                    // Action button
+                    const actionBtn = document.createElement('button');
+                    actionBtn.style.cssText = `
                         width: 100%;
-                        padding: 6px;
+                        padding: 8px;
                         border: none;
                         border-radius: 6px;
                         font-size: 0.75rem;
                         font-weight: bold;
                         cursor: pointer;
                         transition: all 0.2s;
+                        margin-top: 6px;
                         ${isEligible ? 
                             'background: linear-gradient(135deg, #4ade80, #22c55e); color: white;' : 
                             'background: linear-gradient(135deg, #d4af37, #ffd700); color: #2c2c2c;'
                         }
                     `;
-                    priceBtn.textContent = isEligible ? '🎁 FREE - Claim' : '💰 0.2 USDC';
-                    priceBtn.onclick = (e) => {
+                    actionBtn.textContent = isEligible ? '🎁 免费领取' : '💰 购买 0.2 USDC';
+                    actionBtn.onclick = (e) => {
                         e.stopPropagation();
                         if (isEligible) {
                             claimStampInline(stamp.id);
@@ -3174,18 +3202,30 @@
                             buyStampInline(stamp.id);
                         }
                     };
-                    priceBtn.onmouseover = () => {
-                        priceBtn.style.transform = 'scale(1.05)';
-                        priceBtn.style.boxShadow = '0 4px 12px rgba(212,175,55,0.4)';
+                    actionBtn.onmouseover = () => {
+                        actionBtn.style.transform = 'scale(1.05)';
+                        actionBtn.style.boxShadow = '0 4px 12px rgba(212,175,55,0.4)';
                     };
-                    priceBtn.onmouseout = () => {
-                        priceBtn.style.transform = 'scale(1)';
-                        priceBtn.style.boxShadow = 'none';
+                    actionBtn.onmouseout = () => {
+                        actionBtn.style.transform = 'scale(1)';
+                        actionBtn.style.boxShadow = 'none';
                     };
-                    stampWrapper.appendChild(stampCard);
-                    stampWrapper.appendChild(priceBtn);
+                    stampWrapper.appendChild(actionBtn);
                 } else {
-                    stampWrapper.appendChild(stampCard);
+                    // Already owned - show owned status
+                    const ownedDiv = document.createElement('div');
+                    ownedDiv.style.cssText = `
+                        text-align: center;
+                        font-size: 0.7rem;
+                        color: #4ade80;
+                        font-weight: bold;
+                        margin-top: 6px;
+                        padding: 6px;
+                        border-radius: 6px;
+                        background: rgba(74,222,128,0.15);
+                    `;
+                    ownedDiv.textContent = '✓ 已拥有';
+                    stampWrapper.appendChild(ownedDiv);
                 }
                 
                 stampGrid.appendChild(stampWrapper);
