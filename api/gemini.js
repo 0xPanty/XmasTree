@@ -38,21 +38,6 @@ module.exports = async function handler(req, res) {
     try {
         if (action === 'generateCard') {
             // Christmas scenes for variety
-            const christmasScenes = [
-                'building a cute snowman together in a snowy winter wonderland with falling snowflakes',
-                'decorating a beautiful Christmas tree with golden ornaments and twinkling lights',
-                'having a playful snowball fight in a magical snowy forest',
-                'sitting together by a cozy fireplace with hot cocoa and Christmas stockings',
-                'ice skating hand in hand on a frozen pond under gentle falling snowflakes',
-                'excitedly opening Christmas presents under a sparkling decorated tree',
-                'making snow angels together in fresh powdery white snow',
-                'riding a magical sleigh through a winter forest with friendly reindeer',
-                'singing Christmas carols together in a charming snowy village square',
-                'baking delicious Christmas cookies together in a festive warm kitchen'
-            ];
-            
-            const randomScene = christmasScenes[Math.floor(Math.random() * christmasScenes.length)];
-            
             // Fetch sender avatar and convert to base64
             const senderImg = await imageUrlToBase64(senderAvatar);
 
