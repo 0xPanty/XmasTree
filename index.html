@@ -3070,6 +3070,15 @@
                 // Skip Based if not unlocked
                 if (stamp.id === 'based' && !isOwned) return;
                 
+                // Wrapper for stamp + price
+                const stampWrapper = document.createElement('div');
+                stampWrapper.style.cssText = `
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                `;
+                
+                // Stamp card (image container)
                 const stampCard = document.createElement('div');
                 stampCard.style.cssText = `
                     position: relative;
@@ -3077,9 +3086,10 @@
                     border-radius: 8px;
                     overflow: hidden;
                     cursor: ${isOwned ? 'pointer' : 'default'};
-                    border: 2px solid ${selectedStamp === stamp.id ? 'var(--gold)' : 'rgba(212,175,55,0.3)'};
+                    border: ${selectedStamp === stamp.id ? '3px solid var(--gold)' : 'none'};
                     transition: all 0.3s ease;
-                    opacity: ${isOwned ? '1' : '0.5'};
+                    opacity: ${isOwned ? '1' : '0.6'};
+                    background: rgba(2, 48, 32, 0.95);
                 `;
                 
                 if (isOwned) {
@@ -3090,21 +3100,58 @@
                 }
                 
                 stampCard.innerHTML = `
-                    <img src="${stamp.img}" style="width: 100%; height: 100%; object-fit: contain; background: rgba(2, 48, 32, 0.95); padding: 8px;">
+                    <img src="${stamp.img}" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;">
                     ${isOwned ? 
-                        `<div style="position: absolute; top: 4px; right: 4px; background: rgba(74,222,128,0.9); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;">✓</div>` :
-                        (isEligible ?
-                            `<div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(74,222,128,0.95); color: white; padding: 4px; font-size: 0.7rem; text-align: center; cursor: pointer;" onclick="claimStampInline('${stamp.id}')">FREE - Claim</div>` :
-                            `<div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(212,175,55,0.95); color: #2c2c2c; padding: 4px; font-size: 0.7rem; text-align: center; font-weight: bold; cursor: pointer;" onclick="buyStampInline('${stamp.id}')">0.2 USDC</div>`
-                        )
+                        `<div style="position: absolute; top: 6px; right: 6px; background: rgba(74,222,128,0.95); color: white; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">✓</div>` :
+                        ''
                     }
                     ${selectedStamp === stamp.id ? 
-                        `<div style="position: absolute; top: 4px; left: 4px; background: var(--gold); color: #2c2c2c; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;">SELECTED</div>` : 
+                        `<div style="position: absolute; top: 6px; left: 6px; background: var(--gold); color: #2c2c2c; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">SELECTED</div>` : 
                         ''
                     }
                 `;
                 
-                stampGrid.appendChild(stampCard);
+                // Price/action button (below stamp)
+                if (!isOwned) {
+                    const priceBtn = document.createElement('button');
+                    priceBtn.style.cssText = `
+                        width: 100%;
+                        padding: 6px;
+                        border: none;
+                        border-radius: 6px;
+                        font-size: 0.75rem;
+                        font-weight: bold;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        ${isEligible ? 
+                            'background: linear-gradient(135deg, #4ade80, #22c55e); color: white;' : 
+                            'background: linear-gradient(135deg, #d4af37, #ffd700); color: #2c2c2c;'
+                        }
+                    `;
+                    priceBtn.textContent = isEligible ? '🎁 FREE - Claim' : '💰 0.2 USDC';
+                    priceBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        if (isEligible) {
+                            claimStampInline(stamp.id);
+                        } else {
+                            buyStampInline(stamp.id);
+                        }
+                    };
+                    priceBtn.onmouseover = () => {
+                        priceBtn.style.transform = 'scale(1.05)';
+                        priceBtn.style.boxShadow = '0 4px 12px rgba(212,175,55,0.4)';
+                    };
+                    priceBtn.onmouseout = () => {
+                        priceBtn.style.transform = 'scale(1)';
+                        priceBtn.style.boxShadow = 'none';
+                    };
+                    stampWrapper.appendChild(stampCard);
+                    stampWrapper.appendChild(priceBtn);
+                } else {
+                    stampWrapper.appendChild(stampCard);
+                }
+                
+                stampGrid.appendChild(stampWrapper);
             });
             
             // Show tooltip for non-owned stamps
