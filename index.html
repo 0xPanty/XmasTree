@@ -1928,11 +1928,11 @@
                     
                     <!-- Generate Button -->
                     <div id="ai-generate-section">
-                        <button type="button" id="generate-ai-btn" onclick="generateAIPostcard()" style="width:100%; padding:14px 20px; background:linear-gradient(135deg, #667eea, #764ba2); border:none; color:#fff; border-radius:8px; cursor:pointer; font-weight:bold; font-size:1rem; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <button type="button" id="generate-ai-btn" onclick="generateAIPostcard()" disabled style="width:100%; padding:14px 20px; background:rgba(100,100,100,0.3); border:none; color:rgba(255,255,255,0.5); border-radius:8px; cursor:not-allowed; font-weight:bold; font-size:1rem; display:flex; align-items:center; justify-content:center; gap:8px;">
                             <span style="font-size:1.2rem;">🎨</span>
                             <span>Generate AI Postcard</span>
                         </button>
-                        <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-top:6px; text-align:center;">First generation free</div>
+                        <div style="font-size:0.7rem; color:rgba(255,255,255,0.4); margin-top:6px; text-align:center;">Select a stamp first</div>
                     </div>
                     
                     <!-- AI Generated Preview -->
@@ -3103,6 +3103,27 @@
             }
         }
         
+        // Update generate button state based on stamp selection
+        function updateGenerateButtonState() {
+            const btn = document.getElementById('generate-ai-btn');
+            const helpText = btn.parentElement.querySelector('div[style*="font-size:0.7rem"]');
+            const hasStamp = selectedStamp && userStamps[selectedStamp]?.owned;
+            
+            if (hasStamp) {
+                btn.disabled = false;
+                btn.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+                btn.style.color = '#fff';
+                btn.style.cursor = 'pointer';
+                helpText.textContent = 'First generation free';
+            } else {
+                btn.disabled = true;
+                btn.style.background = 'rgba(100,100,100,0.3)';
+                btn.style.color = 'rgba(255,255,255,0.5)';
+                btn.style.cursor = 'not-allowed';
+                helpText.textContent = 'Select a stamp first';
+            }
+        }
+        
         // Render stamp grid inline
         function renderStampGrid() {
             const stampGrid = document.getElementById('stamp-grid');
@@ -3149,6 +3170,7 @@
                     stampCard.onclick = () => {
                         selectedStamp = stamp.id;
                         renderStampGrid();
+                        updateGenerateButtonState();
                     };
                 }
                 
@@ -3292,6 +3314,7 @@
             
             // Re-render
             renderStampGrid();
+            updateGenerateButtonState();
             
             // Update status
             const ownedCount = Object.keys(userStamps).filter(k => userStamps[k]?.owned).length;
