@@ -1911,6 +1911,29 @@
                 <!-- Stamp Grid -->
                 <div id="stamp-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;"></div>
                 
+                <!-- Rules Card -->
+                <div style="margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px;">
+                    <div style="font-size: 0.85rem; font-weight: bold; color: var(--gold); margin-bottom: 12px; text-align: center;">
+                        🎯 Unlock Based for Unlimited Sending!
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div id="based-progress" style="margin-bottom: 12px;">
+                        <!-- Will be populated by JS -->
+                    </div>
+                    
+                    <!-- Quick Rules -->
+                    <div style="border-top: 1px solid rgba(212,175,55,0.2); padding-top: 12px; margin-top: 12px;">
+                        <div style="font-size: 0.7rem; font-weight: bold; color: var(--gold); margin-bottom: 8px;">📖 Quick Rules</div>
+                        <div style="font-size: 0.65rem; color: rgba(255,255,255,0.7); line-height: 1.6;">
+                            • <b>Generate:</b> 1st time free, then 0.1 USDC<br>
+                            • <b>Send:</b> 1 stamp per friend 🎫<br>
+                            • <b>Reuse:</b> Same card → many people<br>
+                            • <b>Prices:</b> Neynar 0.1 | FC 0.37 | Warplet 0.5
+                        </div>
+                    </div>
+                </div>
+                
                 <!-- No Stamp Warning -->
                 <div id="no-stamp-warning" style="display: none; color: #ff6b6b; font-size: 0.8rem; margin-top: 8px; text-align: center;">
                     ⚠️ You need at least one stamp to generate cards
@@ -3284,6 +3307,58 @@
                 
                 stampGrid.appendChild(stampWrapper);
             });
+            
+            // Render Based progress
+            renderBasedProgress();
+        }
+        
+        // Render Based unlock progress
+        function renderBasedProgress() {
+            const progressDiv = document.getElementById('based-progress');
+            if (!progressDiv) return;
+            
+            const checks = [
+                { id: 'neynar', label: 'Neynar Score >0.6', eligible: eligibility?.neynar?.eligible },
+                { id: 'farcaster', label: 'Farcaster Power Badge', eligible: eligibility?.farcaster?.eligible },
+                { id: 'warplet', label: 'Warplet NFT', eligible: eligibility?.warplet?.eligible }
+            ];
+            
+            const completedCount = checks.filter(c => c.eligible).length;
+            const allCompleted = completedCount === 3;
+            
+            progressDiv.innerHTML = `
+                <div style="text-align: center; margin-bottom: 8px;">
+                    <span style="font-size: 0.75rem; color: ${allCompleted ? '#4ade80' : 'rgba(255,255,255,0.6)'};">
+                        Your Progress: ${completedCount}/3 ${allCompleted ? '🎉' : ''}
+                    </span>
+                </div>
+                <div style="display: flex; gap: 4px; margin-bottom: 10px;">
+                    ${checks.map(c => `
+                        <div style="flex: 1; height: 6px; background: ${c.eligible ? 'linear-gradient(90deg, #4ade80, #22c55e)' : 'rgba(100,100,100,0.3)'}; border-radius: 3px;"></div>
+                    `).join('')}
+                </div>
+                <div style="font-size: 0.6rem; color: rgba(255,255,255,0.6); line-height: 1.5;">
+                    ${checks.map(c => `
+                        <div style="display: flex; align-items: center; margin-bottom: 4px;">
+                            <span style="margin-right: 6px;">${c.eligible ? '✅' : '⚪'}</span>
+                            <span>${c.label}</span>
+                        </div>
+                    `).join('')}
+                </div>
+                ${allCompleted ? `
+                    <div style="margin-top: 8px; padding: 8px; background: rgba(74,222,128,0.1); border-radius: 4px; text-align: center;">
+                        <span style="font-size: 0.7rem; color: #4ade80; font-weight: bold;">
+                            🏆 Unlocked! ♾️ Unlimited sending
+                        </span>
+                    </div>
+                ` : `
+                    <div style="margin-top: 8px; padding: 6px; background: rgba(255,215,0,0.05); border-radius: 4px; text-align: center;">
+                        <span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">
+                            💡 Complete all 3 → Unlimited forever
+                        </span>
+                    </div>
+                `}
+            `;
         }
         
         // Claim stamp inline
