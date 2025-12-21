@@ -3325,15 +3325,9 @@
                         
                         const config = stampQuantities[stamp.id];
                         
-                        // Warplet can't be purchased without NFT
+                        // Warplet can't be purchased - don't show button at all
                         if (stamp.id === 'warplet' && !isEligible) {
-                            actionBtn.textContent = '🚫 NFT Required';
-                            actionBtn.style.background = 'rgba(100,100,100,0.3)';
-                            actionBtn.style.cursor = 'not-allowed';
-                            actionBtn.onclick = (e) => {
-                                e.stopPropagation();
-                                alert('🚫 Warplet stamp is exclusive to Warplet NFT holders.\n\nThis special stamp allows your Warplet to appear in postcards!\n\nGet your Warplet at warplet.xyz');
-                            };
+                            // No button needed - "Not Eligible" status already shows
                         } else if (isEligible) {
                             // Free claim with quantity
                             actionBtn.innerHTML = `
@@ -3344,8 +3338,8 @@
                                 e.stopPropagation();
                                 claimStampInline(stamp.id);
                             };
-                        } else {
-                            // Purchase button - opens modal
+                        } else if (stamp.id !== 'warplet' || isEligible) {
+                            // Purchase button - opens modal (but not for Warplet without NFT)
                             actionBtn.innerHTML = `
                                 <div style="font-size: 0.7rem; font-weight: bold;">${config.price} USDC</div>
                                 <div style="font-size: 0.55rem; margin-top: 2px;">→ ${config.quantity} stamp${config.quantity > 1 ? 's' : ''} 🎫</div>
@@ -3354,8 +3348,8 @@
                                 e.stopPropagation();
                                 openPurchaseModal(stamp.id, stamp.name, config);
                             };
+                            stampWrapper.appendChild(actionBtn);
                         }
-                        stampWrapper.appendChild(actionBtn);
                     }
                 } else {
                     // Owned - show quantity
@@ -3842,19 +3836,28 @@
                 based: { owned: false }
             };
             
-            // Check if Based stamp should be unlocked
-            if (userStamps.neynar?.owned && userStamps.farcaster?.owned && userStamps.warplet?.owned) {
-                if (!userStamps.based?.owned) {
-                    userStamps.based = {
-                        owned: true,
-                        acquired_method: 'achievement',
-                        acquired_at: new Date().toISOString()
-                    };
-                    localStorage.setItem(key, JSON.stringify(userStamps));
-                    // Show unlock celebration later
-                    setTimeout(() => showBasedUnlock(), 500);
+            // Migrate old data: Add quantity field if missing
+            const defaultQuantities = {
+                neynar: 1,
+                farcaster: 5,
+                warplet: 5
+            };
+            
+            let needsSave = false;
+            for (const stampId in userStamps) {
+                if (userStamps[stampId]?.owned && userStamps[stampId].quantity === undefined) {
+                    // Old data without quantity - add default
+                    userStamps[stampId].quantity = defaultQuantities[stampId] || 1;
+                    needsSave = true;
                 }
             }
+            
+            if (needsSave) {
+                localStorage.setItem(key, JSON.stringify(userStamps));
+            }
+            
+            // Based is now mint-only, remove auto-unlock
+            // (Users with Based from before keep it)
         }
         
         // Save user's stamps to localStorage
