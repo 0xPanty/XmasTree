@@ -3050,6 +3050,7 @@
         let stampEligibility = {}; // Store eligibility check results
         let eligibility = {}; // Global eligibility for progress bar
         let selectedStamp = null; // Currently selected stamp for generation
+        let purchaseQuantities = { neynar: 1, farcaster: 1 }; // Purchase quantity selection
         
         // Open direct gift modal and load stamps inline
         async function openDirectGiftModal() {
@@ -3344,14 +3345,82 @@
                                 claimStampInline(stamp.id);
                             };
                         } else {
-                            // Purchase with price and quantity
+                            // Purchase - check if quantity selector available (Neynar & Farcaster only)
+                            if (stamp.id === 'neynar' || stamp.id === 'farcaster') {
+                                // Quantity selector
+                                const quantitySelector = document.createElement('div');
+                                quantitySelector.style.cssText = `
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    gap: 8px;
+                                    margin-top: 6px;
+                                    margin-bottom: 6px;
+                                `;
+                                
+                                const minusBtn = document.createElement('button');
+                                minusBtn.textContent = '−';
+                                minusBtn.style.cssText = `
+                                    width: 24px;
+                                    height: 24px;
+                                    border: 1px solid rgba(212,175,55,0.5);
+                                    background: rgba(212,175,55,0.2);
+                                    color: var(--gold);
+                                    border-radius: 4px;
+                                    cursor: pointer;
+                                    font-size: 1rem;
+                                    font-weight: bold;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                `;
+                                minusBtn.onclick = (e) => {
+                                    e.stopPropagation();
+                                    if (purchaseQuantities[stamp.id] > 1) {
+                                        purchaseQuantities[stamp.id]--;
+                                        renderStampGrid();
+                                    }
+                                };
+                                
+                                const qtyDisplay = document.createElement('div');
+                                qtyDisplay.style.cssText = `
+                                    min-width: 40px;
+                                    text-align: center;
+                                    font-size: 0.7rem;
+                                    color: #fff;
+                                    font-weight: bold;
+                                `;
+                                qtyDisplay.textContent = `×${purchaseQuantities[stamp.id]}`;
+                                
+                                const plusBtn = document.createElement('button');
+                                plusBtn.textContent = '+';
+                                plusBtn.style.cssText = minusBtn.style.cssText;
+                                plusBtn.onclick = (e) => {
+                                    e.stopPropagation();
+                                    if (purchaseQuantities[stamp.id] < 10) {
+                                        purchaseQuantities[stamp.id]++;
+                                        renderStampGrid();
+                                    }
+                                };
+                                
+                                quantitySelector.appendChild(minusBtn);
+                                quantitySelector.appendChild(qtyDisplay);
+                                quantitySelector.appendChild(plusBtn);
+                                stampWrapper.appendChild(quantitySelector);
+                            }
+                            
+                            // Purchase button with calculated total
+                            const qty = purchaseQuantities[stamp.id] || 1;
+                            const totalStamps = config.quantity * qty;
+                            const totalPrice = (parseFloat(config.price) * qty).toFixed(2);
+                            
                             actionBtn.innerHTML = `
-                                <div style="font-size: 0.7rem; font-weight: bold;">${config.price} USDC</div>
-                                <div style="font-size: 0.55rem; margin-top: 2px;">→ ${config.quantity} stamp${config.quantity > 1 ? 's' : ''} 🎫</div>
+                                <div style="font-size: 0.7rem; font-weight: bold;">${totalPrice} USDC</div>
+                                <div style="font-size: 0.55rem; margin-top: 2px;">→ ${totalStamps} stamp${totalStamps > 1 ? 's' : ''} 🎫</div>
                             `;
                             actionBtn.onclick = (e) => {
                                 e.stopPropagation();
-                                buyStampInline(stamp.id);
+                                buyStampInline(stamp.id, qty);
                             };
                         }
                         stampWrapper.appendChild(actionBtn);
@@ -3490,27 +3559,40 @@
         }
         
         // Buy stamp inline
-        function buyStampInline(stampId) {
-            const quantities = {
-                neynar: 1,
+        function buyStampInline(stampId, purchaseQty = 1) {
+            const stampQuantities = {
+                neynar: 1,  // stamps per purchase
                 farcaster: 5,
                 warplet: 5
             };
             
             const prices = {
-                neynar: '0.1',
-                farcaster: '0.37',
-                warplet: '0.5'
+                neynar: 0.1,
+                farcaster: 0.37,
+                warplet: 0.5
             };
             
-            const qty = quantities[stampId] || 1;
-            const price = prices[stampId] || '0.2';
+            const stampsPerPurchase = stampQuantities[stampId] || 1;
+            const pricePerUnit = prices[stampId] || 0.2;
             
-            alert(`💰 Payment Required\n\nPurchase: ${qty} stamp${qty > 1 ? 's' : ''} 🎫\nPrice: ${price} USDC\n\nPayment integration coming soon!`);
+            const totalStamps = stampsPerPurchase * purchaseQty;
+            const totalPrice = (pricePerUnit * purchaseQty).toFixed(2);
+            
+            const confirmed = confirm(
+                `💰 Purchase Confirmation\n\n` +
+                `Quantity: ×${purchaseQty}\n` +
+                `Total stamps: ${totalStamps} 🎫\n` +
+                `Total price: ${totalPrice} USDC\n\n` +
+                `Proceed with payment?`
+            );
+            
+            if (!confirmed) return;
+            
+            alert(`Payment integration coming soon!\n\nYour order:\n• ${totalStamps} stamps\n• ${totalPrice} USDC`);
             
             // TODO: Implement payment flow
             // After payment verified:
-            // userStamps[stampId] = { owned: true, quantity: qty, acquired_method: 'purchase', ... };
+            // userStamps[stampId].quantity += totalStamps;
         }
         
         // Show stamp preview modal
