@@ -1782,6 +1782,28 @@
         </div>
     </div>
 
+    <!-- Stamp Preview Modal -->
+    <div id="stamp-preview-modal" class="custom-modal" style="background: rgba(2, 48, 32, 0.98);">
+        <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 90%; max-width: 500px; text-align: center;">
+            <!-- Close button -->
+            <button onclick="closeStampPreview()" style="position: absolute; top: -50px; right: 0; background: transparent; border: 2px solid var(--gold); color: var(--gold); width: 40px; height: 40px; border-radius: 50%; font-size: 1.5rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">×</button>
+            
+            <!-- Stamp large image -->
+            <div style="background: rgba(2, 48, 32, 0.95); border-radius: 16px; padding: 30px; margin-bottom: 24px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
+                <img id="stamp-preview-image" src="" alt="Stamp Preview" style="width: 100%; max-width: 300px; height: auto; object-fit: contain; margin: 0 auto; display: block;">
+            </div>
+            
+            <!-- Stamp info -->
+            <div style="background: rgba(0,0,0,0.5); border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                <div id="stamp-preview-name" style="font-size: 1.5rem; font-weight: bold; color: var(--gold); margin-bottom: 12px;">Neynar Stamp</div>
+                <div id="stamp-preview-reason" style="font-size: 0.95rem; color: rgba(255,255,255,0.8); line-height: 1.6;">Loading...</div>
+            </div>
+            
+            <!-- Action button -->
+            <div id="stamp-preview-action"></div>
+        </div>
+    </div>
+
     <!-- Success Modal -->
     <div id="success-modal" class="custom-modal" style="background: rgba(0,0,0,0.3); backdrop-filter: none;">
         <div class="modal-box" style="max-width: 300px; text-align: center; background: rgba(0,0,0,0.7); border-color: var(--gold);">
@@ -3085,19 +3107,26 @@
                     aspect-ratio: 4/5;
                     border-radius: 8px;
                     overflow: hidden;
-                    cursor: ${isOwned ? 'pointer' : 'default'};
+                    cursor: pointer;
                     border: ${selectedStamp === stamp.id ? '3px solid var(--gold)' : 'none'};
                     transition: all 0.3s ease;
                     opacity: ${isOwned ? '1' : '0.6'};
                     background: rgba(2, 48, 32, 0.95);
                 `;
                 
-                if (isOwned) {
-                    stampCard.onclick = () => {
+                // Click to select (if owned) or preview
+                stampCard.onclick = (e) => {
+                    // If clicking on view icon, show preview
+                    if (e.target.classList.contains('stamp-view-icon')) {
+                        showStampPreview(stamp.id, stamp.name, stamp.img);
+                        return;
+                    }
+                    // Otherwise, select stamp if owned
+                    if (isOwned) {
                         selectedStamp = stamp.id;
-                        renderStampGrid(); // Re-render to update selection
-                    };
-                }
+                        renderStampGrid();
+                    }
+                };
                 
                 stampCard.innerHTML = `
                     <img src="${stamp.img}" style="width: 100%; height: 100%; object-fit: contain; padding: 10px;">
@@ -3109,6 +3138,7 @@
                         `<div style="position: absolute; top: 6px; left: 6px; background: var(--gold); color: #2c2c2c; padding: 3px 8px; border-radius: 6px; font-size: 0.7rem; font-weight: bold; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">SELECTED</div>` : 
                         ''
                     }
+                    <div class="stamp-view-icon" style="position: absolute; bottom: 6px; right: 6px; background: rgba(0,0,0,0.7); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; z-index: 10;" onmouseover="this.style.background='rgba(212,175,55,0.9)'" onmouseout="this.style.background='rgba(0,0,0,0.7)'">👁️</div>
                 `;
                 
                 // Price/action button (below stamp)
@@ -3207,6 +3237,84 @@
         // Buy stamp inline
         function buyStampInline(stampId) {
             alert(`Payment for ${stampId} stamp (0.2 USDC) - Coming soon!`);
+        }
+        
+        // Show stamp preview modal
+        function showStampPreview(stampId, stampName, stampImg) {
+            const isOwned = userStamps[stampId]?.owned;
+            const eligibility = stampEligibility[stampId];
+            const isEligible = eligibility?.eligible;
+            
+            // Set image
+            document.getElementById('stamp-preview-image').src = stampImg;
+            
+            // Set name
+            document.getElementById('stamp-preview-name').textContent = `${stampName} Stamp`;
+            
+            // Set reason/eligibility info
+            const reasonDiv = document.getElementById('stamp-preview-reason');
+            if (isOwned) {
+                reasonDiv.innerHTML = `
+                    <div style="color: #4ade80; font-weight: bold; margin-bottom: 8px;">✓ You own this stamp</div>
+                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">${eligibility?.reason || ''}</div>
+                `;
+            } else {
+                reasonDiv.innerHTML = `
+                    <div style="margin-bottom: 8px;">${eligibility?.reason || 'Loading eligibility info...'}</div>
+                `;
+            }
+            
+            // Set action button
+            const actionDiv = document.getElementById('stamp-preview-action');
+            if (isOwned) {
+                // Already owned - no action button needed, or show "Use this stamp" button
+                actionDiv.innerHTML = `
+                    <button onclick="selectAndClosePreview('${stampId}')" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #d4af37, #ffd700); border: none; color: #2c2c2c; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem;">
+                        ✨ Use This Stamp
+                    </button>
+                `;
+            } else if (isEligible) {
+                // Eligible for free claim
+                actionDiv.innerHTML = `
+                    <button onclick="claimFromPreview('${stampId}')" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #4ade80, #22c55e); border: none; color: white; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem;">
+                        🎁 符合资格 - 免费领取
+                    </button>
+                `;
+            } else {
+                // Need to buy
+                actionDiv.innerHTML = `
+                    <button onclick="buyFromPreview('${stampId}')" style="width: 100%; padding: 14px; background: linear-gradient(135deg, #d4af37, #ffd700); border: none; color: #2c2c2c; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem;">
+                        💰 需要 0.2 USDC 购买
+                    </button>
+                `;
+            }
+            
+            // Show modal
+            document.getElementById('stamp-preview-modal').classList.add('visible');
+        }
+        
+        // Close stamp preview
+        function closeStampPreview() {
+            document.getElementById('stamp-preview-modal').classList.remove('visible');
+        }
+        
+        // Select stamp and close preview
+        function selectAndClosePreview(stampId) {
+            selectedStamp = stampId;
+            renderStampGrid();
+            closeStampPreview();
+        }
+        
+        // Claim from preview
+        function claimFromPreview(stampId) {
+            claimStampInline(stampId);
+            closeStampPreview();
+        }
+        
+        // Buy from preview
+        function buyFromPreview(stampId) {
+            buyStampInline(stampId);
+            closeStampPreview();
         }
         
         // Show Based unlock toast
