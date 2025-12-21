@@ -3168,62 +3168,84 @@
                 
                 // Status and details
                 if (!isOwned) {
-                    // Status container
-                    const statusContainer = document.createElement('div');
-                    statusContainer.style.cssText = `
-                        text-align: center;
-                        font-size: 0.6rem;
-                        line-height: 1.3;
-                    `;
-                    
-                    // Status line
-                    const statusLine = document.createElement('div');
-                    statusLine.style.cssText = `
-                        font-weight: bold;
-                        color: ${isEligible ? '#4ade80' : '#ff6b6b'};
-                        margin-bottom: 2px;
-                    `;
-                    statusLine.textContent = isEligible ? '✓ Eligible' : '✗ Not Eligible';
-                    statusContainer.appendChild(statusLine);
-                    
-                    // Reason line (show for both eligible and not eligible)
-                    const reasonLine = document.createElement('div');
-                    reasonLine.style.cssText = `
-                        color: rgba(255,255,255,0.6);
-                        font-size: 0.55rem;
-                    `;
-                    reasonLine.textContent = eligibility?.reason || '';
-                    statusContainer.appendChild(reasonLine);
-                    
-                    stampWrapper.appendChild(statusContainer);
-                    
-                    // Action button
-                    const actionBtn = document.createElement('button');
-                    actionBtn.style.cssText = `
-                        width: 100%;
-                        padding: 6px 4px;
-                        border: none;
-                        border-radius: 4px;
-                        font-size: 0.65rem;
-                        font-weight: bold;
-                        cursor: pointer;
-                        transition: all 0.2s;
-                        margin-top: 4px;
-                        ${isEligible ? 
-                            'background: linear-gradient(135deg, #4ade80, #22c55e); color: white;' : 
-                            'background: linear-gradient(135deg, #d4af37, #ffd700); color: #2c2c2c;'
-                        }
-                    `;
-                    actionBtn.textContent = isEligible ? 'Free Claim' : 'Buy 0.2 USDC';
-                    actionBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        if (isEligible) {
-                            claimStampInline(stamp.id);
-                        } else {
-                            buyStampInline(stamp.id);
-                        }
-                    };
-                    stampWrapper.appendChild(actionBtn);
+                    // For Based stamp - special message
+                    if (stamp.id === 'based') {
+                        const basedHint = document.createElement('div');
+                        basedHint.style.cssText = `
+                            text-align: center;
+                            font-size: 0.6rem;
+                            color: #ffd700;
+                            line-height: 1.4;
+                            margin-top: 4px;
+                            padding: 8px;
+                            background: rgba(255,215,0,0.1);
+                            border-radius: 4px;
+                        `;
+                        basedHint.innerHTML = `
+                            <div style="font-weight: bold; margin-bottom: 4px;">🏆 Achievement</div>
+                            <div style="font-size: 0.55rem; color: rgba(255,255,255,0.7);">Collect all 3 stamps to unlock</div>
+                            <div style="font-size: 0.5rem; color: rgba(255,255,255,0.5); margin-top: 2px;">(Cannot be purchased)</div>
+                        `;
+                        stampWrapper.appendChild(basedHint);
+                    } else {
+                        // Status container for regular stamps
+                        const statusContainer = document.createElement('div');
+                        statusContainer.style.cssText = `
+                            text-align: center;
+                            font-size: 0.6rem;
+                            line-height: 1.3;
+                            margin-top: 4px;
+                        `;
+                        
+                        // Status line
+                        const statusLine = document.createElement('div');
+                        statusLine.style.cssText = `
+                            font-weight: bold;
+                            color: ${isEligible ? '#4ade80' : '#ff6b6b'};
+                            margin-bottom: 2px;
+                        `;
+                        statusLine.textContent = isEligible ? '✓ Eligible' : '✗ Not Eligible';
+                        statusContainer.appendChild(statusLine);
+                        
+                        // Reason line - ALWAYS show score/reason
+                        const reasonLine = document.createElement('div');
+                        reasonLine.style.cssText = `
+                            color: rgba(255,255,255,0.7);
+                            font-size: 0.55rem;
+                            margin-bottom: 4px;
+                        `;
+                        reasonLine.textContent = eligibility?.reason || '';
+                        statusContainer.appendChild(reasonLine);
+                        
+                        stampWrapper.appendChild(statusContainer);
+                        
+                        // Action button
+                        const actionBtn = document.createElement('button');
+                        actionBtn.style.cssText = `
+                            width: 100%;
+                            padding: 7px 4px;
+                            border: none;
+                            border-radius: 4px;
+                            font-size: 0.65rem;
+                            font-weight: bold;
+                            cursor: pointer;
+                            transition: all 0.2s;
+                            ${isEligible ? 
+                                'background: linear-gradient(135deg, #4ade80, #22c55e); color: white;' : 
+                                'background: linear-gradient(135deg, #d4af37, #ffd700); color: #2c2c2c;'
+                            }
+                        `;
+                        actionBtn.textContent = isEligible ? 'Free Claim' : 'Buy 0.2 USDC';
+                        actionBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            if (isEligible) {
+                                claimStampInline(stamp.id);
+                            } else {
+                                buyStampInline(stamp.id);
+                            }
+                        };
+                        stampWrapper.appendChild(actionBtn);
+                    }
                 } else {
                     // Owned indicator
                     const ownedLine = document.createElement('div');
@@ -3232,7 +3254,7 @@
                         font-size: 0.65rem;
                         color: #4ade80;
                         font-weight: bold;
-                        margin-top: 4px;
+                        margin-top: 6px;
                     `;
                     ownedLine.textContent = '✓ Owned';
                     stampWrapper.appendChild(ownedLine);
@@ -3240,15 +3262,6 @@
                 
                 stampGrid.appendChild(stampWrapper);
             });
-            
-            // Show tooltip for non-owned stamps
-            const nonOwnedStamps = stamps.filter(s => s.id !== 'based' && !userStamps[s.id]?.owned);
-            if (nonOwnedStamps.length > 0 && nonOwnedStamps.length < 3) {
-                const tooltip = document.createElement('div');
-                tooltip.style.cssText = 'margin-top: 8px; font-size: 0.75rem; color: rgba(255,255,255,0.6); text-align: center;';
-                tooltip.innerHTML = '💡 Collect all 3 to unlock Based stamp';
-                stampGrid.appendChild(tooltip);
-            }
         }
         
         // Claim stamp inline
