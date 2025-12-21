@@ -705,22 +705,24 @@
         
         /* Farcaster Stamp for Preview - Vintage Style */
         .postcard-stamp-preview {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 56px;
-            height: 62px;
-            background: linear-gradient(145deg, #7952b3 0%, #6940a8 50%, #5b3596 100%);
-            border: 3px solid #f5f5dc;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 6px 4px;
+            position: absolute !important;
+            top: 12px !important;
+            right: 12px !important;
+            width: 56px !important;
+            height: 62px !important;
+            background: linear-gradient(145deg, #7952b3 0%, #6940a8 50%, #5b3596 100%) !important;
+            border: 3px solid #f5f5dc !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            padding: 6px 4px !important;
             box-shadow: 
                 0 4px 12px rgba(0,0,0,0.4),
-                inset 0 0 20px rgba(0,0,0,0.2);
-            transform: rotate(5deg);
+                inset 0 0 20px rgba(0,0,0,0.2) !important;
+            transform: rotate(5deg) !important;
+            z-index: 10 !important;
+            pointer-events: none !important;
             /* Vintage stamp perforated edges */
             -webkit-mask: 
                 radial-gradient(circle at 0% 0%, transparent 1.5px, black 1.5px) 0 0 / 6px 6px,
@@ -732,9 +734,9 @@
                 radial-gradient(circle at 100% 0%, transparent 1.5px, black 1.5px) 100% 0 / 6px 6px,
                 radial-gradient(circle at 0% 100%, transparent 1.5px, black 1.5px) 0 100% / 6px 6px,
                 radial-gradient(circle at 100% 100%, transparent 1.5px, black 1.5px) 100% 100% / 6px 6px;
-            color: #fff;
-            font-weight: bold;
-            text-align: center;
+            color: #fff !important;
+            font-weight: bold !important;
+            text-align: center !important;
             font-family: 'Cinzel', serif;
             letter-spacing: 0.5px;
         }
@@ -1749,8 +1751,12 @@
                     
                     <!-- AI Generated Preview -->
                     <div id="ai-preview-section" style="display:none; margin-top:12px;">
-                        <div style="position:relative; width:100%; aspect-ratio:9/16; border-radius:12px; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.4); margin-bottom:12px;">
-                            <img id="ai-preview-image" src="" alt="AI Postcard" style="width:100%; height:100%; object-fit:cover;">
+                        <div style="position:relative; width:100%; max-width:500px; aspect-ratio:9/16; border-radius:12px; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.4); margin:0 auto 12px; cursor:pointer;" onclick="enlargeAIImage()">
+                            <img id="ai-preview-image" src="" alt="AI Postcard" style="width:100%; height:100%; object-fit:cover; display:block;">
+                            <!-- Click to enlarge hint -->
+                            <div style="position:absolute; bottom:8px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.6); color:#fff; padding:4px 12px; border-radius:12px; font-size:0.7rem; pointer-events:none;">
+                                🔍 Click to enlarge
+                            </div>
                             <!-- Farcaster Stamp -->
                             <div class="postcard-stamp-preview">
                                 <!-- Santa Hat on Farcaster Logo -->
@@ -4085,6 +4091,42 @@ Write only the reply text, nothing else:`;
             document.getElementById('reply-modal').classList.remove('visible');
             pendingReply = null;
             generatedReplyText = '';
+        }
+        
+        // Enlarge AI image
+        function enlargeAIImage() {
+            const imgSrc = document.getElementById('ai-preview-image').src;
+            if (!imgSrc) return;
+            
+            // Create fullscreen overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0,0,0,0.95);
+                z-index: 10000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: zoom-out;
+            `;
+            
+            const img = document.createElement('img');
+            img.src = imgSrc;
+            img.style.cssText = `
+                max-width: 90vw;
+                max-height: 90vh;
+                object-fit: contain;
+                border-radius: 12px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+            `;
+            
+            overlay.appendChild(img);
+            overlay.onclick = () => document.body.removeChild(overlay);
+            document.body.appendChild(overlay);
         }
         
         async function confirmSendReply() {

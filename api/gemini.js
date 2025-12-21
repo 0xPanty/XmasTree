@@ -59,30 +59,174 @@ export default async function handler(req, res) {
             let imageData = null;
             let imageError = null;
 
-            // Generate vintage Christmas postcard with intelligent scene analysis
-            const imagePrompt = `Analyze the provided profile image and create a vintage Christmas postcard:
+            // Generate diverse vintage Christmas postcard scenes - 100+ variations!
+            const diverseScenes = [
+                // OUTDOOR WINTER SPORTS & ACTIVITIES (25)
+                '⛷️ skiing down snowy mountain slope with pine trees and festive village below',
+                '⛸️ ice skating on frozen pond surrounded by snow-covered trees with string lights',
+                '🛷 sledding down steep hill with scarves flying in wind',
+                '🎿 snowboarding off jump with powder spray and mountain backdrop',
+                '🏂 cross-country skiing through silent snowy forest at sunset',
+                '⛷️ teaching child to ski on gentle bunny slope',
+                '🏔️ snowshoeing through deep powder with mountain peaks behind',
+                '⛸️ figure skating performance on outdoor ice rink with crowd watching',
+                '🛷 riding toboggan down winding track with friends',
+                '🏂 snowmobile adventure through winter wonderland',
+                '⛷️ ski lift ride up mountain with view of snowy valley',
+                '🏔️ building snow fort and having epic snowball fight',
+                '⛄ creating entire snowman family with accessories',
+                '❄️ making snow angels in fresh powder field',
+                '🏔️ ice climbing frozen waterfall with gear and ropes',
+                '⛷️ nighttime skiing under floodlights and stars',
+                '🏂 dogsledding through arctic landscape with husky team',
+                '⛸️ hockey game on outdoor frozen lake',
+                '🏔️ winter camping with tent in snowy wilderness',
+                '⛷️ backcountry skiing adventure through untouched powder',
+                '🏂 tubing park racing down lanes',
+                '⛸️ ice fishing on frozen lake with warming hut',
+                '🏔️ building elaborate ice sculptures',
+                '⛷️ learning to ski behind instructor',
+                '🏂 snow biking on fat-tire bike through winter trails',
+                
+                // COZY INDOOR SCENES (20)
+                '🔥 roasting chestnuts by crackling fireplace with stockings hung',
+                '☕ sipping hot cocoa with marshmallows by frost-covered window',
+                '📚 reading Christmas classics in armchair with blanket',
+                '🎸 playing acoustic guitar by glowing Christmas tree',
+                '🧶 knitting cozy sweaters with yarn basket and cat nearby',
+                '🎹 playing piano with sheet music of Christmas carols',
+                '🕯️ writing in journal by candlelight at antique desk',
+                '📖 reading bedtime stories to children in pajamas',
+                '🎮 playing board games with family around coffee table',
+                '🧩 working on Christmas jigsaw puzzle together',
+                '🎨 painting winter landscape on canvas by easel',
+                '📝 hand-writing Christmas cards with calligraphy pen',
+                '🧸 arranging toy train set under Christmas tree',
+                '📺 watching classic holiday movies with popcorn',
+                '☕ tea time with grandmother\'s china and Christmas cookies',
+                '🎼 listening to vinyl records of Christmas music',
+                '🪡 sewing handmade ornaments and decorations',
+                '📷 organizing and framing family Christmas photos',
+                '🎨 decorating Christmas stockings with glitter and sequins',
+                '🕯️ lighting advent candles in peaceful meditation',
+                
+                // FESTIVE BAKING & COOKING (15)
+                '🍪 baking Christmas cookies with cookie cutters shaped like trees and stars',
+                '🎂 decorating elaborate gingerbread house with icing and candy',
+                '🥧 pulling fresh-baked pies from oven - apple, pumpkin, pecan',
+                '🍗 carving golden turkey at dining table with family gathered',
+                '🥘 preparing traditional holiday feast with multiple generations cooking',
+                '🎄 making candy canes and Christmas treats',
+                '🍰 decorating Yule log cake with chocolate and holly',
+                '🥖 baking fresh bread and dinner rolls for feast',
+                '🍫 making homemade chocolates and truffles as gifts',
+                '🥧 crimping pie crust edges with grandmother teaching',
+                '🍪 using grandmother\'s secret recipe from handwritten cards',
+                '🎂 frosting layer cake with festive red and green',
+                '🥘 stirring large pot of mulled cider with spices',
+                '🍗 preparing roasted chestnuts and winter vegetables',
+                '🍰 assembling trifle dessert in glass bowl with layers',
+                
+                // CHRISTMAS SHOPPING & MARKETS (12)
+                '🏪 browsing outdoor Christmas market with wooden stalls and lights',
+                '🎁 carrying armfuls of wrapped presents down snowy street',
+                '🛍️ window shopping on decorated Fifth Avenue style boulevard',
+                '🎄 choosing perfect Christmas tree at tree farm',
+                '🏬 shopping in vintage department store with elaborate displays',
+                '🎅 visiting Santa at elaborate North Pole mall setup',
+                '🏪 browsing handmade crafts at artisan holiday fair',
+                '🎁 gift shopping in quaint village with carolers outside',
+                '🏬 picking out ornaments at Christmas specialty shop',
+                '🛍️ holiday shopping with packages and bags galore',
+                '🎄 wreaths and garland shopping at garden center',
+                '🏪 buying fresh cookies and treats from bakery window',
+                
+                // DECORATING & PREPARATIONS (15)
+                '🎄 decorating tall Christmas tree with family passing ornaments',
+                '🏡 hanging outdoor Christmas lights on house roofline',
+                '🎀 wrapping gifts at table covered in ribbons and bows',
+                '🎄 stringing popcorn and cranberries for tree garland',
+                '🏠 decorating mantle with garland, candles and stockings',
+                '🎨 making handmade ornaments from salt dough',
+                '🎄 placing star or angel on top of tree with ladder',
+                '🏡 setting up outdoor nativity scene in front yard',
+                '🎀 tying bows on wreaths for every door',
+                '🕯️ arranging advent wreath with candles',
+                '🎄 fluffing artificial tree branches to perfection',
+                '🏠 hanging Christmas cards on ribbon display',
+                '🎨 spray-painting pine cones gold and silver',
+                '🏡 inflating lawn decorations - Santa, snowman, reindeer',
+                '🎄 untangling last year\'s Christmas lights with patience',
+                
+                // CITY & URBAN SCENES (12)
+                '🌃 walking through city decorated with giant ornaments and window displays',
+                '🗽 ice skating at famous city plaza with tall Christmas tree',
+                '🏙️ viewing holiday lights from rooftop with city skyline',
+                '🚕 taxi ride through city streets with festive decorations',
+                '🎭 attending Christmas ballet performance at grand theater',
+                '🏛️ visiting museum decorated for holidays with giant tree in atrium',
+                '🌉 strolling across bridge with holiday lights reflecting in water',
+                '🏬 window shopping at luxury stores with elaborate displays',
+                '🎪 visiting Christmas village setup in city park',
+                '🚇 subway platform decorated with garland and lights',
+                '🏙️ viewing light show projected on historic buildings',
+                '🌃 horse-drawn carriage ride through decorated downtown',
+                
+                // CHURCH & COMMUNITY (8)
+                '⛪ attending candlelight Christmas Eve service',
+                '🎵 singing in church choir with robes and candles',
+                '⛪ children\'s nativity pageant performance',
+                '🎄 helping decorate church sanctuary with poinsettias',
+                '🎵 caroling door-to-door in neighborhood with songbooks',
+                '🏘️ caroling at nursing home spreading joy to seniors',
+                '⛪ bell choir performance during Christmas service',
+                '🎵 community tree lighting ceremony with crowd singing',
+                
+                // GIVING BACK & CHARITY (6)
+                '🎁 volunteering at toy drive wrapping gifts for children',
+                '🥘 serving meals at community dinner on Christmas',
+                '🎅 delivering presents to families in need',
+                '🏠 adopting family for holidays and shopping for them',
+                '🎄 collecting donations at charity kettle with bell',
+                '📦 packing care packages for troops overseas',
+                
+                // SPECIAL & UNIQUE SCENES (8)
+                '🚂 riding vintage Christmas train through snowy countryside',
+                '🎪 visiting Christmas fair with Ferris wheel and carnival rides',
+                '🌴 tropical Christmas on beach with decorated palm tree',
+                '✈️ airport departure for holiday travel with luggage',
+                '⛵ Christmas on boat decorated with lights',
+                '🏕️ RV camping Christmas adventure in national park',
+                '🎆 watching fireworks display over snowy town',
+                '🌠 viewing northern lights on Christmas Eve'
+            ];
+            
+            // Randomly select a diverse scene to ensure variety
+            const randomScene = diverseScenes[Math.floor(Math.random() * diverseScenes.length)];
+            console.log('🎲 Selected scene:', randomScene);
+            
+            const imagePrompt = `Create a vintage Christmas postcard illustration:
 
-STEP 1 - SCENE DETECTION:
-Identify the scene/context in the photo:
-- Human portrait → Preserve facial features, hairstyle, clothing style
-- Non-human (logo/animal/object) → Extract color palette, visual style, mood
-- Winter/snow scene → Skiing, snowman building, snow play
-- Travel photo → Traveling in [location], exploring cities
-- Family gathering → Family reunion, decorating Christmas tree
-- Pet photo → Spending holidays with pet
-- Indoor/cozy → By the fireplace, hot chocolate, reading
-- Beach/summer → Winter vacation in warm place
-- Urban/city → City lights, holiday shopping
-- Nature/outdoor → Hiking in winter forest
+SCENE: ${randomScene}
 
-STEP 2 - GENERATE IMAGE:
-Style: Vintage Christmas postcard inspired by Jenny Nyström, Anton Pieck, Ellen Clapsaddle
-Scene: Match the detected scene with festive winter atmosphere
-Character: Based on the photo analysis (preserve likeness or embody extracted elements)
-Format: Vertical 9:16, hand-painted illustration, muted colors, vintage paper texture
-Mood: Warm, nostalgic, cozy holiday feeling
+CHARACTER DESIGN:
+- Analyze the provided reference image
+- If PERSON: Preserve their facial features, hair color/style, approximate age, clothing style
+- If NOT person (logo/object): Extract dominant colors and visual mood, create a character embodying those traits
 
-REFERENCE IMAGE: Analyze this image to create the postcard.`;
+STYLE REQUIREMENTS:
+- Vintage 1950s painted postcard aesthetic (Norman Rockwell / Coca-Cola ads style)
+- Warm nostalgic colors: burgundy red, forest green, golden yellow, cream, warm brown
+- Soft painted brushstrokes, NOT photorealistic - illustration style
+- Rich detail and Christmas decorations: lights, garlands, ornaments, wreaths
+- Vertical 9:16 portrait format
+- Warm golden lighting with slight vignette effect
+- Vintage paper texture overlay
+- Joyful, magical holiday atmosphere
+
+IMPORTANT: Make the scene dynamic and engaging! Show action, emotion, movement. Capture the JOY of the activity.
+
+REFERENCE IMAGE for character design:`;
 
             // Build the request with sender's image only
             const parts = [{ text: imagePrompt }];
