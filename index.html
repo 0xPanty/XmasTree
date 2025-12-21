@@ -1891,14 +1891,14 @@
                     <div style="position: relative; width: 100%; height: 40px; background: rgba(0,0,0,0.4); border-radius: 20px; overflow: hidden; border: 1px solid var(--gold);">
                         <!-- Progress bar track -->
                         <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.5) 50%, rgba(212,175,55,0.2) 100%); background-size: 200% 100%; animation: shimmer 2s infinite;"></div>
-                        <!-- Santa hat bouncing -->
-                        <div id="santa-hat-loader" style="position: absolute; top: 50%; transform: translateY(-50%); font-size: 1.5rem; animation: santaBounce 1.5s ease-in-out infinite;">🎅</div>
+                        <!-- Stamp icon bouncing -->
+                        <div id="stamp-loader" style="position: absolute; top: 50%; transform: translateY(-50%); font-size: 1.5rem; animation: stampBounce 1.5s ease-in-out infinite;">🎫</div>
                     </div>
                     <div style="margin-top: 8px; font-size: 0.75rem; color: var(--gold); text-align: center;" id="stamp-loading-inline-text">Checking eligibility...</div>
                 </div>
                 
                 <style>
-                    @keyframes santaBounce {
+                    @keyframes stampBounce {
                         0%, 100% { left: 0%; }
                         50% { left: calc(100% - 30px); }
                     }
