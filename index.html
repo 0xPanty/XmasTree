@@ -259,7 +259,6 @@
             height: 100px;
             object-fit: contain;
             border-radius: 8px;
-            background: rgba(0,0,0,0.3);
             padding: 8px;
         }
 
@@ -3078,10 +3077,10 @@
             stampGrid.innerHTML = '';
             
             const stamps = [
-                { id: 'neynar', icon: '🟣', name: 'Neynar', img: '/stamp/neynar.png' },
-                { id: 'farcaster', icon: '🟪', name: 'Farcaster', img: '/stamp/farcaster.png' },
-                { id: 'warplet', icon: '🎨', name: 'Warplet', img: '/stamp/warplet.png' },
-                { id: 'based', icon: '🌟', name: 'Based', img: '/stamp/based.png' }
+                { id: 'neynar', icon: '🟣', name: 'Neynar', img: '/stamp/neynar-preview.png', original: '/stamp/neynar.png' },
+                { id: 'farcaster', icon: '🟪', name: 'Farcaster', img: '/stamp/farcaster-preview.png', original: '/stamp/farcaster.png' },
+                { id: 'warplet', icon: '🎨', name: 'Warplet', img: '/stamp/warplet-preview.png', original: '/stamp/warplet.png' },
+                { id: 'based', icon: '🌟', name: 'Based', img: '/stamp/based-preview.png', original: '/stamp/based.png' }
             ];
             
             stamps.forEach(stamp => {
@@ -3111,7 +3110,6 @@
                     border: ${selectedStamp === stamp.id ? '3px solid var(--gold)' : 'none'};
                     transition: all 0.3s ease;
                     opacity: ${isOwned ? '1' : '0.6'};
-                    background: rgba(0,0,0,0.3);
                 `;
                 
                 // Click to select (if owned) or preview
@@ -3245,7 +3243,7 @@
             const eligibility = stampEligibility[stampId];
             const isEligible = eligibility?.eligible;
             
-            // Set image
+            // Set image (use preview version with dark green background)
             document.getElementById('stamp-preview-image').src = stampImg;
             
             // Set name
@@ -4678,8 +4676,8 @@ Write only the reply text, nothing else:`;
                         document.getElementById('ai-preview-greeting').textContent = currentAIGreeting;
                         resolve();
                     };
-                    // Use selected stamp, fallback to default
-                    stamp.src = selectedStamp ? `/stamp/${selectedStamp}.png` : '/stamp.png';
+                    // Use original transparent stamp for canvas (not preview version)
+                    stamp.src = selectedStamp ? `/stamp/${selectedStamp}.png` : '/stamp/neynar.png';
                 };
                 aiImg.onerror = reject;
                 aiImg.src = `data:image/png;base64,${base64Image}`;
