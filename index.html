@@ -3345,82 +3345,14 @@
                                 claimStampInline(stamp.id);
                             };
                         } else {
-                            // Purchase - check if quantity selector available (Neynar & Farcaster only)
-                            if (stamp.id === 'neynar' || stamp.id === 'farcaster') {
-                                // Quantity selector
-                                const quantitySelector = document.createElement('div');
-                                quantitySelector.style.cssText = `
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                    gap: 8px;
-                                    margin-top: 6px;
-                                    margin-bottom: 6px;
-                                `;
-                                
-                                const minusBtn = document.createElement('button');
-                                minusBtn.textContent = '−';
-                                minusBtn.style.cssText = `
-                                    width: 24px;
-                                    height: 24px;
-                                    border: 1px solid rgba(212,175,55,0.5);
-                                    background: rgba(212,175,55,0.2);
-                                    color: var(--gold);
-                                    border-radius: 4px;
-                                    cursor: pointer;
-                                    font-size: 1rem;
-                                    font-weight: bold;
-                                    display: flex;
-                                    align-items: center;
-                                    justify-content: center;
-                                `;
-                                minusBtn.onclick = (e) => {
-                                    e.stopPropagation();
-                                    if (purchaseQuantities[stamp.id] > 1) {
-                                        purchaseQuantities[stamp.id]--;
-                                        renderStampGrid();
-                                    }
-                                };
-                                
-                                const qtyDisplay = document.createElement('div');
-                                qtyDisplay.style.cssText = `
-                                    min-width: 40px;
-                                    text-align: center;
-                                    font-size: 0.7rem;
-                                    color: #fff;
-                                    font-weight: bold;
-                                `;
-                                qtyDisplay.textContent = `×${purchaseQuantities[stamp.id]}`;
-                                
-                                const plusBtn = document.createElement('button');
-                                plusBtn.textContent = '+';
-                                plusBtn.style.cssText = minusBtn.style.cssText;
-                                plusBtn.onclick = (e) => {
-                                    e.stopPropagation();
-                                    if (purchaseQuantities[stamp.id] < 10) {
-                                        purchaseQuantities[stamp.id]++;
-                                        renderStampGrid();
-                                    }
-                                };
-                                
-                                quantitySelector.appendChild(minusBtn);
-                                quantitySelector.appendChild(qtyDisplay);
-                                quantitySelector.appendChild(plusBtn);
-                                stampWrapper.appendChild(quantitySelector);
-                            }
-                            
-                            // Purchase button with calculated total
-                            const qty = purchaseQuantities[stamp.id] || 1;
-                            const totalStamps = config.quantity * qty;
-                            const totalPrice = (parseFloat(config.price) * qty).toFixed(2);
-                            
+                            // Purchase button - opens modal
                             actionBtn.innerHTML = `
-                                <div style="font-size: 0.7rem; font-weight: bold;">${totalPrice} USDC</div>
-                                <div style="font-size: 0.55rem; margin-top: 2px;">→ ${totalStamps} stamp${totalStamps > 1 ? 's' : ''} 🎫</div>
+                                <div style="font-size: 0.7rem; font-weight: bold;">${config.price} USDC</div>
+                                <div style="font-size: 0.55rem; margin-top: 2px;">→ ${config.quantity} stamp${config.quantity > 1 ? 's' : ''} 🎫</div>
                             `;
                             actionBtn.onclick = (e) => {
                                 e.stopPropagation();
-                                buyStampInline(stamp.id, qty);
+                                openPurchaseModal(stamp.id, stamp.name, config);
                             };
                         }
                         stampWrapper.appendChild(actionBtn);
@@ -3556,6 +3488,134 @@
                 statusIndicator.innerHTML = `<span style="color: #4ade80;">✓ ${ownedCount} stamp${ownedCount > 1 ? 's' : ''}</span>`;
             }
             document.getElementById('no-stamp-warning').style.display = 'none';
+        }
+        
+        // Open purchase modal
+        function openPurchaseModal(stampId, stampName, config) {
+            const modal = document.createElement('div');
+            modal.id = 'purchase-modal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                animation: fadeIn 0.2s;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: linear-gradient(135deg, #1a3a2e, #0d1f1a);
+                border: 2px solid var(--gold);
+                border-radius: 16px;
+                padding: 32px;
+                max-width: 400px;
+                width: 90%;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            `;
+            
+            let quantity = 1;
+            
+            const updateDisplay = () => {
+                const totalStamps = config.quantity * quantity;
+                const totalPrice = (parseFloat(config.price) * quantity).toFixed(2);
+                
+                qtyText.textContent = `×${quantity}`;
+                totalStampsText.textContent = `${totalStamps} stamp${totalStamps > 1 ? 's' : ''} 🎫`;
+                totalPriceText.textContent = `${totalPrice} USDC`;
+            };
+            
+            modalContent.innerHTML = `
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--gold); margin-bottom: 8px;">
+                        Purchase ${stampName} Stamps
+                    </div>
+                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">
+                        ${config.price} USDC = ${config.quantity} stamp${config.quantity > 1 ? 's' : ''}
+                    </div>
+                </div>
+                
+                <!-- Quantity Selector -->
+                <div style="display: flex; align-items: center; justify-content: center; gap: 20px; margin-bottom: 24px;">
+                    <button id="qty-minus" style="width: 48px; height: 48px; border: 2px solid var(--gold); background: rgba(212,175,55,0.2); color: var(--gold); border-radius: 8px; cursor: pointer; font-size: 1.5rem; font-weight: bold;">−</button>
+                    <div id="qty-display" style="min-width: 60px; text-align: center; font-size: 2rem; color: var(--gold); font-weight: bold;">×1</div>
+                    <button id="qty-plus" style="width: 48px; height: 48px; border: 2px solid var(--gold); background: rgba(212,175,55,0.2); color: var(--gold); border-radius: 8px; cursor: pointer; font-size: 1.5rem; font-weight: bold;">+</button>
+                </div>
+                
+                <!-- Total Display -->
+                <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: rgba(255,255,255,0.7);">Total Stamps:</span>
+                        <span id="total-stamps" style="color: #fff; font-weight: bold;">${config.quantity} stamp${config.quantity > 1 ? 's' : ''} 🎫</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: rgba(255,255,255,0.7);">Total Price:</span>
+                        <span id="total-price" style="color: var(--gold); font-weight: bold; font-size: 1.1rem;">${config.price} USDC</span>
+                    </div>
+                </div>
+                
+                <!-- Usage Info -->
+                <div style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 12px; margin-bottom: 20px;">
+                    <div style="font-size: 0.75rem; font-weight: bold; color: var(--gold); margin-bottom: 8px;">📮 How Stamps Work:</div>
+                    <div style="font-size: 0.7rem; color: rgba(255,255,255,0.7); line-height: 1.6;">
+                        • 1 stamp consumed per friend 🎫 → 👤<br>
+                        • Same postcard → send to multiple people<br>
+                        • Stamps don't expire
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 12px;">
+                    <button id="cancel-purchase" style="flex: 1; padding: 14px; border: 2px solid rgba(212,175,55,0.5); background: transparent; color: var(--gold); border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: bold;">Cancel</button>
+                    <button id="confirm-purchase" style="flex: 2; padding: 14px; border: none; background: linear-gradient(135deg, #d4af37, #ffd700); color: #2c2c2c; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: bold;">Purchase Now</button>
+                </div>
+            `;
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Get elements
+            const qtyText = document.getElementById('qty-display');
+            const totalStampsText = document.getElementById('total-stamps');
+            const totalPriceText = document.getElementById('total-price');
+            
+            // Quantity controls
+            document.getElementById('qty-minus').onclick = () => {
+                if (quantity > 1) {
+                    quantity--;
+                    updateDisplay();
+                }
+            };
+            
+            document.getElementById('qty-plus').onclick = () => {
+                if (quantity < 10) {
+                    quantity++;
+                    updateDisplay();
+                }
+            };
+            
+            // Cancel
+            document.getElementById('cancel-purchase').onclick = () => {
+                modal.remove();
+            };
+            
+            // Close on backdrop click
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            };
+            
+            // Confirm purchase
+            document.getElementById('confirm-purchase').onclick = () => {
+                modal.remove();
+                buyStampInline(stampId, quantity);
+            };
         }
         
         // Buy stamp inline
