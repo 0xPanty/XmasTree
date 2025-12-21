@@ -3382,6 +3382,19 @@
         const PAYMENT_ADDRESS = '0x0f540466695cf91203ed8cbca3065fe7232154b9';
         
         async function generateAIPostcard() {
+            // ===== STAMP VERIFICATION =====
+            // Check if user has selected a stamp
+            if (!selectedStamp) {
+                alert('⚠️ Please select a stamp first!\n\nYou need at least one stamp to generate AI postcards.');
+                return;
+            }
+            
+            // Check if user owns the selected stamp
+            if (!userStamps[selectedStamp]?.owned) {
+                alert('⚠️ You don\'t own this stamp!\n\nPlease claim or buy a stamp first.');
+                return;
+            }
+            
             if (aiGenerationCount > 0) {
                 alert('Please use "Regenerate" button');
                 return;
