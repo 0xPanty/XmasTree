@@ -1883,20 +1883,36 @@
             <div id="stamp-section" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.3); border-radius: 12px; padding: 16px; margin-bottom: 20px; --stamp-bg: rgba(0,0,0,0.3);">
                 <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                     <div style="font-weight: bold; color: var(--gold); font-size: 0.95rem;">📮 Choose Your Stamp</div>
-                    <div id="stamp-status-indicator" style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Loading...</div>
+                    <div id="stamp-status-indicator" style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">Loading...</div>
                 </div>
                 
                 <!-- Loading State -->
-                <div id="stamp-loading-inline" style="display: none; text-align: center; padding: 20px;">
-                    <div class="stamp-loading-spinner" style="margin: 0 auto;"></div>
-                    <div style="margin-top: 12px; font-size: 0.85rem; color: var(--gold);" id="stamp-loading-inline-text">Checking eligibility...</div>
+                <div id="stamp-loading-inline" style="display: none; padding: 16px;">
+                    <div style="position: relative; width: 100%; height: 40px; background: rgba(0,0,0,0.4); border-radius: 20px; overflow: hidden; border: 1px solid var(--gold);">
+                        <!-- Progress bar track -->
+                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(90deg, rgba(212,175,55,0.2) 0%, rgba(212,175,55,0.5) 50%, rgba(212,175,55,0.2) 100%); background-size: 200% 100%; animation: shimmer 2s infinite;"></div>
+                        <!-- Santa hat bouncing -->
+                        <div id="santa-hat-loader" style="position: absolute; top: 50%; transform: translateY(-50%); font-size: 1.5rem; animation: santaBounce 1.5s ease-in-out infinite;">🎅</div>
+                    </div>
+                    <div style="margin-top: 8px; font-size: 0.75rem; color: var(--gold); text-align: center;" id="stamp-loading-inline-text">Checking eligibility...</div>
                 </div>
+                
+                <style>
+                    @keyframes santaBounce {
+                        0%, 100% { left: 0%; }
+                        50% { left: calc(100% - 30px); }
+                    }
+                    @keyframes shimmer {
+                        0% { background-position: -200% 0; }
+                        100% { background-position: 200% 0; }
+                    }
+                </style>
                 
                 <!-- Stamp Grid -->
                 <div id="stamp-grid" style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px;"></div>
                 
                 <!-- No Stamp Warning -->
-                <div id="no-stamp-warning" style="display: none; color: #ff6b6b; font-size: 0.85rem; margin-top: 8px; text-align: center;">
+                <div id="no-stamp-warning" style="display: none; color: #ff6b6b; font-size: 0.8rem; margin-top: 8px; text-align: center;">
                     ⚠️ You need at least one stamp to generate cards
                 </div>
             </div>
@@ -3045,10 +3061,10 @@
                 
                 // Animate loading text
                 loadingText.textContent = 'Scanning Neynar Score...';
-                await new Promise(r => setTimeout(r, 400));
+                await new Promise(r => setTimeout(r, 500));
                 
                 loadingText.textContent = 'Checking Power Badge...';
-                await new Promise(r => setTimeout(r, 400));
+                await new Promise(r => setTimeout(r, 500));
                 
                 loadingText.textContent = 'Verifying Warplet NFT...';
                 
@@ -3074,7 +3090,7 @@
                     statusIndicator.innerHTML = '<span style="color: #ff6b6b;">⚠️ No stamps</span>';
                     noStampWarning.style.display = 'block';
                 } else if (ownedCount === 4) {
-                    statusIndicator.innerHTML = '<span style="color: #ffd700;">✨ Based Collector</span>';
+                    statusIndicator.innerHTML = '<span style="color: #ffd700;">✨ Complete</span>';
                 } else {
                     statusIndicator.innerHTML = `<span style="color: #4ade80;">✓ ${ownedCount} stamp${ownedCount > 1 ? 's' : ''}</span>`;
                 }
@@ -3152,18 +3168,36 @@
                 
                 stampWrapper.appendChild(stampCard);
                 
-                // Compact status + button
+                // Status and details
                 if (!isOwned) {
-                    // Status indicator
+                    // Status container
+                    const statusContainer = document.createElement('div');
+                    statusContainer.style.cssText = `
+                        text-align: center;
+                        font-size: 0.6rem;
+                        line-height: 1.3;
+                    `;
+                    
+                    // Status line
                     const statusLine = document.createElement('div');
                     statusLine.style.cssText = `
-                        text-align: center;
-                        font-size: 0.65rem;
                         font-weight: bold;
                         color: ${isEligible ? '#4ade80' : '#ff6b6b'};
+                        margin-bottom: 2px;
                     `;
-                    statusLine.textContent = isEligible ? '✓ 符合' : '✗ 不符合';
-                    stampWrapper.appendChild(statusLine);
+                    statusLine.textContent = isEligible ? '✓ Eligible' : '✗ Not Eligible';
+                    statusContainer.appendChild(statusLine);
+                    
+                    // Reason line (show for both eligible and not eligible)
+                    const reasonLine = document.createElement('div');
+                    reasonLine.style.cssText = `
+                        color: rgba(255,255,255,0.6);
+                        font-size: 0.55rem;
+                    `;
+                    reasonLine.textContent = eligibility?.reason || '';
+                    statusContainer.appendChild(reasonLine);
+                    
+                    stampWrapper.appendChild(statusContainer);
                     
                     // Action button
                     const actionBtn = document.createElement('button');
@@ -3176,12 +3210,13 @@
                         font-weight: bold;
                         cursor: pointer;
                         transition: all 0.2s;
+                        margin-top: 4px;
                         ${isEligible ? 
                             'background: linear-gradient(135deg, #4ade80, #22c55e); color: white;' : 
                             'background: linear-gradient(135deg, #d4af37, #ffd700); color: #2c2c2c;'
                         }
                     `;
-                    actionBtn.textContent = isEligible ? '免费领取' : '0.2 USDC';
+                    actionBtn.textContent = isEligible ? 'Free Claim' : 'Buy 0.2 USDC';
                     actionBtn.onclick = (e) => {
                         e.stopPropagation();
                         if (isEligible) {
@@ -3199,8 +3234,9 @@
                         font-size: 0.65rem;
                         color: #4ade80;
                         font-weight: bold;
+                        margin-top: 4px;
                     `;
-                    ownedLine.textContent = '✓ 已拥有';
+                    ownedLine.textContent = '✓ Owned';
                     stampWrapper.appendChild(ownedLine);
                 }
                 
