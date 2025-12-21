@@ -260,6 +260,7 @@
             object-fit: contain;
             border-radius: 8px;
             background: rgba(2, 48, 32, 0.95);
+            padding: 8px;
         }
 
         .stamp-card-info {
@@ -3089,7 +3090,7 @@
                 }
                 
                 stampCard.innerHTML = `
-                    <img src="${stamp.img}" style="width: 100%; height: 100%; object-fit: cover; background: rgba(2, 48, 32, 0.95);">
+                    <img src="${stamp.img}" style="width: 100%; height: 100%; object-fit: contain; background: rgba(2, 48, 32, 0.95); padding: 8px;">
                     ${isOwned ? 
                         `<div style="position: absolute; top: 4px; right: 4px; background: rgba(74,222,128,0.9); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: bold;">✓</div>` :
                         (isEligible ?
