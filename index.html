@@ -1757,21 +1757,6 @@
                             <div style="position:absolute; bottom:8px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.6); color:#fff; padding:4px 12px; border-radius:12px; font-size:0.7rem; pointer-events:none;">
                                 🔍 Click to enlarge
                             </div>
-                            <!-- Farcaster Stamp -->
-                            <div class="postcard-stamp-preview">
-                                <!-- Santa Hat on Farcaster Logo -->
-                                <div style="position:relative; margin-top:2px;">
-                                    <div style="position:absolute; top:-8px; left:50%; transform:translateX(-50%); font-size:0.85rem;">🎅</div>
-                                    <!-- Farcaster Arch Logo -->
-                                    <svg width="28" height="26" viewBox="0 0 24 24" fill="none" style="margin-top:4px;">
-                                        <path d="M 12 2 L 12 12 M 12 12 L 4 22 M 12 12 L 20 22 M 4 8 L 12 8 L 20 8" stroke="#f5f5dc" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </div>
-                                <!-- Text -->
-                                <div style="font-size:0.42rem; font-weight:900; color:#f5f5dc; letter-spacing:0.3px; text-shadow:0 1px 2px rgba(0,0,0,0.3); margin-top:-2px;">FARCASTER</div>
-                                <!-- Price -->
-                                <div style="font-size:0.6rem; font-weight:bold; color:#f5f5dc; position:absolute; bottom:4px; right:6px; text-shadow:0 1px 2px rgba(0,0,0,0.3);">37¢</div>
-                            </div>
                         </div>
                         <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(212,175,55,0.2); border-radius:8px; padding:16px; margin-bottom:12px;">
                             <div style="font-size:0.75rem; color:rgba(255,255,255,0.6); margin-bottom:8px;">💌 AI Generated Greeting (Postcard Back):</div>
@@ -3063,7 +3048,6 @@
                 console.log('API response data:', data);
                 
                 if (data.success && data.image) {
-                    currentAIImage = data.image;
                     currentAIGreeting = data.greeting || 'Merry Christmas!';
                     currentAIScene = {
                         type: data.sceneType || 'general',
@@ -3072,11 +3056,8 @@
                     isAIGenerated = true;
                     aiGenerationCount++;
                     
-                    // Show preview
-                    document.getElementById('ai-generate-section').style.display = 'none';
-                    document.getElementById('ai-preview-section').style.display = 'block';
-                    document.getElementById('ai-preview-image').src = `data:image/png;base64,${currentAIImage}`;
-                    document.getElementById('ai-preview-greeting').textContent = currentAIGreeting;
+                    // Composite stamp onto AI image using Canvas
+                    await compositeStampOnImage(data.image);
                 } else {
                     throw new Error(data.error || 'Generation failed - no image returned');
                 }
@@ -4091,6 +4072,65 @@ Write only the reply text, nothing else:`;
             document.getElementById('reply-modal').classList.remove('visible');
             pendingReply = null;
             generatedReplyText = '';
+        }
+        
+        // Composite stamp onto AI generated image
+        async function compositeStampOnImage(base64Image) {
+            return new Promise((resolve, reject) => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Load AI generated image
+                const aiImg = new Image();
+                aiImg.onload = () => {
+                    // Set canvas size to match AI image
+                    canvas.width = aiImg.width;
+                    canvas.height = aiImg.height;
+                    
+                    // Draw AI image
+                    ctx.drawImage(aiImg, 0, 0);
+                    
+                    // Load and draw stamp
+                    const stamp = new Image();
+                    stamp.onload = () => {
+                        // Calculate stamp size (about 15% of image width)
+                        const stampWidth = aiImg.width * 0.15;
+                        const stampHeight = stamp.height * (stampWidth / stamp.width);
+                        
+                        // Position: top-right corner with margin
+                        const x = aiImg.width - stampWidth - (aiImg.width * 0.05);
+                        const y = aiImg.height * 0.03;
+                        
+                        // Draw stamp
+                        ctx.drawImage(stamp, x, y, stampWidth, stampHeight);
+                        
+                        // Convert to base64
+                        const compositeImage = canvas.toDataURL('image/png').split(',')[1];
+                        currentAIImage = compositeImage;
+                        
+                        // Show preview
+                        document.getElementById('ai-generate-section').style.display = 'none';
+                        document.getElementById('ai-preview-section').style.display = 'block';
+                        document.getElementById('ai-preview-image').src = `data:image/png;base64,${compositeImage}`;
+                        document.getElementById('ai-preview-greeting').textContent = currentAIGreeting;
+                        
+                        resolve();
+                    };
+                    stamp.onerror = () => {
+                        console.error('Failed to load stamp image');
+                        // Fallback: show image without stamp
+                        currentAIImage = base64Image;
+                        document.getElementById('ai-generate-section').style.display = 'none';
+                        document.getElementById('ai-preview-section').style.display = 'block';
+                        document.getElementById('ai-preview-image').src = `data:image/png;base64,${base64Image}`;
+                        document.getElementById('ai-preview-greeting').textContent = currentAIGreeting;
+                        resolve();
+                    };
+                    stamp.src = '/stamp.png';
+                };
+                aiImg.onerror = reject;
+                aiImg.src = `data:image/png;base64,${base64Image}`;
+            });
         }
         
         // Enlarge AI image
