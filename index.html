@@ -3898,12 +3898,34 @@
             };
             const stampImg = stampImages[stampId] || 'stamp/neynar-preview.png';
             
-            // Get stamp requirements
+            // Get stamp requirements and pricing
             const stampRequirements = {
-                neynar: { title: 'Neynar Stamp', condition: 'Neynar Score > 0.6' },
-                farcaster: { title: 'Farcaster 2025 Stamp', condition: 'Power Badge holder' },
-                warplet: { title: 'Warplet Stamp', condition: 'Own Warplet NFT' },
-                based: { title: 'Based Stamp', condition: 'All 3 stamps owned' }
+                neynar: { 
+                    title: 'Neynar Stamp', 
+                    condition: 'Neynar Score > 0.6',
+                    freeQty: 3,
+                    price: '0.1 USDC',
+                    buyQty: 1
+                },
+                farcaster: { 
+                    title: 'Farcaster 2025 Stamp', 
+                    condition: 'Power Badge holder',
+                    freeQty: 5,
+                    price: '0.37 USDC',
+                    buyQty: 5
+                },
+                warplet: { 
+                    title: 'Warplet Stamp', 
+                    condition: 'Own Warplet NFT',
+                    freeQty: 5,
+                    price: '0.5 USDC',
+                    buyQty: 5
+                },
+                based: { 
+                    title: 'Based Stamp', 
+                    condition: 'All 3 stamps owned',
+                    price: '0.99 USDC'
+                }
             };
             const stampInfo = stampRequirements[stampId];
             
@@ -3930,10 +3952,10 @@
                     <!-- Complete Info Box -->
                     <div style="background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.25); border-radius: 6px; padding: 10px; margin-bottom: 12px;">
                         <div style="font-size: 0.6rem; color: rgba(255,255,255,0.7); line-height: 1.6;">
-                            <div style="color: rgba(255,215,0,0.9); margin-bottom: 4px;">🎯 Get: ${stampInfo.condition}</div>
-                            <div style="color: rgba(255,255,255,0.75);">💰 Buy: ${config.price} USDC = ${config.quantity} stamp${config.quantity > 1 ? 's' : ''}</div>
+                            <div style="color: rgba(74,222,128,0.9); margin-bottom: 3px;">✅ Qualified: Get ${stampInfo.freeQty} stamps FREE</div>
+                            <div style="color: rgba(255,215,0,0.9); margin-bottom: 3px;">🎯 Requirement: ${stampInfo.condition}</div>
+                            <div style="color: rgba(255,255,255,0.75); margin-bottom: 3px;">❌ Not qualified: ${stampInfo.price} = ${stampInfo.buyQty} stamp${stampInfo.buyQty > 1 ? 's' : ''}</div>
                             <div style="color: rgba(255,255,255,0.75);">📤 Use: 1 stamp per send</div>
-                            <div style="color: rgba(255,255,255,0.75);">♻️ Reuse: Same card → multiple sends</div>
                         </div>
                     </div>
                     
@@ -3972,10 +3994,10 @@
                     <!-- Based Info Box -->
                     <div style="background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.3); border-radius: 6px; padding: 10px; margin-bottom: 12px;">
                         <div style="font-size: 0.6rem; color: rgba(255,255,255,0.7); line-height: 1.6;">
-                            <div style="color: rgba(74,222,128,0.9); margin-bottom: 4px;">🎯 Get: ${stampInfo.condition}</div>
-                            <div style="color: rgba(255,255,255,0.75);">💰 Mint: 0.99 USDC</div>
-                            <div style="color: rgba(255,255,255,0.75);">📤 Use: Unlimited sends forever</div>
-                            <div style="color: rgba(255,255,255,0.75);">🎖️ NFT: ${stamp.acquired_at ? new Date(stamp.acquired_at).toLocaleDateString() : 'N/A'}</div>
+                            <div style="color: rgba(255,215,0,0.9); margin-bottom: 3px;">🎯 Requirement: ${stampInfo.condition}</div>
+                            <div style="color: rgba(255,255,255,0.75); margin-bottom: 3px;">💰 Mint: ${stampInfo.price} (one-time)</div>
+                            <div style="color: rgba(74,222,128,0.9); margin-bottom: 3px;">✅ Benefit: Unlimited sends forever</div>
+                            <div style="color: rgba(255,255,255,0.75);">🎖️ NFT Minted: ${stamp.acquired_at ? new Date(stamp.acquired_at).toLocaleDateString() : 'N/A'}</div>
                         </div>
                     </div>
                 `}
