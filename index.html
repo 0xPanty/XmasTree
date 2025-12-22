@@ -3898,8 +3898,27 @@
             };
             const stampImg = stampImages[stampId] || 'stamp/neynar-preview.png';
             
+            // Get stamp requirements
+            const stampRequirements = {
+                neynar: { title: 'Neynar Stamp', condition: 'Neynar Score > 0.6' },
+                farcaster: { title: 'Farcaster 2025 Stamp', condition: 'Power Badge holder' },
+                warplet: { title: 'Warplet Stamp', condition: 'Own Warplet NFT' },
+                based: { title: 'Based Stamp', condition: 'All 3 stamps owned' }
+            };
+            const stampInfo = stampRequirements[stampId];
+            
             modalContent.innerHTML = `
-                <!-- Extra Large Stamp Image (no separate background needed) -->
+                <!-- Stamp Title -->
+                <div style="text-align: center; margin-bottom: 16px;">
+                    <div style="font-size: 1.1rem; font-weight: bold; color: var(--gold); text-transform: uppercase; letter-spacing: 0.05em;">
+                        ${stampInfo.title}
+                    </div>
+                    <div style="font-size: 0.65rem; color: rgba(255,255,255,0.5); margin-top: 4px;">
+                        🎯 Requirement: ${stampInfo.condition}
+                    </div>
+                </div>
+                
+                <!-- Stamp Image -->
                 <div style="text-align: center; margin-bottom: 20px; padding: 12px;">
                     <img src="${stampImg}" style="width: 200px; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);">
                 </div>
@@ -3907,16 +3926,16 @@
                 ${!isBased ? `
                     <!-- Balance (large, centered) -->
                     <div style="text-align: center; margin-bottom: 16px;">
-                        <div style="font-size: 0.65rem; color: rgba(255,255,255,0.5); margin-bottom: 4px;">Balance</div>
+                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-bottom: 6px;">Your Balance</div>
                         <div style="font-size: 2.5rem; color: #4ade80; font-weight: bold; line-height: 1;">${quantity} 🎫</div>
                     </div>
                     
-                    <!-- Usage Info (compact, no expire text) -->
+                    <!-- Usage Info (compact) -->
                     <div style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 10px; margin-bottom: 14px;">
                         <div style="font-size: 0.7rem; font-weight: bold; color: var(--gold); margin-bottom: 6px;">📮 How Stamps Work</div>
                         <div style="font-size: 0.6rem; color: rgba(255,255,255,0.7); line-height: 1.5;">
-                            • 1 stamp per friend 🎫 → 👤<br>
-                            • Same postcard → multiple people
+                            • 1 stamp consumed per friend 🎫 → 👤<br>
+                            • Same postcard can be sent to multiple recipients
                         </div>
                     </div>
                     
@@ -3946,13 +3965,18 @@
                     ` : ''}
                 ` : `
                     <!-- Based NFT Info -->
-                    <div style="background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.4); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-                        <div style="font-size: 0.8rem; font-weight: bold; color: #4ade80; margin-bottom: 12px;">🏆 Your Achievement:</div>
-                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.8); line-height: 1.8;">
-                            • ♾️ Send unlimited postcards<br>
-                            • 🎖️ Based NFT on-chain<br>
-                            • 💎 Minted on: ${new Date(stamp.acquired_at).toLocaleDateString()}<br>
-                            • 🔗 Permanent collector status
+                    <div style="text-align: center; margin-bottom: 16px;">
+                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-bottom: 6px;">Status</div>
+                        <div style="font-size: 2.5rem; color: #4ade80; font-weight: bold; line-height: 1;">♾️</div>
+                        <div style="font-size: 0.8rem; color: #4ade80; margin-top: 6px; font-weight: bold;">Unlimited Sending</div>
+                    </div>
+                    
+                    <div style="background: rgba(74,222,128,0.1); border: 1px solid rgba(74,222,128,0.4); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                        <div style="font-size: 0.7rem; font-weight: bold; color: #4ade80; margin-bottom: 8px;">🏆 Achievement Unlocked</div>
+                        <div style="font-size: 0.6rem; color: rgba(255,255,255,0.7); line-height: 1.6;">
+                            • Send unlimited postcards forever<br>
+                            • On-chain Based NFT (${stamp.acquired_at ? new Date(stamp.acquired_at).toLocaleDateString() : 'N/A'})<br>
+                            • Permanent collector status
                         </div>
                     </div>
                 `}
