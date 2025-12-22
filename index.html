@@ -3238,12 +3238,12 @@
                 // Stamp card (image container)
                 const stampCard = document.createElement('div');
                 
-                // Adjust size for visual alignment
-                let cardTransform = 'scale(1)';
-                if (stamp.id === 'farcaster') {
-                    cardTransform = 'scale(1.08)'; // Slightly larger
-                } else if (stamp.id === 'neynar') {
-                    cardTransform = 'scale(0.95)'; // Slightly smaller
+                // Adjust image scale for visual alignment
+                let imageScale = '1';
+                if (stamp.id === 'neynar' || stamp.id === 'warplet') {
+                    imageScale = '0.85'; // Smaller to match Farcaster frame
+                } else if (stamp.id === 'farcaster') {
+                    imageScale = '1'; // Keep original size
                 }
                 
                 const canClick = isOwned || (stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible);
@@ -3258,7 +3258,6 @@
                     opacity: ${isOwned ? '1' : '0.6'};
                     padding: 4px;
                     background: rgba(0,0,0,0.2);
-                    transform: ${cardTransform};
                 `;
                 
                 // Click handler for all stamps
