@@ -3918,8 +3918,7 @@
                     title: 'Warplet Stamp', 
                     condition: 'Own Warplet NFT',
                     freeQty: 5,
-                    price: '0.5 USDC',
-                    buyQty: 5
+                    cannotBuy: true  // Can only get by owning NFT
                 },
                 based: { 
                     title: 'Based Stamp', 
@@ -3949,7 +3948,10 @@
                         <div style="flex: 1; font-size: 0.6rem; color: rgba(255,255,255,0.7); line-height: 1.6;">
                             <div style="color: rgba(74,222,128,0.9); margin-bottom: 3px;">✅ Qualified: Get ${stampInfo.freeQty} stamps FREE</div>
                             <div style="color: rgba(255,215,0,0.9); margin-bottom: 3px;">🎯 Requirement: ${stampInfo.condition}</div>
-                            <div style="color: rgba(255,255,255,0.75); margin-bottom: 3px;">❌ Not qualified: ${stampInfo.price} = ${stampInfo.buyQty} stamp${stampInfo.buyQty > 1 ? 's' : ''}</div>
+                            ${stampInfo.cannotBuy 
+                                ? `<div style="color: rgba(255,100,100,0.9); margin-bottom: 3px;">⚠️ Cannot purchase - NFT holders only</div>`
+                                : `<div style="color: rgba(255,255,255,0.75); margin-bottom: 3px;">❌ Not qualified: ${stampInfo.price} = ${stampInfo.buyQty} stamp${stampInfo.buyQty > 1 ? 's' : ''}</div>`
+                            }
                             <div style="color: rgba(255,255,255,0.75);">📤 Use: 1 stamp per send</div>
                         </div>
                         
