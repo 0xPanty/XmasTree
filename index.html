@@ -3316,7 +3316,38 @@
                                        eligibility?.farcaster?.eligible && 
                                        eligibility?.warplet?.eligible;
                         
-                        // Mint button no longer needed here - click card itself
+                        // Add visible Mint button when eligible
+                        if (canMint) {
+                            const mintBtn = document.createElement('button');
+                            mintBtn.style.cssText = `
+                                width: 100%;
+                                padding: 10px 8px;
+                                border: none;
+                                border-radius: 6px;
+                                font-size: 0.8rem;
+                                font-weight: bold;
+                                cursor: pointer;
+                                transition: all 0.2s;
+                                margin-top: 8px;
+                                background: linear-gradient(135deg, #ffd700, #ffed4e);
+                                color: #2c2c2c;
+                                box-shadow: 0 2px 8px rgba(255,215,0,0.4);
+                            `;
+                            mintBtn.innerHTML = '🎖️ Mint NFT (0.99 USDC)';
+                            mintBtn.onmouseover = () => {
+                                mintBtn.style.transform = 'scale(1.02)';
+                                mintBtn.style.boxShadow = '0 4px 12px rgba(255,215,0,0.6)';
+                            };
+                            mintBtn.onmouseout = () => {
+                                mintBtn.style.transform = 'scale(1)';
+                                mintBtn.style.boxShadow = '0 2px 8px rgba(255,215,0,0.4)';
+                            };
+                            mintBtn.onclick = (e) => {
+                                e.stopPropagation();
+                                openBasedMintModal();
+                            };
+                            stampWrapper.appendChild(mintBtn);
+                        }
                     } else {
                         // Status container for regular stamps
                         const statusContainer = document.createElement('div');
@@ -4312,8 +4343,13 @@
             const amount = document.getElementById('direct-gift-amount').value || '0';
             let token = document.getElementById('direct-gift-token').value;
             if (token === 'CUSTOM') token = 'TOKEN';
-            document.getElementById('direct-preview-amount').textContent = amount + ' ' + token + ' each';
-            document.getElementById('direct-preview-info').textContent = selectedRecipients.length > 0 
+            
+            // Only show "each" if 2+ recipients
+            const recipientCount = selectedRecipients.length;
+            const eachText = recipientCount > 1 ? ' each' : '';
+            
+            document.getElementById('direct-preview-amount').textContent = amount + ' ' + token + eachText;
+            document.getElementById('direct-preview-info').textContent = recipientCount > 0 
                 ? '→ ' + selectedRecipients.map(u => '@' + u.username).join(', ')
                 : 'Select recipient(s) above';
         }
