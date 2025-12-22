@@ -3236,19 +3236,9 @@
                 stampWrapper.style.cssText = `
                     display: flex;
                     flex-direction: column;
-                    gap: 4px;
-                    cursor: ${isOwned ? 'pointer' : (stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible) ? 'pointer' : 'default'};
+                    align-items: center;
+                    gap: 8px;
                 `;
-                
-                // Wrapper click for Based stamp (when eligible but not owned)
-                if (!isOwned && stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible) {
-                    stampWrapper.onclick = (e) => {
-                        // Don't trigger if clicking a button
-                        if (e.target.tagName !== 'BUTTON') {
-                            openBasedMintModal();
-                        }
-                    };
-                }
                 
                 // Stamp card (image container)
                 const stampCard = document.createElement('div');
@@ -3269,14 +3259,14 @@
                 
                 stampCard.style.cssText = `
                     position: relative;
-                    border-radius: 6px;
-                    overflow: visible;
-                    cursor: ${canClick ? 'pointer' : 'default'};
-                    border: ${selectedStamp === stamp.id ? '2px solid var(--gold)' : '1px solid rgba(212,175,55,0.3)'};
-                    transition: all 0.2s ease;
-                    opacity: ${isOwned ? '1' : '0.6'};
-                    padding: 2px;
-                    background: rgba(0,0,0,0.2);
+                    border-radius: 8px;
+                    overflow: hidden;
+                    cursor: pointer;
+                    border: 3px solid ${selectedStamp === stamp.id ? 'var(--gold)' : 'rgba(212,175,55,0.3)'};
+                    transition: all 0.3s ease;
+                    box-shadow: ${selectedStamp === stamp.id ? '0 0 20px rgba(212,175,55,0.6)' : 'none'};
+                    background: #001a10;
+                    max-width: 280px;
                 `;
                 
                 // Click handler for all stamps
@@ -3312,8 +3302,20 @@
                 
                 stampWrapper.appendChild(stampCard);
                 
-                // Status and details
-                if (!isOwned) {
+                // Balance display below stamp
+                const quantity = userStamps[stamp.id]?.quantity || 0;
+                const balanceDiv = document.createElement('div');
+                balanceDiv.style.cssText = `
+                    font-size: 1.2rem;
+                    color: var(--gold);
+                    font-weight: bold;
+                    text-align: center;
+                `;
+                balanceDiv.innerHTML = `${quantity} 🎫`;
+                stampWrapper.appendChild(balanceDiv);
+                
+                // OLD: Status and details - REMOVED
+                if (false && !isOwned) {
                     // For Based stamp - show progress and mint button
                     if (stamp.id === 'based') {
                         const basedProgress = document.createElement('div');
