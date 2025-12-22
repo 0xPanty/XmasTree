@@ -3149,7 +3149,12 @@
                 console.error('Error checking stamps:', error);
                 loadingDiv.style.display = 'none';
                 statusIndicator.innerHTML = '<span style="color: #ff6b6b;">Error loading</span>';
-                alert('Failed to check stamps. Please try again.');
+                
+                if (TEST_MODE) {
+                    alert(`TEST MODE Error: ${error.message}\n\nThis shouldn't happen in test mode. Check console for details.`);
+                } else {
+                    alert('Failed to check stamps. Please try again.');
+                }
             }
         }
         
