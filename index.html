@@ -3240,10 +3240,14 @@
                 
                 // Adjust image scale for visual alignment
                 let imageScale = '1';
-                if (stamp.id === 'neynar' || stamp.id === 'warplet') {
-                    imageScale = '0.85'; // Smaller to match Farcaster frame
+                if (stamp.id === 'neynar') {
+                    imageScale = '0.92'; // Slightly smaller
                 } else if (stamp.id === 'farcaster') {
                     imageScale = '1'; // Keep original size
+                } else if (stamp.id === 'warplet') {
+                    imageScale = '0.88'; // Medium size
+                } else if (stamp.id === 'based') {
+                    imageScale = '0.95'; // Slightly smaller
                 }
                 
                 const canClick = isOwned || (stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible);
