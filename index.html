@@ -3875,8 +3875,8 @@
                 background: linear-gradient(135deg, #1a3a2e, #0d1f1a);
                 border: 2px solid var(--gold);
                 border-radius: 16px;
-                padding: 32px;
-                max-width: 450px;
+                padding: 24px;
+                max-width: 420px;
                 width: 90%;
                 box-shadow: 0 8px 32px rgba(0,0,0,0.5);
             `;
@@ -3890,49 +3890,47 @@
             const config = stampPrices[stampId];
             
             modalContent.innerHTML = `
-                <div style="text-align: center; margin-bottom: 24px;">
-                    <div style="font-size: 2.5rem; margin-bottom: 12px;">🎫</div>
-                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--gold); margin-bottom: 8px;">
+                <div style="text-align: center; margin-bottom: 16px;">
+                    <div style="font-size: 2rem; margin-bottom: 8px;">🎫</div>
+                    <div style="font-size: 1.2rem; font-weight: bold; color: var(--gold); margin-bottom: 4px;">
                         ${stampName} Stamp
                     </div>
                     ${isBased ? `
-                        <div style="font-size: 0.9rem; color: #4ade80; font-weight: bold;">
+                        <div style="font-size: 0.8rem; color: #4ade80; font-weight: bold;">
                             ♾️ Unlimited Sending
                         </div>
-                    ` : `
-                        <div style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">
-                            You own <b style="color: #4ade80;">${quantity}</b> stamp${quantity !== 1 ? 's' : ''}
-                        </div>
-                    `}
+                    ` : ``}
                 </div>
                 
                 ${!isBased ? `
-                    <!-- Current Balance -->
-                    <div style="background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.4); border-radius: 8px; padding: 16px; margin-bottom: 20px; text-align: center;">
-                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.6); margin-bottom: 4px;">Current Balance</div>
-                        <div style="font-size: 2.5rem; color: #4ade80; font-weight: bold;">${quantity}</div>
-                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.7); margin-top: 4px;">stamp${quantity !== 1 ? 's' : ''} remaining 🎫</div>
-                    </div>
-                    
-                    <!-- Usage Info -->
-                    <div style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 12px; margin-bottom: 20px;">
-                        <div style="font-size: 0.75rem; font-weight: bold; color: var(--gold); margin-bottom: 8px;">📮 Usage:</div>
-                        <div style="font-size: 0.7rem; color: rgba(255,255,255,0.7); line-height: 1.6;">
-                            • 1 stamp consumed per friend 🎫 → 👤<br>
-                            • Same postcard → send to multiple people<br>
-                            • Stamps don't expire
+                    <!-- Compact layout: Balance + Usage side by side -->
+                    <div style="display: flex; gap: 12px; margin-bottom: 16px;">
+                        <!-- Current Balance (left, smaller) -->
+                        <div style="flex: 0 0 100px; background: rgba(74,222,128,0.15); border: 1px solid rgba(74,222,128,0.4); border-radius: 8px; padding: 12px; text-align: center;">
+                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.5); margin-bottom: 4px;">Balance</div>
+                            <div style="font-size: 2rem; color: #4ade80; font-weight: bold; line-height: 1;">${quantity}</div>
+                            <div style="font-size: 0.55rem; color: rgba(255,255,255,0.6); margin-top: 4px;">stamps 🎫</div>
+                        </div>
+                        
+                        <!-- Usage Info (right, compact) -->
+                        <div style="flex: 1; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 12px;">
+                            <div style="font-size: 0.7rem; font-weight: bold; color: var(--gold); margin-bottom: 6px;">📮 Usage</div>
+                            <div style="font-size: 0.65rem; color: rgba(255,255,255,0.7); line-height: 1.5;">
+                                • 1 per friend 🎫→👤<br>
+                                • Reusable postcard<br>
+                                • Never expire
+                            </div>
                         </div>
                     </div>
                     
-                    <!-- Buy More Section -->
+                    <!-- Buy More Section (compact) -->
                     ${config ? `
-                        <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
-                            <div style="font-size: 0.75rem; font-weight: bold; color: var(--gold); margin-bottom: 8px; text-align: center;">💰 Buy More</div>
-                            <div style="text-align: center; margin-bottom: 12px;">
-                                <span style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">${config.price} USDC = ${config.quantity} stamp${config.quantity > 1 ? 's' : ''}</span>
+                        <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+                            <div style="font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-bottom: 6px; text-align: center;">
+                                ${config.price} USDC = ${config.quantity} stamp${config.quantity > 1 ? 's' : ''}
                             </div>
-                            <button id="buy-more-stamps" style="width: 100%; padding: 12px; border: none; background: linear-gradient(135deg, #d4af37, #ffd700); color: #2c2c2c; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: bold;">
-                                Purchase More Stamps
+                            <button id="buy-more-stamps" style="width: 100%; padding: 10px; border: none; background: linear-gradient(135deg, #d4af37, #ffd700); color: #2c2c2c; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: bold;">
+                                💰 Purchase More
                             </button>
                         </div>
                     ` : ''}
@@ -3950,7 +3948,7 @@
                 `}
                 
                 <!-- Close Button -->
-                <button id="close-details" style="width: 100%; padding: 14px; border: 2px solid rgba(212,175,55,0.5); background: transparent; color: var(--gold); border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: bold;">Close</button>
+                <button id="close-details" style="width: 100%; padding: 10px; border: 2px solid rgba(212,175,55,0.5); background: transparent; color: var(--gold); border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-weight: bold;">Close</button>
             `;
             
             modal.appendChild(modalContent);
