@@ -3241,13 +3241,13 @@
                 // Adjust image scale for visual alignment
                 let imageScale = '1';
                 if (stamp.id === 'neynar') {
-                    imageScale = '0.92'; // Slightly smaller
+                    imageScale = '0.95'; // Slightly larger than before
                 } else if (stamp.id === 'farcaster') {
-                    imageScale = '1'; // Keep original size
+                    imageScale = '1'; // Standard reference
                 } else if (stamp.id === 'warplet') {
-                    imageScale = '0.88'; // Medium size
+                    imageScale = '0.82'; // Smaller (was too big)
                 } else if (stamp.id === 'based') {
-                    imageScale = '0.95'; // Slightly smaller
+                    imageScale = '0.90'; // Compact
                 }
                 
                 const canClick = isOwned || (stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible);
