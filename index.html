@@ -1908,8 +1908,17 @@
                     }
                 </style>
                 
-                <!-- Stamp Grid (2x2 with asymmetric columns) -->
-                <div id="stamp-grid" style="display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 8px;"></div>
+                <!-- Single Stamp Display with Navigation (keep ID for JS compatibility) -->
+                <div style="position: relative; max-width: 400px; margin: 0 auto;">
+                    <!-- Left Arrow -->
+                    <button id="prev-stamp-btn" style="position: absolute; left: -16px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; background: rgba(0,0,0,0.7); border: 2px solid var(--gold); border-radius: 50%; color: var(--gold); cursor: pointer; font-size: 1.5rem; display: none; align-items: center; justify-content: center; z-index: 10; font-weight: bold; transition: all 0.2s;">‹</button>
+                    
+                    <!-- Stamp Container (keep stamp-grid ID!) -->
+                    <div id="stamp-grid" style="display: flex; justify-content: center;"></div>
+                    
+                    <!-- Right Arrow -->
+                    <button id="next-stamp-btn" style="position: absolute; right: -16px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; background: rgba(0,0,0,0.7); border: 2px solid var(--gold); border-radius: 50%; color: var(--gold); cursor: pointer; font-size: 1.5rem; display: flex; align-items: center; justify-content: center; z-index: 10; font-weight: bold; transition: all 0.2s;">›</button>
+                </div>
                 
                 <!-- Quick Rules Card (below stamps) -->
                 <div style="margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px;">
@@ -3197,19 +3206,23 @@
             }
         }
         
-        // Render stamp grid inline
+        // Current stamp index for navigation
+        let currentStampIndex = 0;
+        
+        const allStamps = [
+            { id: 'neynar', icon: '🟣', name: 'Neynar', img: '/stamp/neynar-preview.png', original: '/stamp/neynar.png' },
+            { id: 'farcaster', icon: '🟪', name: 'Farcaster', img: '/stamp/farcaster-preview.png', original: '/stamp/farcaster.png' },
+            { id: 'warplet', icon: '🎨', name: 'Warplet', img: '/stamp/warplet-preview.png', original: '/stamp/warplet.png' },
+            { id: 'based', icon: '🌟', name: 'Based', img: '/stamp/based-preview.png', original: '/stamp/based.png' }
+        ];
+        
+        // Render stamp grid inline (single stamp display)
         function renderStampGrid() {
             const stampGrid = document.getElementById('stamp-grid');
             stampGrid.innerHTML = '';
             
-            const stamps = [
-                { id: 'neynar', icon: '🟣', name: 'Neynar', img: '/stamp/neynar-preview.png', original: '/stamp/neynar.png' },
-                { id: 'farcaster', icon: '🟪', name: 'Farcaster', img: '/stamp/farcaster-preview.png', original: '/stamp/farcaster.png' },
-                { id: 'warplet', icon: '🎨', name: 'Warplet', img: '/stamp/warplet-preview.png', original: '/stamp/warplet.png' },
-                { id: 'based', icon: '🌟', name: 'Based', img: '/stamp/based-preview.png', original: '/stamp/based.png' }
-            ];
-            
-            stamps.forEach(stamp => {
+            // Render only current stamp
+            const stamp = allStamps[currentStampIndex];
                 const isOwned = userStamps[stamp.id]?.owned;
                 const eligibility = stampEligibility[stamp.id];
                 const isEligible = eligibility?.eligible;
@@ -3514,11 +3527,41 @@
                     }
                 }
                 
-                stampGrid.appendChild(stampWrapper);
-            });
+            stampGrid.appendChild(stampWrapper);
+            
+            // Update arrows
+            updateArrows();
+            
+            // Auto-select if owned
+            if (isOwned && !selectedStamp) {
+                selectedStamp = stamp.id;
+                updateGenerateButtonState();
+            }
             
             // Render Based progress
             renderBasedProgress();
+        }
+        
+        // Update arrow visibility and handlers
+        function updateArrows() {
+            const prevBtn = document.getElementById('prev-stamp-btn');
+            const nextBtn = document.getElementById('next-stamp-btn');
+            
+            if (prevBtn) {
+                prevBtn.style.display = currentStampIndex > 0 ? 'flex' : 'none';
+                prevBtn.onclick = () => {
+                    currentStampIndex--;
+                    renderStampGrid();
+                };
+            }
+            
+            if (nextBtn) {
+                nextBtn.style.display = currentStampIndex < allStamps.length - 1 ? 'flex' : 'none';
+                nextBtn.onclick = () => {
+                    currentStampIndex++;
+                    renderStampGrid();
+                };
+            }
         }
         
         // Render Based unlock progress
