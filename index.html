@@ -3203,26 +3203,48 @@
                 
                 // Stamp card (image container)
                 const stampCard = document.createElement('div');
+                
+                // Adjust size for visual alignment
+                let cardTransform = 'scale(1)';
+                if (stamp.id === 'farcaster') {
+                    cardTransform = 'scale(1.08)'; // Slightly larger
+                } else if (stamp.id === 'neynar') {
+                    cardTransform = 'scale(0.95)'; // Slightly smaller
+                }
+                
+                const canClick = isOwned || (stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible);
+                
                 stampCard.style.cssText = `
                     position: relative;
                     border-radius: 6px;
                     overflow: visible;
-                    cursor: ${isOwned ? 'pointer' : 'default'};
+                    cursor: ${canClick ? 'pointer' : 'default'};
                     border: ${selectedStamp === stamp.id ? '2px solid var(--gold)' : '1px solid rgba(212,175,55,0.3)'};
-                    transition: all 0.3s ease;
+                    transition: all 0.2s ease;
                     opacity: ${isOwned ? '1' : '0.6'};
                     padding: 4px;
                     background: rgba(0,0,0,0.2);
+                    transform: ${cardTransform};
                 `;
                 
-                // Click to select if owned
-                if (isOwned) {
-                    stampCard.onclick = () => {
+                // Click handler for all stamps
+                stampCard.onclick = () => {
+                    if (isOwned) {
+                        // Select this stamp
                         selectedStamp = stamp.id;
-                        renderStampGrid();
                         updateGenerateButtonState();
-                    };
-                }
+                        // Only update visual selection without full re-render
+                        document.querySelectorAll('#stamp-grid > div > div').forEach(card => {
+                            card.style.border = '2px solid rgba(212,175,55,0.3)';
+                            card.style.boxShadow = 'none';
+                        });
+                        stampCard.style.border = '2px solid var(--gold)';
+                        stampCard.style.boxShadow = '0 0 20px rgba(212,175,55,0.6)';
+                    } else if (stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible) {
+                        // Based stamp - open mint modal
+                        openBasedMintModal();
+                    }
+                };
                 
                 stampCard.innerHTML = `
                     <img src="${stamp.img}" style="display: block; width: 100%; height: auto; object-fit: contain; border-radius: 4px;">
@@ -3261,32 +3283,7 @@
                                        eligibility?.farcaster?.eligible && 
                                        eligibility?.warplet?.eligible;
                         
-                        if (canMint) {
-                            // Mint button
-                            const mintBtn = document.createElement('button');
-                            mintBtn.style.cssText = `
-                                width: 100%;
-                                padding: 8px 4px;
-                                border: none;
-                                border-radius: 4px;
-                                font-size: 0.7rem;
-                                font-weight: bold;
-                                cursor: pointer;
-                                transition: all 0.2s;
-                                margin-top: 6px;
-                                background: linear-gradient(135deg, #ffd700, #ffed4e);
-                                color: #2c2c2c;
-                            `;
-                            mintBtn.innerHTML = `
-                                <div style="font-size: 0.75rem;">🎖️ Mint Based NFT</div>
-                                <div style="font-size: 0.55rem; margin-top: 2px; opacity: 0.8;">0.99 USDC</div>
-                            `;
-                            mintBtn.onclick = (e) => {
-                                e.stopPropagation();
-                                mintBasedNFT();
-                            };
-                            stampWrapper.appendChild(mintBtn);
-                        }
+                        // Mint button no longer needed here - click card itself
                     } else {
                         // Status container for regular stamps
                         const statusContainer = document.createElement('div');
@@ -3770,20 +3767,94 @@
             closeStampPreview();
         }
         
+        // Open Based Mint Modal
+        function openBasedMintModal() {
+            const modal = document.createElement('div');
+            modal.id = 'based-mint-modal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0,0,0,0.85);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 10000;
+                animation: fadeIn 0.2s;
+            `;
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background: linear-gradient(135deg, #1a3a2e, #0d1f1a);
+                border: 2px solid var(--gold);
+                border-radius: 16px;
+                padding: 32px;
+                max-width: 450px;
+                width: 90%;
+                box-shadow: 0 8px 32px rgba(255,215,0,0.3);
+            `;
+            
+            modalContent.innerHTML = `
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 3rem; margin-bottom: 12px;">🎖️</div>
+                    <div style="font-size: 1.5rem; font-weight: bold; color: var(--gold); margin-bottom: 8px;">
+                        Mint Based NFT
+                    </div>
+                    <div style="font-size: 0.85rem; color: rgba(255,255,255,0.6);">
+                        Ultimate Achievement Badge
+                    </div>
+                </div>
+                
+                <!-- Benefits -->
+                <div style="background: rgba(255,215,0,0.1); border: 1px solid rgba(255,215,0,0.3); border-radius: 8px; padding: 16px; margin-bottom: 20px;">
+                    <div style="font-size: 0.8rem; font-weight: bold; color: var(--gold); margin-bottom: 12px;">💎 What You Get:</div>
+                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.8); line-height: 1.8;">
+                        • ♾️ Unlimited postcard sending forever<br>
+                        • 🏆 Exclusive Based collector status<br>
+                        • 🔗 Permanent on-chain proof<br>
+                        • 💎 Your Farcaster journey immortalized
+                    </div>
+                </div>
+                
+                <!-- Price -->
+                <div style="background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 16px; margin-bottom: 20px; text-align: center;">
+                    <div style="font-size: 0.7rem; color: rgba(255,255,255,0.6); margin-bottom: 4px;">Mint Price</div>
+                    <div style="font-size: 2rem; color: var(--gold); font-weight: bold;">0.99 USDC</div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 12px;">
+                    <button id="cancel-mint" style="flex: 1; padding: 14px; border: 2px solid rgba(212,175,55,0.5); background: transparent; color: var(--gold); border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: bold;">Cancel</button>
+                    <button id="confirm-mint" style="flex: 2; padding: 14px; border: none; background: linear-gradient(135deg, #ffd700, #ffed4e); color: #2c2c2c; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: bold;">🎖️ Mint Now</button>
+                </div>
+            `;
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Cancel
+            document.getElementById('cancel-mint').onclick = () => {
+                modal.remove();
+            };
+            
+            // Close on backdrop click
+            modal.onclick = (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            };
+            
+            // Confirm mint
+            document.getElementById('confirm-mint').onclick = () => {
+                modal.remove();
+                mintBasedNFT();
+            };
+        }
+        
         // Mint Based NFT (0.99 USDC)
         async function mintBasedNFT() {
-            const confirmed = confirm(
-                '🎖️ Mint Based NFT\n\n' +
-                'This is your ultimate achievement badge!\n\n' +
-                '💎 Benefits:\n' +
-                '• ♾️ Unlimited postcard sending forever\n' +
-                '• 🏆 Exclusive Based collector status\n' +
-                '• 🔗 On-chain proof of your Farcaster journey\n\n' +
-                'Price: 0.99 USDC\n\n' +
-                'Proceed with mint?'
-            );
-            
-            if (!confirmed) return;
             
             // TODO: Implement actual minting + payment
             
