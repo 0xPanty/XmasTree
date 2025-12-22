@@ -3238,16 +3238,16 @@
                 // Stamp card (image container)
                 const stampCard = document.createElement('div');
                 
-                // Adjust image scale for visual alignment
+                // Adjust image scale for perfect visual alignment
                 let imageScale = '1';
                 if (stamp.id === 'neynar') {
-                    imageScale = '0.95'; // Slightly larger than before
+                    imageScale = '1.05'; // Larger to match Farcaster frame height
                 } else if (stamp.id === 'farcaster') {
-                    imageScale = '1'; // Standard reference
+                    imageScale = '1'; // Reference standard
                 } else if (stamp.id === 'warplet') {
-                    imageScale = '0.82'; // Smaller (was too big)
+                    imageScale = '0.78'; // Much smaller (tall stamp needs reduction)
                 } else if (stamp.id === 'based') {
-                    imageScale = '0.90'; // Compact
+                    imageScale = '0.88'; // Compact horizontal
                 }
                 
                 const canClick = isOwned || (stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible);
