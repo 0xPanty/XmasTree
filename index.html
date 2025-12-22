@@ -3238,16 +3238,16 @@
                 // Stamp card (image container)
                 const stampCard = document.createElement('div');
                 
-                // Adjust image scale for perfect visual alignment
+                // Adjust image scale for visual alignment
                 let imageScale = '1';
                 if (stamp.id === 'neynar') {
-                    imageScale = '1.05'; // Larger to match Farcaster frame height
+                    imageScale = '1.05'; // Larger
                 } else if (stamp.id === 'farcaster') {
-                    imageScale = '1'; // Reference standard
+                    imageScale = '1'; // Reference
                 } else if (stamp.id === 'warplet') {
-                    imageScale = '0.78'; // Much smaller (tall stamp needs reduction)
+                    imageScale = '0.78'; // Smaller
                 } else if (stamp.id === 'based') {
-                    imageScale = '0.88'; // Compact horizontal
+                    imageScale = '1.1'; // Larger (was too small)
                 }
                 
                 const canClick = isOwned || (stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible);
@@ -3260,7 +3260,7 @@
                     border: ${selectedStamp === stamp.id ? '2px solid var(--gold)' : '1px solid rgba(212,175,55,0.3)'};
                     transition: all 0.2s ease;
                     opacity: ${isOwned ? '1' : '0.6'};
-                    padding: 4px;
+                    padding: 2px;
                     background: rgba(0,0,0,0.2);
                 `;
                 
@@ -3441,17 +3441,36 @@
                     // Owned - show quantity
                     const quantity = userStamps[stamp.id]?.quantity || 0;
                     
+                    // Show eligibility status first (if eligible but not owned)
+                    if (!isOwned && isEligible && stamp.id !== 'based') {
+                        const eligibleBadge = document.createElement('div');
+                        eligibleBadge.style.cssText = `
+                            text-align: center;
+                            margin-top: 4px;
+                            padding: 4px 6px;
+                            background: rgba(74,222,128,0.15);
+                            border: 1px solid rgba(74,222,128,0.4);
+                            border-radius: 4px;
+                            font-size: 0.55rem;
+                            color: #4ade80;
+                            font-weight: bold;
+                        `;
+                        const freeQty = stamp.id === 'neynar' ? 3 : (stamp.id === 'farcaster' ? 10 : 5);
+                        eligibleBadge.innerHTML = `✅ Get ${freeQty} FREE`;
+                        stampWrapper.appendChild(eligibleBadge);
+                    }
+                    
                     if (stamp.id === 'based' && userStamps.based?.permanent) {
                         // Based unlimited
                         const unlimitedBadge = document.createElement('div');
                         unlimitedBadge.style.cssText = `
                             text-align: center;
-                            font-size: 0.65rem;
-                            margin-top: 6px;
-                            padding: 6px 8px;
+                            font-size: 0.6rem;
+                            margin-top: 4px;
+                            padding: 5px 6px;
                             background: linear-gradient(135deg, rgba(74,222,128,0.2), rgba(34,197,94,0.2));
                             border: 1px solid rgba(74,222,128,0.5);
-                            border-radius: 6px;
+                            border-radius: 5px;
                             color: #4ade80;
                             font-weight: bold;
                             cursor: pointer;
@@ -3462,23 +3481,23 @@
                             openStampDetailsModal(stamp.id, stamp.name);
                         };
                         stampWrapper.appendChild(unlimitedBadge);
-                    } else {
-                        // Regular stamps with quantity - clickable
+                    } else if (isOwned) {
+                        // Regular stamps with quantity - clickable (smaller)
                         const quantityDisplay = document.createElement('div');
                         quantityDisplay.style.cssText = `
                             text-align: center;
-                            margin-top: 6px;
-                            padding: 6px 8px;
+                            margin-top: 4px;
+                            padding: 4px 6px;
                             background: rgba(74,222,128,0.15);
                             border: 1px solid rgba(74,222,128,0.4);
-                            border-radius: 6px;
+                            border-radius: 5px;
                             cursor: pointer;
                             transition: all 0.2s;
                         `;
                         quantityDisplay.innerHTML = `
-                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.6); margin-bottom: 2px;">Owned</div>
-                            <div style="font-size: 0.75rem; color: #4ade80; font-weight: bold;">
-                                ${quantity} stamp${quantity !== 1 ? 's' : ''} 🎫
+                            <div style="font-size: 0.55rem; color: rgba(255,255,255,0.5); margin-bottom: 1px;">Owned</div>
+                            <div style="font-size: 0.7rem; color: #4ade80; font-weight: bold;">
+                                ${quantity} 🎫
                             </div>
                         `;
                         quantityDisplay.onclick = (e) => {
