@@ -1909,7 +1909,7 @@
                 </style>
                 
                 <!-- Stamp Grid (2x2 with asymmetric columns) -->
-                <div id="stamp-grid" style="display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 12px;"></div>
+                <div id="stamp-grid" style="display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 8px;"></div>
                 
                 <!-- Quick Rules Card (below stamps) -->
                 <div style="margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px;">
@@ -3241,13 +3241,13 @@
                 // Adjust image scale for visual alignment
                 let imageScale = '1';
                 if (stamp.id === 'neynar') {
-                    imageScale = '1.05'; // Larger
+                    imageScale = '1.15'; // Much larger to match Farcaster
                 } else if (stamp.id === 'farcaster') {
                     imageScale = '1'; // Reference
                 } else if (stamp.id === 'warplet') {
                     imageScale = '0.78'; // Smaller
                 } else if (stamp.id === 'based') {
-                    imageScale = '1.1'; // Larger (was too small)
+                    imageScale = '1.1'; // Larger
                 }
                 
                 const canClick = isOwned || (stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible);
