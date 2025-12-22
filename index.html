@@ -3068,33 +3068,40 @@
             const loadingText = document.getElementById('stamp-loading-inline-text');
             const noStampWarning = document.getElementById('no-stamp-warning');
             
+            // Verify DOM elements exist
+            if (!loadingDiv || !stampGrid || !statusIndicator || !loadingText) {
+                console.error('Missing DOM elements for stamp check');
+                return;
+            }
+            
             // Show loading
             loadingDiv.style.display = 'block';
             stampGrid.style.display = 'none';
-            noStampWarning.style.display = 'none';
+            if (noStampWarning) noStampWarning.style.display = 'none';
             statusIndicator.textContent = 'Checking...';
             
             try {
                 const userFid = window.currentUser?.fid || 3;
                 
-                // Animate loading text
-                loadingText.textContent = 'Scanning Neynar Score...';
-                await new Promise(r => setTimeout(r, 500));
-                
-                loadingText.textContent = 'Checking Power Badge...';
-                await new Promise(r => setTimeout(r, 500));
-                
-                loadingText.textContent = 'Verifying Warplet NFT...';
-                
-                // Call API or use test data
+                // TEST MODE: Skip all API calls
                 if (TEST_MODE) {
-                    // TEST MODE: Auto-approve all stamps
-                    await new Promise(r => setTimeout(r, 800)); // Simulate loading
+                    console.log('🧪 TEST MODE: Auto-granting stamps...');
                     
+                    // Simulate loading animation
+                    loadingText.textContent = 'Scanning Neynar Score...';
+                    await new Promise(r => setTimeout(r, 500));
+                    
+                    loadingText.textContent = 'Checking Power Badge...';
+                    await new Promise(r => setTimeout(r, 500));
+                    
+                    loadingText.textContent = 'Verifying Warplet NFT...';
+                    await new Promise(r => setTimeout(r, 800));
+                    
+                    // Set eligibility
                     stampEligibility = {
-                        neynar: { eligible: true, score: 0.85, reason: 'Neynar Score: 0.85 (>0.6)' },
-                        farcaster: { eligible: true, reason: 'Farcaster Power Badge holder' },
-                        warplet: { eligible: true, reason: 'Warplet NFT holder' }
+                        neynar: { eligible: true, score: 0.85, reason: 'TEST: Neynar Score: 0.85 (>0.6)' },
+                        farcaster: { eligible: true, reason: 'TEST: Farcaster Power Badge holder' },
+                        warplet: { eligible: true, reason: 'TEST: Warplet NFT holder' }
                     };
                     eligibility = stampEligibility;
                     
@@ -3103,10 +3110,21 @@
                         neynar: { owned: true, quantity: 3, acquired_method: 'test', first_free_claimed: true },
                         farcaster: { owned: true, quantity: 10, acquired_method: 'test', first_free_claimed: true },
                         warplet: { owned: true, quantity: 5, acquired_method: 'test', first_free_claimed: true },
-                        based: { owned: false } // Not minted yet
+                        based: { owned: false } // Not minted yet - can test mint flow
                     };
                     saveUserStamps(userFid);
+                    
+                    console.log('🧪 TEST MODE: Stamps granted!', userStamps);
                 } else {
+                    // PRODUCTION MODE: Real API call with loading animation
+                    loadingText.textContent = 'Scanning Neynar Score...';
+                    await new Promise(r => setTimeout(r, 500));
+                    
+                    loadingText.textContent = 'Checking Power Badge...';
+                    await new Promise(r => setTimeout(r, 500));
+                    
+                    loadingText.textContent = 'Verifying Warplet NFT...';
+                    await new Promise(r => setTimeout(r, 500));
                     // PRODUCTION MODE: Real API call
                     const response = await fetch(`/api/neynar?action=check_stamps&fid=${userFid}`);
                     
