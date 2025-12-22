@@ -3199,7 +3199,18 @@
                     display: flex;
                     flex-direction: column;
                     gap: 4px;
+                    cursor: ${isOwned ? 'pointer' : (stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible) ? 'pointer' : 'default'};
                 `;
+                
+                // Wrapper click for Based stamp (when eligible but not owned)
+                if (!isOwned && stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible) {
+                    stampWrapper.onclick = (e) => {
+                        // Don't trigger if clicking a button
+                        if (e.target.tagName !== 'BUTTON') {
+                            openBasedMintModal();
+                        }
+                    };
+                }
                 
                 // Stamp card (image container)
                 const stampCard = document.createElement('div');
