@@ -3852,11 +3852,19 @@
             closeStampPreview();
         }
         
-        // Open stamp details modal (for owned stamps)
+        // Get all stamp IDs in order
+        const allStampIds = ['neynar', 'farcaster', 'warplet', 'based'];
+        
+        // Open stamp details modal (for owned stamps) with navigation
         function openStampDetailsModal(stampId, stampName) {
             const stamp = userStamps[stampId];
             const quantity = stamp?.quantity || 0;
             const isBased = stampId === 'based' && stamp?.permanent;
+            
+            // Get current index
+            const currentIndex = allStampIds.indexOf(stampId);
+            const hasPrev = currentIndex > 0;
+            const hasNext = currentIndex < allStampIds.length - 1;
             
             const modal = document.createElement('div');
             modal.id = 'stamp-details-modal';
@@ -3883,6 +3891,7 @@
                 max-width: 360px;
                 width: 88%;
                 box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+                position: relative;
             `;
             
             const stampPrices = {
@@ -3933,6 +3942,14 @@
             const stampInfo = stampRequirements[stampId];
             
             modalContent.innerHTML = `
+                <!-- Navigation Arrows -->
+                ${hasPrev ? `
+                    <button id="prev-stamp-arrow" style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: rgba(0,0,0,0.7); border: 1.5px solid var(--gold); border-radius: 50%; color: var(--gold); cursor: pointer; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; z-index: 10; font-weight: bold;">‹</button>
+                ` : ''}
+                ${hasNext ? `
+                    <button id="next-stamp-arrow" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; background: rgba(0,0,0,0.7); border: 1.5px solid var(--gold); border-radius: 50%; color: var(--gold); cursor: pointer; font-size: 1.3rem; display: flex; align-items: center; justify-content: center; z-index: 10; font-weight: bold;">›</button>
+                ` : ''}
+                
                 <!-- Large Title -->
                 <div style="text-align: center; margin-bottom: 14px;">
                     <div style="font-size: 1.35rem; font-weight: bold; color: var(--gold); text-transform: uppercase; letter-spacing: 0.08em; line-height: 1.2;">
@@ -4059,6 +4076,30 @@
                         document.getElementById('purchase-qty').textContent = purchaseQty;
                         updatePurchaseTotal();
                     }
+                };
+            }
+            
+            // Navigation arrow handlers
+            const prevArrow = document.getElementById('prev-stamp-arrow');
+            const nextArrow = document.getElementById('next-stamp-arrow');
+            
+            if (prevArrow) {
+                prevArrow.onclick = (e) => {
+                    e.stopPropagation();
+                    modal.remove();
+                    const prevId = allStampIds[currentIndex - 1];
+                    const prevName = stampRequirements[prevId].title;
+                    openStampDetailsModal(prevId, prevName);
+                };
+            }
+            
+            if (nextArrow) {
+                nextArrow.onclick = (e) => {
+                    e.stopPropagation();
+                    modal.remove();
+                    const nextId = allStampIds[currentIndex + 1];
+                    const nextName = stampRequirements[nextId].title;
+                    openStampDetailsModal(nextId, nextName);
                 };
             }
             
