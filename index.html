@@ -4330,48 +4330,8 @@
                 const loadingMsg = document.getElementById('selected-users');
                 loadingMsg.innerHTML = '<div style="color:rgba(255,255,255,0.5);font-size:0.8rem;text-align:center;padding:12px;">🔍 Finding your best friends...</div>';
                 
-                // TEST MODE: Use mock data if no user logged in (simulate as @xqc)
-                if (TEST_MODE && !currentUser) {
-                    await new Promise(r => setTimeout(r, 800)); // Simulate API delay
-                    
-                    // Mock friends data for testing - xqc's best friends
-                    const mockFriends = [
-                        { fid: 3, username: 'dwr', display_name: 'Dan Romero', pfp_url: 'https://i.imgur.com/CQq3Bk9.jpg', is_mutual: true, friendship_score: 150 },
-                        { fid: 2, username: 'v', display_name: 'Varun Srinivasan', pfp_url: 'https://i.imgur.com/vy2Fkt5.jpg', is_mutual: true, friendship_score: 132 },
-                        { fid: 99, username: 'jessepollak', display_name: 'Jesse Pollak 💜', pfp_url: 'https://i.imgur.com/gF8Bqkm.jpg', is_mutual: true, friendship_score: 118 },
-                        { fid: 576, username: 'pfista', display_name: 'Pfista', pfp_url: 'https://i.imgur.com/yJ8Tqk3.jpg', is_mutual: false, friendship_score: 95 },
-                        { fid: 1, username: 'farcaster', display_name: 'Farcaster', pfp_url: 'https://i.imgur.com/I2rEbPF.png', is_mutual: false, friendship_score: 87 }
-                    ];
-                    
-                    selectedRecipients = mockFriends.map(u => ({
-                        fid: u.fid,
-                        username: u.username,
-                        display_name: u.display_name,
-                        pfp_url: u.pfp_url,
-                        is_mutual: u.is_mutual,
-                        friendship_score: u.friendship_score
-                    }));
-                    
-                    renderSelectedUsers();
-                    updateDirectPreview();
-                    
-                    // Show mock stats
-                    const mutualCount = mockFriends.filter(u => u.is_mutual).length;
-                    setTimeout(() => {
-                        const hint = document.createElement('div');
-                        hint.style.cssText = 'font-size:0.7rem;color:#4ade80;text-align:center;margin-top:8px;';
-                        hint.innerHTML = `✅ @xqc's top 5 friends with most interactions (${mutualCount} mutual)<br>
-                            <span style="font-size:0.65rem;color:rgba(255,255,255,0.6);">
-                                🧪 TEST MODE - Mock data · 💬 28 replies · ❤️ 45 likes · 🔄 12 recasts
-                            </span>`;
-                        loadingMsg.appendChild(hint);
-                        setTimeout(() => hint.remove(), 4000);
-                    }, 100);
-                    return;
-                }
-                
-                // Use current user's fid
-                const fid = currentUser?.fid || 3;
+                // Use current user's fid, or @xqc (275646) for TEST_MODE
+                const fid = currentUser?.fid || (TEST_MODE ? 275646 : 3);
                 
                 // Call new best_friends API
                 const res = await fetch(`/api/neynar?action=best_friends&fid=${fid}`);
@@ -4394,10 +4354,11 @@
                     // Show success message with interaction stats
                     const mutualCount = data.users.filter(u => u.is_mutual).length;
                     const topInteraction = data.top_interaction_type;
+                    const userLabel = (TEST_MODE && !currentUser) ? "@xqc's" : "Your";
                     setTimeout(() => {
                         const hint = document.createElement('div');
                         hint.style.cssText = 'font-size:0.7rem;color:#4ade80;text-align:center;margin-top:8px;';
-                        hint.innerHTML = `✅ Found ${data.users.length} friends with most interactions (${mutualCount} mutual)<br>
+                        hint.innerHTML = `✅ ${userLabel} top ${data.users.length} friends with most interactions (${mutualCount} mutual)<br>
                             <span style="font-size:0.65rem;color:rgba(255,255,255,0.6);">
                                 💬 ${topInteraction.replies || 0} replies · ❤️ ${topInteraction.likes || 0} likes · 🔄 ${topInteraction.recasts || 0} recasts
                             </span>`;
