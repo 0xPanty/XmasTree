@@ -36,6 +36,142 @@ module.exports = async function handler(req, res) {
                 // Get user's following
                 url = `https://api.neynar.com/v2/farcaster/following?fid=${fid}&limit=${limit || 5}`;
                 break;
+            case 'best_friends':
+                // Get user's best friends based on real interactions
+                try {
+                    // Step 1: Get user's recent interactions (likes, recasts, replies)
+                    const interactionsUrl = `https://api.neynar.com/v2/farcaster/feed/user/${fid}/notifications?limit=150`;
+                    const interactionsRes = await fetch(interactionsUrl, {
+                        headers: {
+                            'accept': 'application/json',
+                            'x-api-key': NEYNAR_API_KEY
+                        }
+                    });
+                    const interactionsData = await interactionsRes.json();
+                    
+                    // Step 2: Count interactions per user
+                    const interactionCounts = {};
+                    
+                    if (interactionsData.notifications) {
+                        interactionsData.notifications.forEach(notification => {
+                            const actors = notification.actors || [];
+                            actors.forEach(actor => {
+                                if (actor.fid && actor.fid !== parseInt(fid)) {
+                                    if (!interactionCounts[actor.fid]) {
+                                        interactionCounts[actor.fid] = {
+                                            user: actor,
+                                            likes: 0,
+                                            recasts: 0,
+                                            replies: 0,
+                                            mentions: 0,
+                                            total: 0
+                                        };
+                                    }
+                                    
+                                    // Count interaction types
+                                    const type = notification.type;
+                                    if (type === 'likes') {
+                                        interactionCounts[actor.fid].likes++;
+                                    } else if (type === 'recasts') {
+                                        interactionCounts[actor.fid].recasts++;
+                                    } else if (type === 'reply') {
+                                        interactionCounts[actor.fid].replies++;
+                                    } else if (type === 'mention') {
+                                        interactionCounts[actor.fid].mentions++;
+                                    }
+                                    
+                                    interactionCounts[actor.fid].total++;
+                                }
+                            });
+                        });
+                    }
+                    
+                    // Step 3: Get user's following list to verify relationships
+                    const followingUrl = `https://api.neynar.com/v2/farcaster/following?fid=${fid}&limit=150`;
+                    const followingRes = await fetch(followingUrl, {
+                        headers: {
+                            'accept': 'application/json',
+                            'x-api-key': NEYNAR_API_KEY
+                        }
+                    });
+                    const followingData = await followingRes.json();
+                    const followingFids = new Set((followingData.users || []).map(u => u.fid));
+                    
+                    // Step 4: Get followers for mutual follow check
+                    const followersUrl = `https://api.neynar.com/v2/farcaster/followers?fid=${fid}&limit=150`;
+                    const followersRes = await fetch(followersUrl, {
+                        headers: {
+                            'accept': 'application/json',
+                            'x-api-key': NEYNAR_API_KEY
+                        }
+                    });
+                    const followersData = await followersRes.json();
+                    const followerFids = new Set((followersData.users || []).map(u => u.fid));
+                    
+                    // Step 5: Score users based on interactions
+                    const scoredUsers = Object.values(interactionCounts).map(item => {
+                        let score = 0;
+                        
+                        // Interaction-based scoring (most important!)
+                        score += item.likes * 1;        // +1 per like
+                        score += item.recasts * 3;      // +3 per recast (more valuable)
+                        score += item.replies * 5;      // +5 per reply (conversation!)
+                        score += item.mentions * 4;     // +4 per mention
+                        
+                        // +50 bonus for mutual follows
+                        const isMutual = followingFids.has(item.user.fid) && followerFids.has(item.user.fid);
+                        if (isMutual) {
+                            score += 50;
+                        }
+                        
+                        // +20 bonus for following (even if not mutual)
+                        if (followingFids.has(item.user.fid)) {
+                            score += 20;
+                        }
+                        
+                        return {
+                            ...item.user,
+                            interaction_stats: {
+                                likes: item.likes,
+                                recasts: item.recasts,
+                                replies: item.replies,
+                                mentions: item.mentions,
+                                total: item.total
+                            },
+                            friendship_score: score,
+                            is_mutual: isMutual,
+                            is_following: followingFids.has(item.user.fid)
+                        };
+                    });
+                    
+                    // Step 6: Sort by interaction score and return top 5
+                    const topFriends = scoredUsers
+                        .sort((a, b) => b.friendship_score - a.friendship_score)
+                        .slice(0, 5);
+                    
+                    if (topFriends.length === 0) {
+                        return res.status(200).json({ 
+                            success: false, 
+                            users: [],
+                            message: 'No interaction history found'
+                        });
+                    }
+                    
+                    return res.status(200).json({ 
+                        success: true, 
+                        users: topFriends,
+                        total_interactions: Object.keys(interactionCounts).length,
+                        top_interaction_type: topFriends[0]?.interaction_stats || {}
+                    });
+                } catch (error) {
+                    console.error('Best friends API error:', error);
+                    return res.status(500).json({ 
+                        success: false, 
+                        users: [],
+                        error: 'Failed to fetch best friends'
+                    });
+                }
+                break;
             case 'check_stamps':
                 // Check all three stamp eligibility conditions in one call
                 // 1. Neynar Score > 0.6 → Free Neynar stamp

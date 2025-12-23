@@ -4392,27 +4392,55 @@
         
         async function fetchTopFriends() {
             try {
-                document.getElementById('selected-users').innerHTML = '<div style="color:rgba(255,255,255,0.5);font-size:0.8rem;">Loading friends...</div>';
+                const loadingMsg = document.getElementById('selected-users');
+                loadingMsg.innerHTML = '<div style="color:rgba(255,255,255,0.5);font-size:0.8rem;text-align:center;padding:12px;">🔍 Finding your best friends...</div>';
                 
-                // Use current user's fid or default to a popular user for demo
-                const fid = currentUser?.fid || 3; // dwr.eth as default
-                const res = await fetch(`/api/neynar?action=following&fid=${fid}&limit=5`);
+                // Use current user's fid
+                const fid = currentUser?.fid || 3;
+                
+                // Call new best_friends API
+                const res = await fetch(`/api/neynar?action=best_friends&fid=${fid}`);
                 const data = await res.json();
-                if (data.users?.length > 0) {
-                    selectedRecipients = data.users.slice(0, 5).map(u => ({
+                
+                if (data.success && data.users?.length > 0) {
+                    // Map to selectedRecipients format
+                    selectedRecipients = data.users.map(u => ({
                         fid: u.fid,
                         username: u.username,
                         display_name: u.display_name,
-                        pfp_url: u.pfp_url
+                        pfp_url: u.pfp_url,
+                        is_mutual: u.is_mutual,
+                        friendship_score: u.friendship_score
                     }));
+                    
                     renderSelectedUsers();
                     updateDirectPreview();
+                    
+                    // Show success message with interaction stats
+                    const mutualCount = data.users.filter(u => u.is_mutual).length;
+                    const topInteraction = data.top_interaction_type;
+                    setTimeout(() => {
+                        const hint = document.createElement('div');
+                        hint.style.cssText = 'font-size:0.7rem;color:#4ade80;text-align:center;margin-top:8px;';
+                        hint.innerHTML = `✅ Found ${data.users.length} friends with most interactions (${mutualCount} mutual)<br>
+                            <span style="font-size:0.65rem;color:rgba(255,255,255,0.6);">
+                                💬 ${topInteraction.replies || 0} replies · ❤️ ${topInteraction.likes || 0} likes · 🔄 ${topInteraction.recasts || 0} recasts
+                            </span>`;
+                        loadingMsg.appendChild(hint);
+                        setTimeout(() => hint.remove(), 4000);
+                    }, 100);
                 } else {
-                    document.getElementById('selected-users').innerHTML = '';
+                    loadingMsg.innerHTML = '<div style="color:#ff6b6b;font-size:0.75rem;text-align:center;padding:12px;">⚠️ No friends found. Try searching manually.</div>';
+                    setTimeout(() => {
+                        loadingMsg.innerHTML = '';
+                    }, 3000);
                 }
             } catch (e) { 
-                console.error('Failed to fetch friends:', e);
-                document.getElementById('selected-users').innerHTML = '';
+                console.error('Failed to fetch best friends:', e);
+                document.getElementById('selected-users').innerHTML = '<div style="color:#ff6b6b;font-size:0.75rem;text-align:center;padding:12px;">❌ Failed to load friends</div>';
+                setTimeout(() => {
+                    document.getElementById('selected-users').innerHTML = '';
+                }, 3000);
             }
         }
         function closeDirectGiftModal() { document.getElementById('direct-gift-modal').classList.remove('visible'); }
@@ -5859,5 +5887,8 @@ Write only the reply text, nothing else:`;
             document.getElementById('reply-gift-section').style.display = this.checked ? 'block' : 'none';
         });
     </script>
+    
+    <!-- Single Stamp Purchase Modal with Slider -->
+    <script src="./stamp-purchase-modal.js"></script>
 </body>
 </html>
