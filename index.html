@@ -1908,19 +1908,8 @@
                     }
                 </style>
                 
-                <!-- Single Stamp Display with Dot Navigation -->
-                <div style="max-width: 400px; margin: 0 auto;">
-                    <!-- Stamp Container (keep stamp-grid ID!) -->
-                    <div id="stamp-grid" style="display: flex; justify-content: center; margin-bottom: 12px;"></div>
-                    
-                    <!-- Dot Indicators -->
-                    <div id="stamp-dots" style="display: flex; justify-content: center; gap: 8px;">
-                        <div class="stamp-dot" data-index="0" style="width: 10px; height: 10px; border-radius: 50%; background: var(--gold); cursor: pointer; transition: all 0.3s;"></div>
-                        <div class="stamp-dot" data-index="1" style="width: 10px; height: 10px; border-radius: 50%; background: rgba(212,175,55,0.3); cursor: pointer; transition: all 0.3s;"></div>
-                        <div class="stamp-dot" data-index="2" style="width: 10px; height: 10px; border-radius: 50%; background: rgba(212,175,55,0.3); cursor: pointer; transition: all 0.3s;"></div>
-                        <div class="stamp-dot" data-index="3" style="width: 10px; height: 10px; border-radius: 50%; background: rgba(212,175,55,0.3); cursor: pointer; transition: all 0.3s;"></div>
-                    </div>
-                </div>
+                <!-- Stamp Grid (2x2) -->
+                <div id="stamp-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;"></div>
                 
                 <!-- Quick Rules Card (below stamps) -->
                 <div style="margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px;">
@@ -3208,23 +3197,19 @@
             }
         }
         
-        // Current stamp index for navigation
-        let currentStampIndex = 0;
-        
-        const allStamps = [
-            { id: 'neynar', icon: '🟣', name: 'Neynar', img: '/stamp/neynar-preview.png', original: '/stamp/neynar.png' },
-            { id: 'farcaster', icon: '🟪', name: 'Farcaster', img: '/stamp/farcaster-preview.png', original: '/stamp/farcaster.png' },
-            { id: 'warplet', icon: '🎨', name: 'Warplet', img: '/stamp/warplet-preview.png', original: '/stamp/warplet.png' },
-            { id: 'based', icon: '🌟', name: 'Based', img: '/stamp/based-preview.png', original: '/stamp/based.png' }
-        ];
-        
-        // Render stamp grid inline (single stamp display)
+        // Render stamp grid inline
         function renderStampGrid() {
             const stampGrid = document.getElementById('stamp-grid');
             stampGrid.innerHTML = '';
             
-            // Render only current stamp
-            const stamp = allStamps[currentStampIndex];
+            const stamps = [
+                { id: 'neynar', icon: '🟣', name: 'Neynar', img: '/stamp/neynar-preview.png', original: '/stamp/neynar.png' },
+                { id: 'farcaster', icon: '🟪', name: 'Farcaster', img: '/stamp/farcaster-preview.png', original: '/stamp/farcaster.png' },
+                { id: 'warplet', icon: '🎨', name: 'Warplet', img: '/stamp/warplet-preview.png', original: '/stamp/warplet.png' },
+                { id: 'based', icon: '🌟', name: 'Based', img: '/stamp/based-preview.png', original: '/stamp/based.png' }
+            ];
+            
+            stamps.forEach(stamp => {
                 const isOwned = userStamps[stamp.id]?.owned;
                 const eligibility = stampEligibility[stamp.id];
                 const isEligible = eligibility?.eligible;
@@ -3236,9 +3221,19 @@
                 stampWrapper.style.cssText = `
                     display: flex;
                     flex-direction: column;
-                    align-items: center;
-                    gap: 8px;
+                    gap: 4px;
+                    cursor: ${isOwned ? 'pointer' : (stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible) ? 'pointer' : 'default'};
                 `;
+                
+                // Wrapper click for Based stamp (when eligible but not owned)
+                if (!isOwned && stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible) {
+                    stampWrapper.onclick = (e) => {
+                        // Don't trigger if clicking a button
+                        if (e.target.tagName !== 'BUTTON') {
+                            openBasedMintModal();
+                        }
+                    };
+                }
                 
                 // Stamp card (image container)
                 const stampCard = document.createElement('div');
@@ -3246,27 +3241,27 @@
                 // Adjust image scale for visual alignment
                 let imageScale = '1';
                 if (stamp.id === 'neynar') {
-                    imageScale = '1.15'; // Much larger to match Farcaster
+                    imageScale = '0.95'; // Slightly larger than before
                 } else if (stamp.id === 'farcaster') {
-                    imageScale = '1'; // Reference
+                    imageScale = '1'; // Standard reference
                 } else if (stamp.id === 'warplet') {
-                    imageScale = '0.78'; // Smaller
+                    imageScale = '0.82'; // Smaller (was too big)
                 } else if (stamp.id === 'based') {
-                    imageScale = '1.1'; // Larger
+                    imageScale = '0.90'; // Compact
                 }
                 
                 const canClick = isOwned || (stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible);
                 
                 stampCard.style.cssText = `
                     position: relative;
-                    border-radius: 8px;
-                    overflow: hidden;
-                    cursor: pointer;
-                    border: 3px solid ${selectedStamp === stamp.id ? 'var(--gold)' : 'rgba(212,175,55,0.3)'};
-                    transition: all 0.3s ease;
-                    box-shadow: ${selectedStamp === stamp.id ? '0 0 20px rgba(212,175,55,0.6)' : 'none'};
-                    background: #001a10;
-                    max-width: 280px;
+                    border-radius: 6px;
+                    overflow: visible;
+                    cursor: ${canClick ? 'pointer' : 'default'};
+                    border: ${selectedStamp === stamp.id ? '2px solid var(--gold)' : '1px solid rgba(212,175,55,0.3)'};
+                    transition: all 0.2s ease;
+                    opacity: ${isOwned ? '1' : '0.6'};
+                    padding: 4px;
+                    background: rgba(0,0,0,0.2);
                 `;
                 
                 // Click handler for all stamps
@@ -3302,20 +3297,8 @@
                 
                 stampWrapper.appendChild(stampCard);
                 
-                // Balance display below stamp
-                const quantity = userStamps[stamp.id]?.quantity || 0;
-                const balanceDiv = document.createElement('div');
-                balanceDiv.style.cssText = `
-                    font-size: 1.2rem;
-                    color: var(--gold);
-                    font-weight: bold;
-                    text-align: center;
-                `;
-                balanceDiv.innerHTML = `${quantity} 🎫`;
-                stampWrapper.appendChild(balanceDiv);
-                
-                // OLD: Status and details - REMOVED
-                if (false && !isOwned) {
+                // Status and details
+                if (!isOwned) {
                     // For Based stamp - show progress and mint button
                     if (stamp.id === 'based') {
                         const basedProgress = document.createElement('div');
@@ -3458,36 +3441,17 @@
                     // Owned - show quantity
                     const quantity = userStamps[stamp.id]?.quantity || 0;
                     
-                    // Show eligibility status first (if eligible but not owned)
-                    if (!isOwned && isEligible && stamp.id !== 'based') {
-                        const eligibleBadge = document.createElement('div');
-                        eligibleBadge.style.cssText = `
-                            text-align: center;
-                            margin-top: 4px;
-                            padding: 4px 6px;
-                            background: rgba(74,222,128,0.15);
-                            border: 1px solid rgba(74,222,128,0.4);
-                            border-radius: 4px;
-                            font-size: 0.55rem;
-                            color: #4ade80;
-                            font-weight: bold;
-                        `;
-                        const freeQty = stamp.id === 'neynar' ? 3 : (stamp.id === 'farcaster' ? 10 : 5);
-                        eligibleBadge.innerHTML = `✅ Get ${freeQty} FREE`;
-                        stampWrapper.appendChild(eligibleBadge);
-                    }
-                    
                     if (stamp.id === 'based' && userStamps.based?.permanent) {
                         // Based unlimited
                         const unlimitedBadge = document.createElement('div');
                         unlimitedBadge.style.cssText = `
                             text-align: center;
-                            font-size: 0.6rem;
-                            margin-top: 4px;
-                            padding: 5px 6px;
+                            font-size: 0.65rem;
+                            margin-top: 6px;
+                            padding: 6px 8px;
                             background: linear-gradient(135deg, rgba(74,222,128,0.2), rgba(34,197,94,0.2));
                             border: 1px solid rgba(74,222,128,0.5);
-                            border-radius: 5px;
+                            border-radius: 6px;
                             color: #4ade80;
                             font-weight: bold;
                             cursor: pointer;
@@ -3498,23 +3462,23 @@
                             openStampDetailsModal(stamp.id, stamp.name);
                         };
                         stampWrapper.appendChild(unlimitedBadge);
-                    } else if (isOwned) {
-                        // Regular stamps with quantity - clickable (smaller)
+                    } else {
+                        // Regular stamps with quantity - clickable
                         const quantityDisplay = document.createElement('div');
                         quantityDisplay.style.cssText = `
                             text-align: center;
-                            margin-top: 4px;
-                            padding: 4px 6px;
+                            margin-top: 6px;
+                            padding: 6px 8px;
                             background: rgba(74,222,128,0.15);
                             border: 1px solid rgba(74,222,128,0.4);
-                            border-radius: 5px;
+                            border-radius: 6px;
                             cursor: pointer;
                             transition: all 0.2s;
                         `;
                         quantityDisplay.innerHTML = `
-                            <div style="font-size: 0.55rem; color: rgba(255,255,255,0.5); margin-bottom: 1px;">Owned</div>
-                            <div style="font-size: 0.7rem; color: #4ade80; font-weight: bold;">
-                                ${quantity} 🎫
+                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.6); margin-bottom: 2px;">Owned</div>
+                            <div style="font-size: 0.75rem; color: #4ade80; font-weight: bold;">
+                                ${quantity} stamp${quantity !== 1 ? 's' : ''} 🎫
                             </div>
                         `;
                         quantityDisplay.onclick = (e) => {
@@ -3531,40 +3495,11 @@
                     }
                 }
                 
-            stampGrid.appendChild(stampWrapper);
-            
-            // Update arrows
-            updateArrows();
-            
-            // Auto-select if owned
-            if (isOwned && !selectedStamp) {
-                selectedStamp = stamp.id;
-                updateGenerateButtonState();
-            }
+                stampGrid.appendChild(stampWrapper);
+            });
             
             // Render Based progress
             renderBasedProgress();
-        }
-        
-        // Update dot indicators
-        function updateArrows() {
-            const dots = document.querySelectorAll('.stamp-dot');
-            dots.forEach((dot, index) => {
-                // Update active state
-                if (index === currentStampIndex) {
-                    dot.style.background = 'var(--gold)';
-                    dot.style.transform = 'scale(1.2)';
-                } else {
-                    dot.style.background = 'rgba(212,175,55,0.3)';
-                    dot.style.transform = 'scale(1)';
-                }
-                
-                // Add click handler
-                dot.onclick = () => {
-                    currentStampIndex = index;
-                    renderStampGrid();
-                };
-            });
         }
         
         // Render Based unlock progress
