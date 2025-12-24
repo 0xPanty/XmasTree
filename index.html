@@ -5918,20 +5918,20 @@ Write only the reply text, nothing else:`;
                     const contentX = 150;
                     const contentWidth = canvas.width - 300;
                 
-                    // Add "Dear @username," greeting
-                    ctx.font = 'italic 40px Georgia';
+                    // Add "Dear @username," greeting (larger font)
+                    ctx.font = 'italic 48px Georgia';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'left';
                     if (typeof recipientNames === 'string') {
                         ctx.fillText(`Dear @${recipientNames},`, contentX, yPos);
-                        yPos += 80;
+                        yPos += 90;
                     } else if (Array.isArray(recipientNames) && recipientNames.length > 0) {
                         ctx.fillText(`Dear Friends,`, contentX, yPos);
-                        yPos += 80;
+                        yPos += 90;
                     }
                     
-                    // Greeting text (hand-written style)
-                    ctx.font = '34px Brush Script MT, cursive';
+                    // Greeting text (larger hand-written style)
+                    ctx.font = '40px Brush Script MT, cursive';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'left';
                 
@@ -5942,7 +5942,7 @@ Write only the reply text, nothing else:`;
                     // Word wrap the greeting (确保显示完整内容)
                     const words = (greeting || 'Wishing you a wonderful Christmas season filled with joy and warmth!').split(' ');
                     let line = '';
-                    const lineHeight = 52;
+                    const lineHeight = 60;
                     const maxWidth = contentWidth;
                 
                     for (let word of words) {
@@ -5952,7 +5952,7 @@ Write only the reply text, nothing else:`;
                             ctx.fillText(line, contentX, yPos);
                             line = word + ' ';
                             yPos += lineHeight;
-                            if (yPos > canvas.height - 280) break; // Leave space for signature
+                            if (yPos > canvas.height - 300) break; // Leave space for signature
                         } else {
                             line = testLine;
                         }
@@ -5961,12 +5961,12 @@ Write only the reply text, nothing else:`;
                         ctx.fillText(line, contentX, yPos);
                     }
                 
-                    // Sender signature (bottom right) - 更大更明显
-                    yPos = canvas.height - 200;
-                    ctx.font = 'italic 50px Brush Script MT, cursive';
+                    // Sender signature (below content, right-aligned like formal letter)
+                    yPos += 100; // Space after content
+                    ctx.font = 'italic 52px Brush Script MT, cursive';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'right';
-                    ctx.fillText(`- ${senderName}`, canvas.width - 120, yPos);
+                    ctx.fillText(`- ${senderName}`, canvas.width - contentX, yPos);
                     
                     // Convert to base64
                     resolve(canvas.toDataURL('image/png'));
