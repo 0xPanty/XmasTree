@@ -252,7 +252,9 @@ Festive winter scene, snowy fairy-tale forest, decorated Christmas tree with war
 Timeless vintage winter clothing, classic international postcard style.
 Cozy, joyful, nostalgic holiday mood.
 Hand-painted illustration look, muted colors, subtle vintage paper texture.
-Vertical format 9:16.`;
+Vertical format 9:16.
+
+IMPORTANT: No text, no words, no captions, no letters in the image. Pure illustration only.`;
 
 
             // Build parts array: IMAGE FIRST, then prompt (following farstand3 pattern)
@@ -283,7 +285,9 @@ Festive winter scene, snowy fairy-tale forest, decorated Christmas tree with war
 Timeless vintage winter clothing, classic international postcard style.
 Cozy, joyful, nostalgic holiday mood.
 Hand-painted illustration look, muted colors, subtle vintage paper texture.
-Vertical format 9:16.`
+Vertical format 9:16.
+
+IMPORTANT: No text, no words, no captions, no letters in the image. Pure illustration only.`
                 : visualPrompt; // Fallback if no image
             
             imageParts.push({ text: finalPrompt });
@@ -357,7 +361,7 @@ Style: Natural, heartfelt, with vivid details
 Write only the greeting text, nothing else:`;
 
             const textResponse = await fetch(
-                `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+                `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
