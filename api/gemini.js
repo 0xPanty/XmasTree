@@ -254,14 +254,18 @@ Cozy, joyful, nostalgic holiday mood.
 Hand-painted illustration look, muted colors, subtle vintage paper texture.
 Vertical format 9:16.
 
-CRITICAL REQUIREMENTS:
-- NO oval frame, NO decorative borders, NO ornamental lines
-- NO text at bottom, NO words anywhere
-- Pure full-frame illustration filling the entire image
-- Simple, clean composition without frames or borders
-- The illustration should extend to all edges
+CRITICAL COMPOSITION REQUIREMENTS:
+- Central illustration with soft ARCHED or OVAL vignette frame
+- Gentle fade from the scene into cream/beige background at the edges
+- Soft, natural vignette effect (NOT hard edges)
+- The illustration should have rounded/arched borders that blend naturally into the paper background
+- Leave cream-colored space around the edges (like a vintage postcard)
+- Smooth transition between illustration and background
+- NO text, NO words, NO captions in the image
 
-IMPORTANT: No text, no words, no captions, no letters, no frames, no borders in the image. Pure illustration only.`;
+Think: Classic vintage postcard with soft oval/arched illustration that fades naturally into the paper.
+
+IMPORTANT: Soft vignette borders with natural fade, NOT hard rectangular edges.`;
 
 
             // Build parts array: IMAGE FIRST, then prompt (following farstand3 pattern)
@@ -294,14 +298,18 @@ Cozy, joyful, nostalgic holiday mood.
 Hand-painted illustration look, muted colors, subtle vintage paper texture.
 Vertical format 9:16.
 
-CRITICAL REQUIREMENTS:
-- NO oval frame, NO decorative borders, NO ornamental lines
-- NO text at bottom, NO words anywhere
-- Pure full-frame illustration filling the entire image
-- Simple, clean composition without frames or borders
-- The illustration should extend to all edges
+CRITICAL COMPOSITION REQUIREMENTS:
+- Central illustration with soft ARCHED or OVAL vignette frame
+- Gentle fade from the scene into cream/beige background at the edges
+- Soft, natural vignette effect (NOT hard edges)
+- The illustration should have rounded/arched borders that blend naturally into the paper background
+- Leave cream-colored space around the edges (like a vintage postcard)
+- Smooth transition between illustration and background
+- NO text, NO words, NO captions in the image
 
-IMPORTANT: No text, no words, no captions, no letters, no frames, no borders in the image. Pure illustration only.`
+Think: Classic vintage postcard with soft oval/arched illustration that fades naturally into the paper.
+
+IMPORTANT: Soft vignette borders with natural fade, NOT hard rectangular edges.`
                 : visualPrompt; // Fallback if no image
             
             imageParts.push({ text: finalPrompt });
@@ -358,9 +366,9 @@ IMPORTANT: No text, no words, no captions, no letters, no frames, no borders in 
 CRITICAL REQUIREMENTS:
 1. The card illustration shows: "${randomScene}"
 2. Your greeting MUST tell a story about this exact scene
-3. LENGTH REQUIREMENT: Write AT LEAST 80 words, UP TO 150 words
+3. LENGTH REQUIREMENT: Write 50-80 words (concise but detailed)
 4. DO NOT write a simple one-line greeting
-5. Tell a vivid story with sensory details about the scene
+5. Write 2-3 sentences with vivid details about the scene
 
 Structure:
 - Opening: Address the recipient directly - "Dear ${displayRecipient}," or "Hey ${displayRecipient}!" followed by a warm holiday greeting
@@ -375,11 +383,11 @@ Structure:
 - Connection (1-2 sentences): Make it personal to the recipient - "I can't wait to catch up with you soon!" or "Hope you're staying warm and cozy!" or "Miss our adventures together!" or "Would love to share this experience with you!"
 - Closing: "Warmest wishes, ${senderName}" or "With love, ${senderName}" or "Cheers, ${senderName}"
 
-Tone: Warm, genuine, storytelling (like a letter from a close friend sharing their life)
-Length: MINIMUM 80 words, MAXIMUM 150 words (this is mandatory, not optional)
-Style: Natural, heartfelt, with vivid details
+Tone: Warm, genuine, storytelling
+Length: 50-80 words (short but vivid)
+Style: Natural, heartfelt, concise
 
-IMPORTANT: Your response must be a complete multi-sentence greeting with detailed storytelling. Do NOT respond with just one sentence. Write at least 3-4 full sentences describing the scene activity, plus opening and closing.
+IMPORTANT: Write 2-3 sentences about the scene activity. Keep it concise but descriptive. Include opening greeting and closing signature.
 
 Write only the greeting text, nothing else:`;
 
@@ -392,7 +400,7 @@ Write only the greeting text, nothing else:`;
                         contents: [{ parts: [{ text: greetingPrompt }] }],
                         generationConfig: {
                             temperature: 0.9,
-                            maxOutputTokens: 400,
+                            maxOutputTokens: 250,
                             candidateCount: 1
                         }
                     })
