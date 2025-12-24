@@ -5908,27 +5908,31 @@ Write only the reply text, nothing else:`;
                     ctx.drawImage(stampImg, stampX, stampY, stampSize, stampSize);
                     ctx.shadowColor = 'transparent';
                     ctx.shadowBlur = 0;
+                    
+                    // Add "To: @username" below stamp (personalized address)
+                    let toYPos = stampY + stampSize + 30;
+                    ctx.font = 'bold 28px Arial';
+                    ctx.fillStyle = '#3a3a3a';
+                    ctx.textAlign = 'right';
+                    ctx.fillText('To:', canvas.width - 60, toYPos);
+                    
+                    toYPos += 45;
+                    ctx.font = '32px Arial';
+                    if (typeof recipientNames === 'string') {
+                        // Single recipient - personalized
+                        ctx.fillText(`@${recipientNames}`, canvas.width - 60, toYPos);
+                    } else if (Array.isArray(recipientNames) && recipientNames.length > 0) {
+                        // Multiple recipients - preview
+                        ctx.fillText(`${recipientNames.length} Friends`, canvas.width - 60, toYPos);
+                        ctx.font = '22px Arial';
+                        ctx.fillStyle = '#666';
+                        toYPos += 35;
+                        ctx.fillText('(Personalized)', canvas.width - 60, toYPos);
+                    }
                 }
                 
-                // Recipient greeting at top (if personalized)
-                let yPos = 200;
-                if (typeof recipientNames === 'string') {
-                    // Single recipient - personalized greeting
-                    ctx.font = 'italic 36px Georgia';
-                    ctx.fillStyle = '#3a3a3a';
-                    ctx.fillText(`Dear @${recipientNames},`, 80, yPos);
-                    yPos += 100;
-                } else if (Array.isArray(recipientNames) && recipientNames.length > 0) {
-                    // Multiple recipients - preview mode
-                    ctx.font = 'italic 36px Georgia';
-                    ctx.fillStyle = '#3a3a3a';
-                    ctx.fillText(`To: ${recipientNames.length} Friends`, 80, yPos);
-                    ctx.font = '28px Arial';
-                    ctx.fillStyle = '#666';
-                    yPos += 50;
-                    ctx.fillText('(Personalized for each)', 80, yPos);
-                    yPos += 80;
-                }
+                // Letter content starts below
+                let yPos = 480;
                 
                 // Main greeting message (centered, word-wrapped)
                 const contentX = 80;
