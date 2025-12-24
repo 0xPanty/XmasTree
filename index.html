@@ -5883,16 +5883,7 @@ Write only the reply text, nothing else:`;
                     // Draw background
                     ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
                     
-                    // Draw stamp on background (right position to match background)
-                    if (stampImg) {
-                        const stampSize = 200;
-                        const stampX = canvas.width - stampSize - 80;
-                        const stampY = 80;
-                        
-                        // Draw stamp directly (no background, blend with bg)
-                        ctx.globalAlpha = 1.0;
-                        ctx.drawImage(stampImg, stampX, stampY, stampSize, stampSize);
-                    }
+                    // Stamp is already in the background image, no need to draw it separately
                     
                     // Add "To: @username" below stamp area (top-right)
                     let toYPos = 340;
@@ -5916,54 +5907,54 @@ Write only the reply text, nothing else:`;
                     }
                     
                     // Letter content starts below
-                    let yPos = 520;
+                    let yPos = 550;
+                    
+                    // Main greeting message (adjust margins to stay within border)
+                    const contentX = 150;
+                    const contentWidth = canvas.width - 300;
                 
-                // Main greeting message
-                const contentX = 100;
-                const contentWidth = canvas.width - 200;
-                
-                // Add "Dear @username," greeting (更大字体)
-                ctx.font = 'italic 48px Georgia';
-                ctx.fillStyle = '#2c1810';
-                ctx.textAlign = 'left';
-                if (typeof recipientNames === 'string') {
-                    ctx.fillText(`Dear @${recipientNames},`, contentX, yPos);
-                    yPos += 100;
-                } else if (Array.isArray(recipientNames) && recipientNames.length > 0) {
-                    ctx.fillText(`Dear Friends,`, contentX, yPos);
-                    yPos += 100;
-                }
-                
-                // Greeting text (更大的手写字体)
-                ctx.font = '40px Brush Script MT, cursive';
-                ctx.fillStyle = '#2c1810';
-                ctx.textAlign = 'left';
+                    // Add "Dear @username," greeting
+                    ctx.font = 'italic 40px Georgia';
+                    ctx.fillStyle = '#2c1810';
+                    ctx.textAlign = 'left';
+                    if (typeof recipientNames === 'string') {
+                        ctx.fillText(`Dear @${recipientNames},`, contentX, yPos);
+                        yPos += 80;
+                    } else if (Array.isArray(recipientNames) && recipientNames.length > 0) {
+                        ctx.fillText(`Dear Friends,`, contentX, yPos);
+                        yPos += 80;
+                    }
+                    
+                    // Greeting text (hand-written style)
+                    ctx.font = '34px Brush Script MT, cursive';
+                    ctx.fillStyle = '#2c1810';
+                    ctx.textAlign = 'left';
                 
                 // Debug: log greeting content
                 console.log('[generateAddressSide] Greeting:', greeting);
                 console.log('[generateAddressSide] Greeting length:', greeting?.length || 0);
                 
-                // Word wrap the greeting (确保显示完整内容)
-                const words = (greeting || 'Wishing you a wonderful Christmas season filled with joy and warmth!').split(' ');
-                let line = '';
-                const lineHeight = 60;
-                const maxWidth = contentWidth;
+                    // Word wrap the greeting (确保显示完整内容)
+                    const words = (greeting || 'Wishing you a wonderful Christmas season filled with joy and warmth!').split(' ');
+                    let line = '';
+                    const lineHeight = 52;
+                    const maxWidth = contentWidth;
                 
-                for (let word of words) {
-                    const testLine = line + word + ' ';
-                    const metrics = ctx.measureText(testLine);
-                    if (metrics.width > maxWidth && line !== '') {
-                        ctx.fillText(line, contentX, yPos);
-                        line = word + ' ';
-                        yPos += lineHeight;
-                        if (yPos > canvas.height - 250) break; // Leave space for signature
-                    } else {
-                        line = testLine;
+                    for (let word of words) {
+                        const testLine = line + word + ' ';
+                        const metrics = ctx.measureText(testLine);
+                        if (metrics.width > maxWidth && line !== '') {
+                            ctx.fillText(line, contentX, yPos);
+                            line = word + ' ';
+                            yPos += lineHeight;
+                            if (yPos > canvas.height - 280) break; // Leave space for signature
+                        } else {
+                            line = testLine;
+                        }
                     }
-                }
-                if (line.trim()) {
-                    ctx.fillText(line, contentX, yPos);
-                }
+                    if (line.trim()) {
+                        ctx.fillText(line, contentX, yPos);
+                    }
                 
                     // Sender signature (bottom right) - 更大更明显
                     yPos = canvas.height - 200;
