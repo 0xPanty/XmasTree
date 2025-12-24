@@ -3351,34 +3351,46 @@
                     statusDiv.style.background = 'linear-gradient(to right, rgba(74,222,128,0.2), rgba(34,197,94,0.2))';
                     statusDiv.style.border = '1px solid rgba(74,222,128,0.4)';
                     statusDiv.style.color = '#4ade80';
-                    statusDiv.innerHTML = isUnlimited ? '✅ 已拥有（无限使用）' : `✅ 已拥有 ${ownedQuantity} 张`;
+                    statusDiv.innerHTML = isUnlimited ? '✅ Owned (Unlimited)' : `✅ Owned ${ownedQuantity} stamps`;
                 } else if (stamp.id === 'based') {
                     if (canMintBased) {
                         statusDiv.style.background = 'linear-gradient(to right, rgba(255,215,0,0.2), rgba(255,237,78,0.2))';
                         statusDiv.style.border = '1px solid rgba(255,215,0,0.4)';
                         statusDiv.style.color = '#ffd700';
-                        statusDiv.innerHTML = '🎖️ 可铸造 NFT';
+                        statusDiv.innerHTML = '🎖️ Ready to Mint NFT';
                     } else {
                         statusDiv.style.background = 'rgba(100,100,100,0.2)';
                         statusDiv.style.border = '1px solid rgba(150,150,150,0.3)';
                         statusDiv.style.color = 'rgba(255,255,255,0.5)';
-                        statusDiv.innerHTML = '🔒 未解锁';
+                        statusDiv.innerHTML = '🔒 Locked - Collect 3 Stamps';
                     }
                 } else if (isEligible) {
                     statusDiv.style.background = 'linear-gradient(to right, rgba(74,222,128,0.2), rgba(34,197,94,0.2))';
                     statusDiv.style.border = '1px solid rgba(74,222,128,0.4)';
                     statusDiv.style.color = '#4ade80';
-                    statusDiv.innerHTML = '🎁 符合免费领取条件';
+                    statusDiv.innerHTML = '🎁 Eligible for Free Claim';
                 } else if (stamp.id === 'warplet') {
                     statusDiv.style.background = 'rgba(255,107,107,0.15)';
                     statusDiv.style.border = '1px solid rgba(255,107,107,0.3)';
                     statusDiv.style.color = '#ff6b6b';
-                    statusDiv.innerHTML = '🔒 需要 Warplet NFT';
+                    statusDiv.innerHTML = '🔒 Warplet NFT Required ❌';
                 } else {
+                    // Not eligible but can purchase - show reason
+                    const reason = eligibility?.reason || '';
+                    let reasonText = '';
+                    if (stamp.id === 'neynar' && eligibility?.score !== undefined) {
+                        reasonText = `Score ${eligibility.score} < 0.6 ❌`;
+                    } else if (stamp.id === 'farcaster') {
+                        reasonText = 'No Power Badge ❌';
+                    } else {
+                        reasonText = 'Not Eligible ❌';
+                    }
                     statusDiv.style.background = 'rgba(212,175,55,0.15)';
                     statusDiv.style.border = '1px solid rgba(212,175,55,0.3)';
-                    statusDiv.style.color = 'rgba(255,255,255,0.8)';
-                    statusDiv.innerHTML = '🛒 可购买';
+                    statusDiv.innerHTML = `
+                        <div style="color: #ff6b6b; font-size: 0.65rem; margin-bottom: 3px;">${reasonText}</div>
+                        <div style="color: #ffd700; font-size: 0.7rem; font-weight: bold;">💰 Available for Purchase</div>
+                    `;
                 }
                 
                 infoSection.appendChild(statusDiv);
@@ -3402,7 +3414,7 @@
                     actionBtn.style.background = 'linear-gradient(135deg, rgba(212,175,55,0.3), rgba(212,175,55,0.2))';
                     actionBtn.style.border = '1px solid rgba(212,175,55,0.5)';
                     actionBtn.style.color = 'var(--gold)';
-                    actionBtn.textContent = '📋 查看详情';
+                    actionBtn.textContent = '📋 View Details';
                     actionBtn.onclick = (e) => {
                         e.stopPropagation();
                         openStampDetailsModal(stamp.id, stamp.name);
@@ -3411,33 +3423,33 @@
                     if (canMintBased) {
                         actionBtn.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
                         actionBtn.style.color = '#2c2c2c';
-                        actionBtn.textContent = `🎖️ 铸造 NFT (${stamp.price} USDC)`;
+                        actionBtn.textContent = `🎖️ Mint NFT (${stamp.price} USDC)`;
                         actionBtn.onclick = () => openBasedMintModal();
                     } else {
                         actionBtn.style.background = 'rgba(100,100,100,0.3)';
                         actionBtn.style.color = 'rgba(255,255,255,0.4)';
                         actionBtn.style.cursor = 'not-allowed';
-                        actionBtn.textContent = '🔒 需收集前 3 张邮票';
+                        actionBtn.textContent = '🔒 Collect 3 Stamps First';
                         actionBtn.disabled = true;
                     }
                 } else if (isEligible) {
                     actionBtn.style.background = 'linear-gradient(135deg, #4ade80, #22c55e)';
                     actionBtn.style.color = 'white';
-                    actionBtn.textContent = `🎁 免费领取 ${stamp.quantity} 张`;
+                    actionBtn.textContent = `🎁 Free Claim ${stamp.quantity} stamps`;
                     actionBtn.onclick = () => claimStampInline(stamp.id);
                 } else if (stamp.id === 'warplet') {
                     actionBtn.style.background = 'rgba(100,100,100,0.3)';
                     actionBtn.style.color = 'rgba(255,255,255,0.4)';
                     actionBtn.style.cursor = 'not-allowed';
-                    actionBtn.textContent = '🔒 查看 NFT 要求';
+                    actionBtn.textContent = '🔒 View NFT Requirement';
                     actionBtn.onclick = (e) => {
                         e.stopPropagation();
-                        alert('需要持有 Warplet NFT 才能使用此邮票\n\n请前往 OpenSea 或 Zora 购买 Warplet NFT');
+                        alert('Warplet NFT Required\n\nYou need to hold a Warplet NFT to use this stamp.\n\nPurchase on OpenSea or Zora.');
                     };
                 } else {
                     actionBtn.style.background = 'linear-gradient(135deg, #d4af37, #ffd700)';
                     actionBtn.style.color = '#2c2c2c';
-                    actionBtn.textContent = `💰 购买 (${stamp.price} USDC)`;
+                    actionBtn.textContent = `💰 Purchase (${stamp.price} USDC)`;
                     actionBtn.onclick = () => openPurchaseModal(stamp.id, stamp.name, { price: stamp.price, quantity: stamp.quantity });
                 }
                 
