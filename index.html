@@ -1623,6 +1623,21 @@
                 <!-- Handwritten Message -->
                 <div class="card-inside-greeting" id="card-inside-greeting"></div>
                 
+                <!-- Double-sided Postcard Preview (for personalized gifts) -->
+                <div id="card-postcard-preview" style="display:none; margin:20px 0;">
+                    <div style="perspective:1500px; cursor:pointer;" onclick="flipCardPostcard()">
+                        <div id="card-postcard-flipper" style="position:relative; width:100%; height:400px; transition:transform 0.8s; transform-style:preserve-3d;">
+                            <!-- Address Side (Back) -->
+                            <img id="card-postcard-back" src="" style="position:absolute; width:100%; height:100%; object-fit:contain; backface-visibility:hidden; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+                            <!-- Picture Side (Front) -->
+                            <img id="card-postcard-front" src="" style="position:absolute; width:100%; height:100%; object-fit:contain; backface-visibility:hidden; transform:rotateY(180deg); border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+                        </div>
+                    </div>
+                    <div id="card-flip-hint" style="text-align:center; margin-top:12px; font-size:0.9rem; color:#8b4513;">
+                        👉 Click to see the picture side
+                    </div>
+                </div>
+                
                 <!-- Gift Icon (clickable to reveal amount) -->
                 <div id="gift-icon-wrapper" style="display:none; text-align:center; padding:24px 0; cursor:pointer;" onclick="revealGift()">
                     <div style="font-size:4rem; animation:pulse 2s infinite;">🎁</div>
@@ -4851,35 +4866,58 @@
             }
             
             closeDirectGiftModal();
-            showLoading('Creating gifts...');
+            showLoading('Creating personalized postcards...');
             
-            // Create a gift for each recipient with shared AI image
-            const links = [];
-            for (const r of selectedRecipients) {
-                const giftId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-                const giftData = {
-                    id: giftId,
-                    title: title,
-                    message: currentAIGreeting, // Use AI generated greeting
-                    hasGift: includeGift, // Whether includes money
-                    token: token,
-                    amount: amount,
-                    cover: selectedCover,
-                    aiImage: currentAIImage, // Store AI image
-                    sceneType: currentAIScene?.type || 'general', // Store scene for reply
-                    sceneDescription: currentAIScene?.description || 'holiday celebration',
-                    shares: 1, type: 'equal', mode: 'direct',
-                    requirePro: false, minScore: 0,
-                    claimed: 0, claimedBy: [],
-                    recipient: { fid: r.fid, username: r.username, pfp: r.pfp_url },
-                    sender: currentUser || { fid: 0, username: 'anonymous', pfp: '' },
-                    createdAt: Date.now()
+            // Generate personalized address side for each recipient
+            const stamp = new Image();
+            stamp.src = selectedStamp ? `/stamp/${selectedStamp}.png` : '/stamp/neynar.png';
+            
+            await new Promise((resolve) => {
+                stamp.onload = async () => {
+                    const senderName = currentUser?.username || (TEST_MODE ? 'xqc' : 'Anonymous');
+                    
+                    // Create a gift for each recipient with personalized address side
+                    const links = [];
+                    for (const r of selectedRecipients) {
+                        // Generate personalized address side (just for this recipient)
+                        const personalizedBack = await generateAddressSide(currentAIGreeting, senderName, r.username, stamp);
+                        
+                        const giftId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                        const giftData = {
+                            id: giftId,
+                            title: title,
+                            message: currentAIGreeting, // Use AI generated greeting
+                            hasGift: includeGift, // Whether includes money
+                            token: token,
+                            amount: amount,
+                            cover: selectedCover,
+                            aiImage: currentAIImage, // Front side (picture)
+                            aiImageBack: personalizedBack, // Personalized back side (address to this recipient)
+                            sceneType: currentAIScene?.type || 'general', // Store scene for reply
+                            sceneDescription: currentAIScene?.description || 'holiday celebration',
+                            shares: 1, type: 'equal', mode: 'direct',
+                            requirePro: false, minScore: 0,
+                            claimed: 0, claimedBy: [],
+                            recipient: { fid: r.fid, username: r.username, pfp: r.pfp_url },
+                            sender: currentUser || { fid: 0, username: 'anonymous', pfp: '' },
+                            createdAt: Date.now()
+                        };
+                        plazaGifts.push(giftData);
+                        links.push({ username: r.username, url: location.origin + location.pathname + '?gift=' + giftId });
+                    }
+                    localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+                    
+                    showShareLinks(links, title, includeGift, amount, token);
+                    resolve();
                 };
-                plazaGifts.push(giftData);
-                links.push({ username: r.username, url: location.origin + location.pathname + '?gift=' + giftId });
-            }
-            localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+                stamp.onerror = () => resolve(); // Continue without stamp if loading fails
+            });
             
+            return; // Early return - all logic handled inside stamp.onload
+        }
+        
+        // Helper function to show share links and reset state
+        async function showShareLinks(links, title, includeGift, amount, token) {
             // Create share text
             let shareText;
             if (includeGift) {
@@ -4895,7 +4933,7 @@
             hideLoading();
             if (navigator.clipboard) {
                 await navigator.clipboard.writeText(shareText);
-                alert(`Gift(s) created for ${selectedRecipients.length} friend(s)!\nLink(s) copied to clipboard!`);
+                alert(`Personalized postcard(s) created for ${links.length} friend(s)!\nEach will see their own name!\nLink(s) copied to clipboard!`);
             } else { alert(shareText); }
             
             // Reset
@@ -5031,6 +5069,24 @@
             document.getElementById('gift-details-wrapper').style.display = 'block';
         }
         
+        // Flip double-sided postcard in card view
+        function flipCardPostcard() {
+            const flipper = document.getElementById('card-postcard-flipper');
+            const hint = document.getElementById('card-flip-hint');
+            
+            if (!window.isCardPostcardFlipped) {
+                // Flip to front (picture side)
+                flipper.style.transform = 'rotateY(180deg)';
+                hint.textContent = '👈 Click to see the address side';
+                window.isCardPostcardFlipped = true;
+            } else {
+                // Flip back to address side
+                flipper.style.transform = 'rotateY(0deg)';
+                hint.textContent = '👉 Click to see the picture side';
+                window.isCardPostcardFlipped = false;
+            }
+        }
+        
         // Open card with flip animation and show AI content
         async function openEnvelopeCard() {
             if (!currentCardGift) return;
@@ -5045,6 +5101,19 @@
                 // Use pre-generated AI image and greeting
                 document.getElementById('card-inside-loading').style.display = 'none';
                 document.getElementById('card-inside-greeting').textContent = currentCardGift.message || 'Merry Christmas!';
+                
+                // Check if has personalized double-sided postcard
+                if (currentCardGift.aiImageBack) {
+                    // Show double-sided postcard
+                    document.getElementById('card-postcard-preview').style.display = 'block';
+                    document.getElementById('card-postcard-back').src = currentCardGift.aiImageBack;
+                    document.getElementById('card-postcard-front').src = `data:image/png;base64,${currentCardGift.aiImage}`;
+                    document.getElementById('card-postcard-flipper').style.transform = 'rotateY(0deg)';
+                    document.getElementById('card-flip-hint').textContent = '👉 Click to see the picture side';
+                    window.isCardPostcardFlipped = false;
+                } else {
+                    document.getElementById('card-postcard-preview').style.display = 'none';
+                }
                 
                 // Show gift icon or details based on hasGift
                 if (currentCardGift.hasGift) {
@@ -5858,14 +5927,26 @@ Write only the reply text, nothing else:`;
                 ctx.fillStyle = '#3a3a3a';
                 ctx.fillText('To:', rightX, canvas.height * 0.35);
                 
-                // Recipient names
+                // Recipient name (personalized for each recipient)
                 ctx.font = '40px Arial';
                 let yPos = canvas.height * 0.40;
-                const recipients = recipientNames || ['Friend'];
-                recipients.slice(0, 3).forEach(name => {
-                    ctx.fillText(`@${name}`, rightX + 20, yPos);
-                    yPos += 50;
-                });
+                
+                // Handle single recipient (personalized) or multiple (preview)
+                if (typeof recipientNames === 'string') {
+                    // Single recipient - personalized
+                    ctx.fillText(`@${recipientNames}`, rightX + 20, yPos);
+                } else if (Array.isArray(recipientNames)) {
+                    // Multiple recipients - preview mode
+                    const count = recipientNames.length;
+                    ctx.fillText(`${count} ${count === 1 ? 'Friend' : 'Friends'}`, rightX + 20, yPos);
+                    ctx.font = '28px Arial';
+                    ctx.fillStyle = '#666';
+                    yPos += 45;
+                    ctx.fillText('(Personalized for each)', rightX + 20, yPos);
+                } else {
+                    // Fallback
+                    ctx.fillText('Friend', rightX + 20, yPos);
+                }
                 
                 // Left side: Message section
                 const leftX = 60;
