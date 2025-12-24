@@ -242,58 +242,34 @@ REFERENCE IMAGE:`;
             // Use Gemini 2.5 Flash Image (proven stable model)
             console.log('🎨 Attempting image generation with Gemini 2.5 Flash Image...');
             
-            const visualPrompt = `Create a vintage Christmas greeting card illustration in the exact style of 1910s-1920s European postcards.
+            const visualPrompt = `Create a vintage New Year or Christmas greeting card using the provided photo as a reference for the person's appearance (preserve facial features and likeness).
 
-SCENE: ${randomScene}
+Inspired by classic illustrated New Year and Christmas postcards by Jenny Nyström, Anton Pieck, or Ellen Clapsaddle.
 
-CRITICAL STYLE REQUIREMENTS (STRICTLY FOLLOW):
-1. ART STYLE:
-   - Hand-drawn ink linework with delicate watercolor fills
-   - Soft, muted color palette: dusty rose, sage green, warm brown, cream, soft gold
-   - Visible pen strokes and cross-hatching for shading
-   - Flat, illustration style (NOT 3D rendering or photorealistic)
-   - Art Nouveau influences with elegant flowing lines
+Scene: ${randomScene}
 
-2. COMPOSITION:
-   - Vertical 9:16 postcard format
-   - Central focal point with decorative border elements
-   - Balanced, harmonious layout
-   - Space at top/bottom for text (leave margins)
-   - Depth created through layering, not perspective
+Festive winter scene, snowy fairy-tale forest, decorated Christmas tree with warm glowing lights.
+Timeless vintage winter clothing, classic international postcard style.
+Cozy, joyful, nostalgic holiday mood.
+Hand-painted illustration look, muted colors, subtle vintage paper texture.
+Vertical format 9:16.`;
 
-3. CHARACTER DESIGN (if people included):
-   - Simplified, idealized faces with gentle expressions
-   - Period-accurate clothing: long coats, fur trim, wool scarves, vintage hats
-   - Graceful poses, not too detailed
-   - Nostalgic, innocent mood
 
-4. ATMOSPHERE:
-   - Soft, diffused lighting (like winter afternoon)
-   - Gentle falling snow (small dots, not dramatic)
-   - Warm window glow with golden candlelight
-   - Cozy, intimate feeling
-
-5. DETAILS:
-   - Decorative elements: holly, poinsettias, pine branches, ribbons
-   - String lights with warm bulbs
-   - Vintage architecture: arched windows, ornate frames
-   - Subtle texture like aged paper
-
-6. COLOR HARMONY:
-   - Warm earth tones with pops of dusty red and green
-   - No bright neon or saturated colors
-   - Sepia undertones for vintage feel
-   - Cream/beige background, never pure white
-
-STRICTLY AVOID:
-- Photorealistic 3D rendering
-- Modern digital gradient effects
-- Overly dramatic lighting or shadows
-- Pure black or pure white
-- Busy, cluttered composition
-- Text or letters in the image
-- Modern clothing or objects`;
-
+            // Build parts array with both prompt and user image
+            const imageParts = [
+                { text: visualPrompt }
+            ];
+            
+            // Add user avatar as reference image if available
+            if (senderImg) {
+                imageParts.push({
+                    inlineData: {
+                        mimeType: senderImg.mimeType,
+                        data: senderImg.base64
+                    }
+                });
+                console.log('✅ Added user avatar as reference image');
+            }
 
             const imageResponse = await fetch(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${GEMINI_API_KEY}`,
@@ -302,9 +278,7 @@ STRICTLY AVOID:
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         contents: [{
-                            parts: [
-                                { text: visualPrompt }
-                            ]
+                            parts: imageParts
                         }],
                         generationConfig: {
                             temperature: 0.7,

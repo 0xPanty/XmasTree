@@ -25,6 +25,7 @@ module.exports = async function handler(req, res) {
                 url = `https://api.neynar.com/v2/farcaster/user/search?q=${encodeURIComponent(q)}&limit=${limit || 10}`;
                 break;
             case 'user':
+            case 'user_by_fid':
                 // Get user by FID
                 url = `https://api.neynar.com/v2/farcaster/user/bulk?fids=${fid}`;
                 break;

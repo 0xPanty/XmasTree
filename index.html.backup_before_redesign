@@ -1911,88 +1911,18 @@
                 <!-- Stamp Grid (2x2) -->
                 <div id="stamp-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;"></div>
                 
-                <!-- How It Works - Collapsible -->
-                <div style="margin-top: 12px;">
-                    <!-- Compact Summary (always visible) -->
-                    <div onclick="document.getElementById('stamp-help-detail').style.display = document.getElementById('stamp-help-detail').style.display === 'none' ? 'block' : 'none'; this.querySelector('.toggle-icon').textContent = document.getElementById('stamp-help-detail').style.display === 'none' ? '▶' : '▼';" 
-                         style="padding: 8px 12px; background: linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.08)); border: 1px solid rgba(212,175,55,0.35); border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.2);"
-                         onmouseover="this.style.background='linear-gradient(135deg, rgba(212,175,55,0.18), rgba(212,175,55,0.12))'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,0.3)';"
-                         onmouseout="this.style.background='linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.08))'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.2)';">
-                        <div style="font-size: 1.3rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">💡</div>
-                        <div style="flex: 1;">
-                            <div style="font-size: 0.78rem; font-weight: bold; color: #ffd700; margin-bottom: 3px; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
-                                1 Stamp 🎫 = 1 Friend
-                            </div>
-                            <div style="font-size: 0.62rem; color: rgba(255,255,255,0.7);">
-                                Get free or buy • Click for details
-                            </div>
-                        </div>
-                        <div class="toggle-icon" style="font-size: 0.9rem; color: var(--gold); font-weight: bold;">▶</div>
+                <!-- Quick Rules Card (below stamps) -->
+                <div style="margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px;">
+                    <div style="font-size: 0.75rem; font-weight: bold; color: var(--gold); margin-bottom: 12px; text-align: center;">
+                        📖 How It Works
                     </div>
-                    
-                    <!-- Detailed Info (collapsible) -->
-                    <div id="stamp-help-detail" style="display: none; margin-top: 8px; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 6px; animation: slideDown 0.3s ease;">
-                        <!-- Stamp table -->
-                        <table style="width: 100%; font-size: 0.65rem; color: rgba(255,255,255,0.85); border-collapse: collapse; margin-bottom: 10px;">
-                            <thead>
-                                <tr style="border-bottom: 1px solid rgba(212,175,55,0.2);">
-                                    <th style="text-align: left; padding: 6px 4px; color: var(--gold); font-size: 0.7rem;">Stamp</th>
-                                    <th style="text-align: center; padding: 6px 4px; color: #4ade80; font-size: 0.7rem;">Free</th>
-                                    <th style="text-align: center; padding: 6px 4px; color: #ffd700; font-size: 0.7rem;">Buy</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                    <td style="padding: 6px 4px; font-weight: bold;">🟣 Neynar</td>
-                                    <td style="text-align: center; padding: 6px 4px; color: #4ade80;">3<br><span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">Score≥0.6</span></td>
-                                    <td style="text-align: center; padding: 6px 4px; color: #ffd700;">0.1$<br><span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">→ 3</span></td>
-                                </tr>
-                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                    <td style="padding: 6px 4px; font-weight: bold;">🟪 Farcaster</td>
-                                    <td style="text-align: center; padding: 6px 4px; color: #4ade80;">10<br><span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">Badge</span></td>
-                                    <td style="text-align: center; padding: 6px 4px; color: #ffd700;">0.37$<br><span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">→ 10</span></td>
-                                </tr>
-                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                                    <td style="padding: 6px 4px; font-weight: bold;">🎨 Warplet</td>
-                                    <td style="text-align: center; padding: 6px 4px; color: #4ade80;">5<br><span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">NFT</span></td>
-                                    <td style="text-align: center; padding: 6px 4px; color: #ff6b6b;">-<br><span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">NFT Only</span></td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 6px 4px; font-weight: bold;">🌟 Based</td>
-                                    <td style="text-align: center; padding: 6px 4px; color: rgba(255,255,255,0.4);">-<br><span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">Need 3↑</span></td>
-                                    <td style="text-align: center; padding: 6px 4px; color: #ffd700;">0.99$<br><span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">Mint→♾️</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        
-                        <!-- Based special note -->
-                        <div style="padding: 6px 8px; background: rgba(255,215,0,0.05); border-left: 3px solid #ffd700; border-radius: 3px; margin-bottom: 8px;">
-                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.7); line-height: 1.4;">
-                                <b style="color: #ffd700;">🎖️ Based NFT:</b> Collect all 3 → Mint → Unlimited ♾️
-                            </div>
-                        </div>
-                        
-                        <!-- Usage flow -->
-                        <div style="padding: 6px 8px; background: rgba(212,175,55,0.05); border-radius: 3px;">
-                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.7); line-height: 1.4; text-align: center;">
-                                Select Stamp → Generate Card → Add Friends → Send (Max 5)
-                            </div>
-                        </div>
+                    <div style="font-size: 0.7rem; color: rgba(255,255,255,0.7); line-height: 1.8;">
+                        <b>Buy Stamps:</b><br>
+                        • Neynar: 0.1 USDC = 1 stamp 🎫<br>
+                        • Farcaster: 0.37 USDC = 5 stamps 🎫🎫🎫🎫🎫<br>
+                        • Warplet: 0.5 USDC = 5 stamps (NFT holders only)
                     </div>
                 </div>
-                
-                <style>
-                    @keyframes slideDown {
-                        from {
-                            opacity: 0;
-                            transform: translateY(-10px);
-                        }
-                        to {
-                            opacity: 1;
-                            transform: translateY(0);
-                        }
-                    }
-                </style>
                 
                 <!-- No Stamp Warning -->
                 <div id="no-stamp-warning" style="display: none; color: #ff6b6b; font-size: 0.8rem; margin-top: 8px; text-align: center;">
@@ -3169,7 +3099,7 @@
                     
                     // Set eligibility
                     stampEligibility = {
-                        neynar: { eligible: false, score: 0.45, reason: 'TEST: Neynar Score: 0.45 (<0.6 不符合)' },
+                        neynar: { eligible: true, score: 0.85, reason: 'TEST: Neynar Score: 0.85 (>0.6)' },
                         farcaster: { eligible: true, reason: 'TEST: Farcaster Power Badge holder' },
                         warplet: { eligible: true, reason: 'TEST: Warplet NFT holder' }
                     };
@@ -3177,7 +3107,7 @@
                     
                     // Auto-grant test stamps with quantities
                     userStamps = {
-                        neynar: { owned: false }, // 不符合资格，未拥有 → 显示购买按钮
+                        neynar: { owned: true, quantity: 3, acquired_method: 'test', first_free_claimed: true },
                         farcaster: { owned: true, quantity: 10, acquired_method: 'test', first_free_claimed: true },
                         warplet: { owned: true, quantity: 5, acquired_method: 'test', first_free_claimed: true },
                         based: { owned: false } // Not minted yet - can test mint flow
@@ -3267,325 +3197,305 @@
             }
         }
         
-        // Render stamp grid inline - FINAL REDESIGN
+        // Render stamp grid inline
         function renderStampGrid() {
             const stampGrid = document.getElementById('stamp-grid');
             stampGrid.innerHTML = '';
             
             const stamps = [
-                { id: 'neynar', name: 'Neynar', img: '/stamp/neynar-preview.png', price: '0.1', quantity: 3 },
-                { id: 'farcaster', name: 'Farcaster', img: '/stamp/farcaster-preview.png', price: '0.37', quantity: 10 },
-                { id: 'warplet', name: 'Warplet', img: '/stamp/warplet-preview.png', price: '0.5', quantity: 5 },
-                { id: 'based', name: 'Based', img: '/stamp/based-preview.png', price: '0.99', quantity: 1 }
+                { id: 'neynar', icon: '🟣', name: 'Neynar', img: '/stamp/neynar-preview.png', original: '/stamp/neynar.png' },
+                { id: 'farcaster', icon: '🟪', name: 'Farcaster', img: '/stamp/farcaster-preview.png', original: '/stamp/farcaster.png' },
+                { id: 'warplet', icon: '🎨', name: 'Warplet', img: '/stamp/warplet-preview.png', original: '/stamp/warplet.png' },
+                { id: 'based', icon: '🌟', name: 'Based', img: '/stamp/based-preview.png', original: '/stamp/based.png' }
             ];
             
             stamps.forEach(stamp => {
                 const isOwned = userStamps[stamp.id]?.owned;
-                const ownedQuantity = userStamps[stamp.id]?.quantity || 0;
                 const eligibility = stampEligibility[stamp.id];
                 const isEligible = eligibility?.eligible;
-                const isUnlimited = stamp.id === 'based' && userStamps.based?.permanent;
-                const canMintBased = stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible;
                 
-                // Card wrapper
-                const card = document.createElement('div');
-                card.style.cssText = `
-                    position: relative;
-                    background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2));
-                    border: 2px solid ${selectedStamp === stamp.id ? 'var(--gold)' : 'rgba(212,175,55,0.3)'};
-                    border-radius: 12px;
-                    overflow: hidden;
-                    cursor: ${isOwned ? 'pointer' : 'default'};
-                    transition: all 0.3s ease;
-                    box-shadow: ${selectedStamp === stamp.id ? '0 0 20px rgba(212,175,55,0.5)' : '0 2px 8px rgba(0,0,0,0.3)'};
-                `;
+                // Always show Based stamp (even if not unlocked yet)
                 
-                // Hover effect for owned stamps
-                if (isOwned) {
-                    card.onmouseover = () => {
-                        if (selectedStamp !== stamp.id) {
-                            card.style.borderColor = 'rgba(212,175,55,0.6)';
-                            card.style.transform = 'translateY(-2px)';
-                            card.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-                        }
-                    };
-                    card.onmouseout = () => {
-                        if (selectedStamp !== stamp.id) {
-                            card.style.borderColor = 'rgba(212,175,55,0.3)';
-                            card.style.transform = 'translateY(0)';
-                            card.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-                        }
-                    };
-                    card.onclick = () => {
-                        // Only update if different stamp selected
-                        if (selectedStamp !== stamp.id) {
-                            // Remove selection from previous card
-                            const prevSelected = document.querySelector('#stamp-grid > div > div[data-selected="true"]');
-                            if (prevSelected) {
-                                prevSelected.style.borderColor = 'rgba(212,175,55,0.3)';
-                                prevSelected.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-                                prevSelected.setAttribute('data-selected', 'false');
-                                // Remove "Selected" badge
-                                const prevBadge = prevSelected.querySelector('[data-badge="selected"]');
-                                if (prevBadge) prevBadge.remove();
-                            }
-                            
-                            // Apply selection to current card
-                            selectedStamp = stamp.id;
-                            card.style.borderColor = 'var(--gold)';
-                            card.style.boxShadow = '0 0 20px rgba(212,175,55,0.5)';
-                            card.setAttribute('data-selected', 'true');
-                            
-                            // Add "Selected" badge
-                            const selectedBadge = document.createElement('div');
-                            selectedBadge.setAttribute('data-badge', 'selected');
-                            selectedBadge.style.cssText = `
-                                position: absolute;
-                                top: 8px;
-                                left: 8px;
-                                background: var(--gold);
-                                color: #2c2c2c;
-                                padding: 4px 10px;
-                                border-radius: 16px;
-                                font-size: 0.65rem;
-                                font-weight: bold;
-                                box-shadow: 0 2px 8px rgba(212,175,55,0.5);
-                                z-index: 10;
-                            `;
-                            selectedBadge.textContent = '✓ Selected';
-                            card.appendChild(selectedBadge);
-                            
-                            updateGenerateButtonState();
-                        }
-                    };
-                    
-                    // Mark if this card is selected
-                    card.setAttribute('data-selected', selectedStamp === stamp.id ? 'true' : 'false');
-                }
-                
-                // Top-right badge (quantity or unlimited)
-                if (isOwned) {
-                    const badge = document.createElement('div');
-                    badge.style.cssText = `
-                        position: absolute;
-                        top: 8px;
-                        right: 8px;
-                        background: ${isUnlimited ? 'linear-gradient(135deg, #ffd700, #ffed4e)' : 'linear-gradient(135deg, #4ade80, #22c55e)'};
-                        color: ${isUnlimited ? '#2c2c2c' : 'white'};
-                        padding: 4px 10px;
-                        border-radius: 16px;
-                        font-size: 0.7rem;
-                        font-weight: bold;
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-                        z-index: 10;
-                    `;
-                    badge.textContent = isUnlimited ? '♾️' : `🎫 ${ownedQuantity}`;
-                    card.appendChild(badge);
-                }
-                
-                // Selected badge
-                if (selectedStamp === stamp.id) {
-                    const selectedBadge = document.createElement('div');
-                    selectedBadge.setAttribute('data-badge', 'selected');
-                    selectedBadge.style.cssText = `
-                        position: absolute;
-                        top: 8px;
-                        left: 8px;
-                        background: var(--gold);
-                        color: #2c2c2c;
-                        padding: 4px 10px;
-                        border-radius: 16px;
-                        font-size: 0.65rem;
-                        font-weight: bold;
-                        box-shadow: 0 2px 8px rgba(212,175,55,0.5);
-                        z-index: 10;
-                    `;
-                    selectedBadge.textContent = '✓ Selected';
-                    card.appendChild(selectedBadge);
-                }
-                
-                // Image container (fixed height for alignment)
-                const imageContainer = document.createElement('div');
-                imageContainer.style.cssText = `
-                    height: 140px;
+                // Compact wrapper for stamp
+                const stampWrapper = document.createElement('div');
+                stampWrapper.style.cssText = `
                     display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    padding: 16px;
-                    background: rgba(255,255,255,0.02);
+                    flex-direction: column;
+                    gap: 4px;
+                    cursor: ${isOwned ? 'pointer' : (stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible) ? 'pointer' : 'default'};
                 `;
                 
-                const img = document.createElement('img');
-                img.src = stamp.img;
-                img.style.cssText = `
-                    max-width: 100%;
-                    max-height: 100%;
-                    object-fit: contain;
-                    opacity: ${isOwned ? '1' : '0.7'};
-                    filter: ${isOwned ? 'none' : 'grayscale(20%)'};
-                `;
-                imageContainer.appendChild(img);
-                card.appendChild(imageContainer);
+                // Wrapper click for Based stamp (when eligible but not owned)
+                if (!isOwned && stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible) {
+                    stampWrapper.onclick = (e) => {
+                        // Don't trigger if clicking a button
+                        if (e.target.tagName !== 'BUTTON') {
+                            openBasedMintModal();
+                        }
+                    };
+                }
                 
-                // Info section
-                const infoSection = document.createElement('div');
-                infoSection.style.cssText = `
-                    padding: 12px 14px;
-                    background: rgba(0,0,0,0.3);
-                    border-top: 1px solid rgba(212,175,55,0.15);
-                `;
+                // Stamp card (image container)
+                const stampCard = document.createElement('div');
                 
-                // Name
-                const nameDiv = document.createElement('div');
-                nameDiv.style.cssText = `
-                    font-size: 0.85rem;
-                    font-weight: bold;
-                    color: var(--gold);
-                    margin-bottom: 8px;
-                    text-align: center;
-                `;
-                nameDiv.textContent = stamp.name;
-                infoSection.appendChild(nameDiv);
+                // Adjust image scale for visual alignment
+                let imageScale = '1';
+                if (stamp.id === 'neynar') {
+                    imageScale = '0.95'; // Slightly larger than before
+                } else if (stamp.id === 'farcaster') {
+                    imageScale = '1'; // Standard reference
+                } else if (stamp.id === 'warplet') {
+                    imageScale = '0.82'; // Smaller (was too big)
+                } else if (stamp.id === 'based') {
+                    imageScale = '0.90'; // Compact
+                }
                 
-                // Status
-                const statusDiv = document.createElement('div');
-                statusDiv.style.cssText = `
-                    font-size: 0.7rem;
-                    text-align: center;
-                    padding: 6px 8px;
+                const canClick = isOwned || (stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible);
+                
+                stampCard.style.cssText = `
+                    position: relative;
                     border-radius: 6px;
-                    margin-bottom: 10px;
-                    font-weight: 500;
+                    overflow: visible;
+                    cursor: ${canClick ? 'pointer' : 'default'};
+                    border: ${selectedStamp === stamp.id ? '2px solid var(--gold)' : '1px solid rgba(212,175,55,0.3)'};
+                    transition: all 0.2s ease;
+                    opacity: ${isOwned ? '1' : '0.6'};
+                    padding: 4px;
+                    background: rgba(0,0,0,0.2);
                 `;
                 
-                if (isOwned) {
-                    statusDiv.style.background = 'linear-gradient(to right, rgba(74,222,128,0.2), rgba(34,197,94,0.2))';
-                    statusDiv.style.border = '1px solid rgba(74,222,128,0.4)';
-                    statusDiv.style.color = '#4ade80';
-                    statusDiv.innerHTML = isUnlimited ? '✅ Owned (Unlimited)' : `✅ Owned ${ownedQuantity} stamps`;
-                } else if (stamp.id === 'based') {
-                    if (canMintBased) {
-                        statusDiv.style.background = 'linear-gradient(to right, rgba(255,215,0,0.2), rgba(255,237,78,0.2))';
-                        statusDiv.style.border = '1px solid rgba(255,215,0,0.4)';
-                        statusDiv.style.color = '#ffd700';
-                        statusDiv.innerHTML = '🎖️ Ready to Mint NFT';
-                    } else {
-                        statusDiv.style.background = 'rgba(100,100,100,0.2)';
-                        statusDiv.style.border = '1px solid rgba(150,150,150,0.3)';
-                        statusDiv.style.color = 'rgba(255,255,255,0.5)';
-                        statusDiv.innerHTML = '🔒 Locked - Collect 3 Stamps';
+                // Click handler for all stamps
+                stampCard.onclick = () => {
+                    if (isOwned) {
+                        // Select this stamp
+                        selectedStamp = stamp.id;
+                        updateGenerateButtonState();
+                        // Only update visual selection without full re-render
+                        document.querySelectorAll('#stamp-grid > div > div').forEach(card => {
+                            card.style.border = '2px solid rgba(212,175,55,0.3)';
+                            card.style.boxShadow = 'none';
+                        });
+                        stampCard.style.border = '2px solid var(--gold)';
+                        stampCard.style.boxShadow = '0 0 20px rgba(212,175,55,0.6)';
+                    } else if (stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible) {
+                        // Based stamp - open mint modal
+                        openBasedMintModal();
                     }
-                } else if (isEligible) {
-                    statusDiv.style.background = 'linear-gradient(to right, rgba(74,222,128,0.2), rgba(34,197,94,0.2))';
-                    statusDiv.style.border = '1px solid rgba(74,222,128,0.4)';
-                    statusDiv.style.color = '#4ade80';
-                    statusDiv.innerHTML = '🎁 Eligible for Free Claim';
-                } else if (stamp.id === 'warplet') {
-                    statusDiv.style.background = 'rgba(255,107,107,0.15)';
-                    statusDiv.style.border = '1px solid rgba(255,107,107,0.3)';
-                    statusDiv.style.color = '#ff6b6b';
-                    statusDiv.innerHTML = '🔒 Warplet NFT Required ❌';
-                } else {
-                    // Not eligible but can purchase - show reason + requirement
-                    const reason = eligibility?.reason || '';
-                    let reasonText = '';
-                    let requirementText = '';
-                    
-                    if (stamp.id === 'neynar' && eligibility?.score !== undefined) {
-                        reasonText = `Score ${eligibility.score} < 0.6 ❌`;
-                        requirementText = 'Free if Score ≥ 0.6';
-                    } else if (stamp.id === 'farcaster') {
-                        reasonText = 'No Power Badge ❌';
-                        requirementText = 'Free with Power Badge';
-                    } else {
-                        reasonText = 'Not Eligible ❌';
-                        requirementText = 'Check requirements';
+                };
+                
+                stampCard.innerHTML = `
+                    <img src="${stamp.img}" style="display: block; width: 100%; height: auto; object-fit: contain; border-radius: 4px; transform: scale(${imageScale});">
+                    ${isOwned ? 
+                        `<div style="position: absolute; top: 2px; right: 2px; background: rgba(74,222,128,0.95); color: white; padding: 1px 4px; border-radius: 3px; font-size: 0.6rem; font-weight: bold; pointer-events: none;">✓</div>` :
+                        ''
                     }
-                    
-                    statusDiv.style.background = 'rgba(212,175,55,0.15)';
-                    statusDiv.style.border = '1px solid rgba(212,175,55,0.3)';
-                    statusDiv.innerHTML = `
-                        <div style="color: #ff6b6b; font-size: 0.65rem; margin-bottom: 2px;">${reasonText}</div>
-                        <div style="color: rgba(255,255,255,0.6); font-size: 0.6rem; margin-bottom: 3px;">${requirementText}</div>
-                        <div style="color: #ffd700; font-size: 0.7rem; font-weight: bold;">💰 Available for Purchase</div>
-                    `;
-                }
-                
-                infoSection.appendChild(statusDiv);
-                
-                // Action button (ALL states have buttons)
-                const actionBtn = document.createElement('button');
-                actionBtn.style.cssText = `
-                    width: 100%;
-                    padding: 10px;
-                    border: none;
-                    border-radius: 8px;
-                    font-size: 0.75rem;
-                    font-weight: bold;
-                    cursor: pointer;
-                    transition: all 0.2s;
-                    text-transform: none;
+                    ${selectedStamp === stamp.id ? 
+                        `<div style="position: absolute; top: 2px; left: 2px; background: var(--gold); color: #2c2c2c; padding: 1px 4px; border-radius: 3px; font-size: 0.6rem; font-weight: bold; pointer-events: none;">SELECTED</div>` : 
+                        ''
+                    }
                 `;
                 
-                if (isOwned) {
-                    // Owned: Show "Details" button
-                    actionBtn.style.background = 'linear-gradient(135deg, rgba(212,175,55,0.3), rgba(212,175,55,0.2))';
-                    actionBtn.style.border = '1px solid rgba(212,175,55,0.5)';
-                    actionBtn.style.color = 'var(--gold)';
-                    actionBtn.textContent = '📋 View Details';
-                    actionBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        openStampDetailsModal(stamp.id, stamp.name);
-                    };
-                } else if (stamp.id === 'based') {
-                    if (canMintBased) {
-                        actionBtn.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
-                        actionBtn.style.color = '#2c2c2c';
-                        actionBtn.textContent = `🎖️ Mint NFT (${stamp.price} USDC)`;
-                        actionBtn.onclick = () => openBasedMintModal();
+                stampWrapper.appendChild(stampCard);
+                
+                // Status and details
+                if (!isOwned) {
+                    // For Based stamp - show progress and mint button
+                    if (stamp.id === 'based') {
+                        const basedProgress = document.createElement('div');
+                        basedProgress.style.cssText = `
+                            text-align: center;
+                            font-size: 0.6rem;
+                            color: #ffd700;
+                            line-height: 1.4;
+                            margin-top: 4px;
+                            padding: 8px;
+                            background: rgba(255,215,0,0.1);
+                            border-radius: 4px;
+                        `;
+                        basedProgress.id = 'based-progress-inline';
+                        stampWrapper.appendChild(basedProgress);
+                        
+                        // Check if eligible to mint (all 3 stamps owned)
+                        const canMint = eligibility?.neynar?.eligible && 
+                                       eligibility?.farcaster?.eligible && 
+                                       eligibility?.warplet?.eligible;
+                        
+                        // Add visible Mint button when eligible
+                        if (canMint) {
+                            const mintBtn = document.createElement('button');
+                            mintBtn.style.cssText = `
+                                width: 100%;
+                                padding: 10px 8px;
+                                border: none;
+                                border-radius: 6px;
+                                font-size: 0.8rem;
+                                font-weight: bold;
+                                cursor: pointer;
+                                transition: all 0.2s;
+                                margin-top: 8px;
+                                background: linear-gradient(135deg, #ffd700, #ffed4e);
+                                color: #2c2c2c;
+                                box-shadow: 0 2px 8px rgba(255,215,0,0.4);
+                            `;
+                            mintBtn.innerHTML = '🎖️ Mint NFT (0.99 USDC)';
+                            mintBtn.onmouseover = () => {
+                                mintBtn.style.transform = 'scale(1.02)';
+                                mintBtn.style.boxShadow = '0 4px 12px rgba(255,215,0,0.6)';
+                            };
+                            mintBtn.onmouseout = () => {
+                                mintBtn.style.transform = 'scale(1)';
+                                mintBtn.style.boxShadow = '0 2px 8px rgba(255,215,0,0.4)';
+                            };
+                            mintBtn.onclick = (e) => {
+                                e.stopPropagation();
+                                openBasedMintModal();
+                            };
+                            stampWrapper.appendChild(mintBtn);
+                        }
                     } else {
-                        actionBtn.style.background = 'rgba(100,100,100,0.3)';
-                        actionBtn.style.color = 'rgba(255,255,255,0.4)';
-                        actionBtn.style.cursor = 'not-allowed';
-                        actionBtn.textContent = '🔒 Collect 3 Stamps First';
-                        actionBtn.disabled = true;
+                        // Status container for regular stamps
+                        const statusContainer = document.createElement('div');
+                        statusContainer.style.cssText = `
+                            text-align: center;
+                            font-size: 0.6rem;
+                            line-height: 1.3;
+                            margin-top: 4px;
+                        `;
+                        
+                        // Status line
+                        const statusLine = document.createElement('div');
+                        statusLine.style.cssText = `
+                            font-weight: bold;
+                            color: ${isEligible ? '#4ade80' : '#ff6b6b'};
+                            margin-bottom: 2px;
+                        `;
+                        statusLine.textContent = isEligible ? '✓ Eligible' : '✗ Not Eligible';
+                        statusContainer.appendChild(statusLine);
+                        
+                        // Reason line - show score/reason (but not for Warplet when not eligible, button already shows it)
+                        if (!(stamp.id === 'warplet' && !isEligible)) {
+                            const reasonLine = document.createElement('div');
+                            reasonLine.style.cssText = `
+                                color: rgba(255,255,255,0.7);
+                                font-size: 0.55rem;
+                                margin-bottom: 4px;
+                            `;
+                            reasonLine.textContent = eligibility?.reason || '';
+                            statusContainer.appendChild(reasonLine);
+                        }
+                        
+                        stampWrapper.appendChild(statusContainer);
+                        
+                        // Action button
+                        const actionBtn = document.createElement('button');
+                        actionBtn.style.cssText = `
+                            width: 100%;
+                            padding: 7px 4px;
+                            border: none;
+                            border-radius: 4px;
+                            font-size: 0.65rem;
+                            font-weight: bold;
+                            cursor: pointer;
+                            transition: all 0.2s;
+                            ${isEligible ? 
+                                'background: linear-gradient(135deg, #4ade80, #22c55e); color: white;' : 
+                                'background: linear-gradient(135deg, #d4af37, #ffd700); color: #2c2c2c;'
+                            }
+                        `;
+                        // Stamp quantities per purchase
+                        const stampQuantities = {
+                            neynar: { price: '0.1', quantity: 3 },
+                            farcaster: { price: '0.37', quantity: 10 },
+                            warplet: { price: '0.5', quantity: 5 }
+                        };
+                        
+                        const config = stampQuantities[stamp.id];
+                        
+                        // Warplet can't be purchased - don't show button at all
+                        if (stamp.id === 'warplet' && !isEligible) {
+                            // No button needed - "Not Eligible" status already shows
+                        } else if (isEligible) {
+                            // Free claim with quantity
+                            actionBtn.innerHTML = `
+                                <div style="font-size: 0.65rem; color: rgba(255,255,255,0.7);">Free Claim</div>
+                                <div style="font-size: 0.55rem; margin-top: 2px;">Get ${config.quantity} stamp${config.quantity > 1 ? 's' : ''} 🎫</div>
+                            `;
+                            actionBtn.onclick = (e) => {
+                                e.stopPropagation();
+                                claimStampInline(stamp.id);
+                            };
+                        } else if (stamp.id !== 'warplet' || isEligible) {
+                            // Purchase button - opens modal (but not for Warplet without NFT)
+                            actionBtn.innerHTML = `
+                                <div style="font-size: 0.7rem; font-weight: bold;">${config.price} USDC</div>
+                                <div style="font-size: 0.55rem; margin-top: 2px;">→ ${config.quantity} stamp${config.quantity > 1 ? 's' : ''} 🎫</div>
+                            `;
+                            actionBtn.onclick = (e) => {
+                                e.stopPropagation();
+                                openPurchaseModal(stamp.id, stamp.name, config);
+                            };
+                            stampWrapper.appendChild(actionBtn);
+                        }
                     }
-                } else if (isEligible) {
-                    actionBtn.style.background = 'linear-gradient(135deg, #4ade80, #22c55e)';
-                    actionBtn.style.color = 'white';
-                    actionBtn.textContent = `🎁 Free Claim ${stamp.quantity} stamps`;
-                    actionBtn.onclick = () => claimStampInline(stamp.id);
-                } else if (stamp.id === 'warplet') {
-                    actionBtn.style.background = 'rgba(100,100,100,0.3)';
-                    actionBtn.style.color = 'rgba(255,255,255,0.4)';
-                    actionBtn.style.cursor = 'not-allowed';
-                    actionBtn.textContent = '🔒 View NFT Requirement';
-                    actionBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        alert('Warplet NFT Required\n\nYou need to hold a Warplet NFT to use this stamp.\n\nPurchase on OpenSea or Zora.');
-                    };
                 } else {
-                    actionBtn.style.background = 'linear-gradient(135deg, #d4af37, #ffd700)';
-                    actionBtn.style.color = '#2c2c2c';
-                    actionBtn.textContent = `💰 Purchase (${stamp.price} USDC)`;
-                    actionBtn.onclick = () => openPurchaseModal(stamp.id, stamp.name, { price: stamp.price, quantity: stamp.quantity });
+                    // Owned - show quantity
+                    const quantity = userStamps[stamp.id]?.quantity || 0;
+                    
+                    if (stamp.id === 'based' && userStamps.based?.permanent) {
+                        // Based unlimited
+                        const unlimitedBadge = document.createElement('div');
+                        unlimitedBadge.style.cssText = `
+                            text-align: center;
+                            font-size: 0.65rem;
+                            margin-top: 6px;
+                            padding: 6px 8px;
+                            background: linear-gradient(135deg, rgba(74,222,128,0.2), rgba(34,197,94,0.2));
+                            border: 1px solid rgba(74,222,128,0.5);
+                            border-radius: 6px;
+                            color: #4ade80;
+                            font-weight: bold;
+                            cursor: pointer;
+                        `;
+                        unlimitedBadge.innerHTML = '♾️ Unlimited';
+                        unlimitedBadge.onclick = (e) => {
+                            e.stopPropagation();
+                            openStampDetailsModal(stamp.id, stamp.name);
+                        };
+                        stampWrapper.appendChild(unlimitedBadge);
+                    } else {
+                        // Regular stamps with quantity - clickable
+                        const quantityDisplay = document.createElement('div');
+                        quantityDisplay.style.cssText = `
+                            text-align: center;
+                            margin-top: 6px;
+                            padding: 6px 8px;
+                            background: rgba(74,222,128,0.15);
+                            border: 1px solid rgba(74,222,128,0.4);
+                            border-radius: 6px;
+                            cursor: pointer;
+                            transition: all 0.2s;
+                        `;
+                        quantityDisplay.innerHTML = `
+                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.6); margin-bottom: 2px;">Owned</div>
+                            <div style="font-size: 0.75rem; color: #4ade80; font-weight: bold;">
+                                ${quantity} stamp${quantity !== 1 ? 's' : ''} 🎫
+                            </div>
+                        `;
+                        quantityDisplay.onclick = (e) => {
+                            e.stopPropagation();
+                            openStampDetailsModal(stamp.id, stamp.name);
+                        };
+                        quantityDisplay.onmouseover = () => {
+                            quantityDisplay.style.background = 'rgba(74,222,128,0.25)';
+                        };
+                        quantityDisplay.onmouseout = () => {
+                            quantityDisplay.style.background = 'rgba(74,222,128,0.15)';
+                        };
+                        stampWrapper.appendChild(quantityDisplay);
+                    }
                 }
                 
-                // Hover effect for active buttons
-                if (!actionBtn.disabled) {
-                    actionBtn.onmouseover = () => {
-                        actionBtn.style.transform = 'translateY(-2px)';
-                        actionBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
-                    };
-                    actionBtn.onmouseout = () => {
-                        actionBtn.style.transform = 'translateY(0)';
-                        actionBtn.style.boxShadow = 'none';
-                    };
-                }
-                
-                infoSection.appendChild(actionBtn);
-                card.appendChild(infoSection);
-                stampGrid.appendChild(card);
+                stampGrid.appendChild(stampWrapper);
             });
             
             // Render Based progress
@@ -4616,29 +4526,8 @@
             btn.innerHTML = '⏳ Generating AI...';
             
             try {
-                // TEST MODE: Use @xqc's real avatar for testing
-                let senderAvatar, senderName;
-                if (TEST_MODE && !currentUser) {
-                    // Fetch @xqc's real profile from Neynar
-                    try {
-                        const xqcResponse = await fetch('/api/neynar?action=user_by_fid&fid=275646');
-                        const xqcData = await xqcResponse.json();
-                        if (xqcData.users && xqcData.users.length > 0) {
-                            senderAvatar = xqcData.users[0].pfp_url;
-                            senderName = xqcData.users[0].username;
-                            console.log('🧪 TEST MODE: Using @xqc avatar:', senderAvatar);
-                        } else {
-                            throw new Error('Failed to fetch xqc profile');
-                        }
-                    } catch (error) {
-                        console.error('Failed to fetch @xqc profile, using fallback:', error);
-                        senderAvatar = 'https://i.imgur.com/HeIi0wU.png';
-                        senderName = 'xqc';
-                    }
-                } else {
-                    senderAvatar = currentUser?.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
-                    senderName = currentUser?.username || 'You';
-                }
+                const senderAvatar = currentUser?.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
+                const senderName = currentUser?.username || 'You';
                 
                 // Get first recipient for personalization
                 const firstRecipient = selectedRecipients.length > 0 ? selectedRecipients[0] : null;
@@ -4712,28 +4601,8 @@
             btn.innerHTML = '⏳ Regenerating...';
             
             try {
-                // TEST MODE: Use @xqc's real avatar for testing
-                let senderAvatar, senderName;
-                if (TEST_MODE && !currentUser) {
-                    try {
-                        const xqcResponse = await fetch('/api/neynar?action=user_by_fid&fid=275646');
-                        const xqcData = await xqcResponse.json();
-                        if (xqcData.users && xqcData.users.length > 0) {
-                            senderAvatar = xqcData.users[0].pfp_url;
-                            senderName = xqcData.users[0].username;
-                            console.log('🧪 TEST MODE: Using @xqc avatar for regeneration');
-                        } else {
-                            throw new Error('Failed to fetch xqc profile');
-                        }
-                    } catch (error) {
-                        console.error('Failed to fetch @xqc profile, using fallback:', error);
-                        senderAvatar = 'https://i.imgur.com/HeIi0wU.png';
-                        senderName = 'xqc';
-                    }
-                } else {
-                    senderAvatar = currentUser?.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
-                    senderName = currentUser?.username || 'You';
-                }
+                const senderAvatar = currentUser?.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
+                const senderName = currentUser?.username || 'You';
                 
                 const response = await fetch('/api/gemini', {
                     method: 'POST',
