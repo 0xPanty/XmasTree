@@ -5976,8 +5976,8 @@ Write only the reply text, nothing else:`;
                     resolve(canvas.toDataURL('image/png'));
                 };
                 
-                // Background image URL (temporary - will upload user's image)
-                bgImage.src = 'https://i.imgur.com/bZhDZ7J.png'; // Placeholder - needs user's actual image
+                // Background image URL (user provided Christmas letter background)
+                bgImage.src = 'https://i.imgur.com/cvdz5mJ.jpeg';
                 
                 // Fallback if image fails to load
                 bgImage.onerror = () => {
