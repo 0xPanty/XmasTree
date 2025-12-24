@@ -1911,22 +1911,29 @@
                 <!-- Stamp Grid (2x2) -->
                 <div id="stamp-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;"></div>
                 
-                <!-- How It Works Card (below stamps) -->
-                <div style="margin-top: 16px; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px;">
-                    <div style="font-size: 0.75rem; font-weight: bold; color: var(--gold); margin-bottom: 10px; text-align: center; border-bottom: 1px solid rgba(212,175,55,0.2); padding-bottom: 8px;">
-                        📖 How It Works
-                    </div>
-                    
-                    <!-- Core concept -->
-                    <div style="text-align: center; margin-bottom: 12px; padding: 8px; background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.05)); border-radius: 6px;">
-                        <div style="font-size: 0.8rem; color: #ffd700; font-weight: bold;">
-                            1 Stamp 🎫 = Send to 1 Friend
+                <!-- How It Works - Collapsible -->
+                <div style="margin-top: 12px;">
+                    <!-- Compact Summary (always visible) -->
+                    <div onclick="document.getElementById('stamp-help-detail').style.display = document.getElementById('stamp-help-detail').style.display === 'none' ? 'block' : 'none'; this.querySelector('.toggle-icon').textContent = document.getElementById('stamp-help-detail').style.display === 'none' ? '▶' : '▼';" 
+                         style="padding: 10px 12px; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s;"
+                         onmouseover="this.style.background='rgba(212,175,55,0.15)'"
+                         onmouseout="this.style.background='rgba(212,175,55,0.1)'">
+                        <div style="font-size: 1.2rem;">💡</div>
+                        <div style="flex: 1;">
+                            <div style="font-size: 0.75rem; font-weight: bold; color: #ffd700; margin-bottom: 2px;">
+                                1 Stamp 🎫 = Send to 1 Friend
+                            </div>
+                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.6);">
+                                Click for prices & details
+                            </div>
                         </div>
+                        <div class="toggle-icon" style="font-size: 0.8rem; color: var(--gold);">▶</div>
                     </div>
                     
-                    <!-- Stamp table -->
-                    <div style="margin-bottom: 10px;">
-                        <table style="width: 100%; font-size: 0.65rem; color: rgba(255,255,255,0.85); border-collapse: collapse;">
+                    <!-- Detailed Info (collapsible) -->
+                    <div id="stamp-help-detail" style="display: none; margin-top: 8px; padding: 12px; background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 6px; animation: slideDown 0.3s ease;">
+                        <!-- Stamp table -->
+                        <table style="width: 100%; font-size: 0.65rem; color: rgba(255,255,255,0.85); border-collapse: collapse; margin-bottom: 10px;">
                             <thead>
                                 <tr style="border-bottom: 1px solid rgba(212,175,55,0.2);">
                                     <th style="text-align: left; padding: 6px 4px; color: var(--gold); font-size: 0.7rem;">Stamp</th>
@@ -1957,23 +1964,35 @@
                                 </tr>
                             </tbody>
                         </table>
-                    </div>
-                    
-                    <!-- Based special note -->
-                    <div style="padding: 8px; background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 4px; margin-bottom: 10px;">
-                        <div style="font-size: 0.6rem; color: rgba(255,255,255,0.7); line-height: 1.5;">
-                            <b style="color: #ffd700;">🎖️ Based NFT:</b> Collect all 3 stamps above → Mint Based → Get unlimited stamps forever
+                        
+                        <!-- Based special note -->
+                        <div style="padding: 6px 8px; background: rgba(255,215,0,0.05); border-left: 3px solid #ffd700; border-radius: 3px; margin-bottom: 8px;">
+                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.7); line-height: 1.4;">
+                                <b style="color: #ffd700;">🎖️ Based NFT:</b> Collect all 3 → Mint → Unlimited ♾️
+                            </div>
                         </div>
-                    </div>
-                    
-                    <!-- Usage flow -->
-                    <div style="padding: 8px; background: rgba(212,175,55,0.05); border-radius: 4px;">
-                        <div style="font-size: 0.65rem; color: rgba(255,255,255,0.8); line-height: 1.6; text-align: center;">
-                            Select Stamp → Generate AI Card → Add Friends → Send<br>
-                            <span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">(Max 5 friends, 1 stamp per friend consumed)</span>
+                        
+                        <!-- Usage flow -->
+                        <div style="padding: 6px 8px; background: rgba(212,175,55,0.05); border-radius: 3px;">
+                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.7); line-height: 1.4; text-align: center;">
+                                Select Stamp → Generate Card → Add Friends → Send (Max 5)
+                            </div>
                         </div>
                     </div>
                 </div>
+                
+                <style>
+                    @keyframes slideDown {
+                        from {
+                            opacity: 0;
+                            transform: translateY(-10px);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: translateY(0);
+                        }
+                    }
+                </style>
                 
                 <!-- No Stamp Warning -->
                 <div id="no-stamp-warning" style="display: none; color: #ff6b6b; font-size: 0.8rem; margin-top: 8px; text-align: center;">
@@ -3298,10 +3317,50 @@
                         }
                     };
                     card.onclick = () => {
-                        selectedStamp = stamp.id;
-                        updateGenerateButtonState();
-                        renderStampGrid();
+                        // Only update if different stamp selected
+                        if (selectedStamp !== stamp.id) {
+                            // Remove selection from previous card
+                            const prevSelected = document.querySelector('#stamp-grid > div > div[data-selected="true"]');
+                            if (prevSelected) {
+                                prevSelected.style.borderColor = 'rgba(212,175,55,0.3)';
+                                prevSelected.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
+                                prevSelected.setAttribute('data-selected', 'false');
+                                // Remove "Selected" badge
+                                const prevBadge = prevSelected.querySelector('[data-badge="selected"]');
+                                if (prevBadge) prevBadge.remove();
+                            }
+                            
+                            // Apply selection to current card
+                            selectedStamp = stamp.id;
+                            card.style.borderColor = 'var(--gold)';
+                            card.style.boxShadow = '0 0 20px rgba(212,175,55,0.5)';
+                            card.setAttribute('data-selected', 'true');
+                            
+                            // Add "Selected" badge
+                            const selectedBadge = document.createElement('div');
+                            selectedBadge.setAttribute('data-badge', 'selected');
+                            selectedBadge.style.cssText = `
+                                position: absolute;
+                                top: 8px;
+                                left: 8px;
+                                background: var(--gold);
+                                color: #2c2c2c;
+                                padding: 4px 10px;
+                                border-radius: 16px;
+                                font-size: 0.65rem;
+                                font-weight: bold;
+                                box-shadow: 0 2px 8px rgba(212,175,55,0.5);
+                                z-index: 10;
+                            `;
+                            selectedBadge.textContent = '✓ Selected';
+                            card.appendChild(selectedBadge);
+                            
+                            updateGenerateButtonState();
+                        }
                     };
+                    
+                    // Mark if this card is selected
+                    card.setAttribute('data-selected', selectedStamp === stamp.id ? 'true' : 'false');
                 }
                 
                 // Top-right badge (quantity or unlimited)
@@ -3327,6 +3386,7 @@
                 // Selected badge
                 if (selectedStamp === stamp.id) {
                     const selectedBadge = document.createElement('div');
+                    selectedBadge.setAttribute('data-badge', 'selected');
                     selectedBadge.style.cssText = `
                         position: absolute;
                         top: 8px;
@@ -3340,7 +3400,7 @@
                         box-shadow: 0 2px 8px rgba(212,175,55,0.5);
                         z-index: 10;
                     `;
-                    selectedBadge.textContent = '✓ 已选';
+                    selectedBadge.textContent = '✓ Selected';
                     card.appendChild(selectedBadge);
                 }
                 
