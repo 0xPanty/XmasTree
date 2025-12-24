@@ -2040,11 +2040,11 @@
                             <div id="postcard-flipper" style="position:relative; width:100%; aspect-ratio:9/16; transform-style:preserve-3d; transition:transform 0.8s;">
                                 <!-- Picture Side (Front) - Shows First (AI Illustration) -->
                                 <div style="position:absolute; width:100%; height:100%; backface-visibility:hidden;">
-                                    <img id="ai-preview-front" src="" style="width:100%; height:100%; object-fit:cover; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4); cursor:pointer;" onclick="flipPostcard()">
+                                    <img id="ai-preview-front" src="" style="width:100%; height:100%; object-fit:cover; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4); cursor:zoom-in;" onclick="enlargeAIImage('ai-preview-front')">
                                 </div>
                                 <!-- Content Side (Back) - Hidden Until Flip (Letter + Stamp) -->
                                 <div style="position:absolute; width:100%; height:100%; backface-visibility:hidden; transform:rotateY(180deg);">
-                                    <img id="ai-preview-back" src="" style="width:100%; height:100%; object-fit:cover; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4); cursor:pointer;" onclick="flipPostcard()">
+                                    <img id="ai-preview-back" src="" style="width:100%; height:100%; object-fit:cover; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4); cursor:zoom-in;" onclick="enlargeAIImage('ai-preview-back')">
                                 </div>
                             </div>
                         </div>
@@ -4696,9 +4696,14 @@
                 
                 const data = await response.json();
                 console.log('API response data:', data);
+                console.log('🎄 Greeting from API:', data.greeting);
+                console.log('🎄 Greeting length:', data.greeting?.length || 0);
                 
                 if (data.success && data.image) {
-                    currentAIGreeting = data.greeting || 'Merry Christmas!';
+                    currentAIGreeting = data.greeting || 'Wishing you a wonderful Christmas season filled with joy, warmth, and beautiful moments with loved ones!';
+                    console.log('🎄 currentAIGreeting set to:', currentAIGreeting);
+                    console.log('🎄 currentAIGreeting length:', currentAIGreeting.length);
+                    
                     currentAIScene = {
                         type: data.sceneType || 'general',
                         description: data.sceneDescription || 'holiday celebration'
