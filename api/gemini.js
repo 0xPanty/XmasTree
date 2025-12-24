@@ -239,20 +239,29 @@ REFERENCE IMAGE:`;
                 });
             }
 
-            // Use Gemini 2.5 Flash for image generation (official supported model)
-            console.log('🎨 Attempting image generation with Gemini 2.5 Flash...');
-            console.log('Parts:', JSON.stringify(parts, null, 2));
+            // Use Imagen 3 directly for more reliable generation
+            console.log('🎨 Attempting image generation with Imagen 3...');
             
+            const simplifiedPrompt = `Create a vintage Christmas or New Year greeting card illustration in the scene: ${randomScene}
+
+Style: Classic illustrated postcard by Jenny Nyström or Anton Pieck
+- Hand-drawn vintage look with soft watercolor washes
+- Muted vintage colors: dusty red, sage green, cream, soft brown
+- Cozy festive winter atmosphere with snow and warm lights
+- Vertical postcard format, nostalgic holiday mood
+- Simple composition, not overly detailed`;
+
             const imageResponse = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:generate?key=${GEMINI_API_KEY}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts }],
-                        generationConfig: {
-                            responseModalities: ["IMAGE"]
-                        }
+                        prompt: simplifiedPrompt,
+                        number_of_images: 1,
+                        aspect_ratio: "9:16",
+                        safety_filter_level: "block_few",
+                        person_generation: "allow_adult"
                     })
                 }
             );
@@ -261,54 +270,19 @@ REFERENCE IMAGE:`;
             
             if (imageResponse.ok) {
                 const imageResult = await imageResponse.json();
-                console.log('✅ Image API Response:', JSON.stringify(imageResult, null, 2));
+                console.log('✅ Image API Response received');
                 
-                // Extract image from response
-                if (imageResult.candidates && imageResult.candidates[0]?.content?.parts) {
-                    for (const part of imageResult.candidates[0].content.parts) {
-                        console.log('Checking part:', part);
-                        if (part.inlineData) {
-                            imageData = part.inlineData.data;
-                            console.log('✅ Found image data! Length:', imageData?.length);
-                            break;
-                        }
-                    }
-                    if (!imageData) {
-                        console.error('❌ No inlineData found in parts');
-                    }
+                // Extract image from Imagen 3 response
+                if (imageResult.generated_images && imageResult.generated_images[0]) {
+                    imageData = imageResult.generated_images[0].image.image_bytes;
+                    console.log('✅ Found image data! Length:', imageData?.length);
                 } else {
-                    console.error('❌ No candidates or parts in response');
+                    console.error('❌ No generated_images in response:', imageResult);
+                    imageError = 'No image in response';
                 }
             } else {
                 imageError = await imageResponse.text();
                 console.error('❌ Image generation failed:', imageError);
-                
-                // Fallback to Imagen 3 with vintage postcard style
-                const fallbackResponse = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${GEMINI_API_KEY}`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            instances: [{ 
-                                prompt: `Create a vintage New Year or Christmas greeting card. Inspired by classic illustrated New Year and Christmas postcards by Jenny Nyström, Anton Pieck, or Ellen Clapsaddle. Festive winter scene, snowy fairy-tale forest, decorated Christmas tree with warm glowing lights. Timeless vintage winter clothing, classic international postcard style. Cozy, joyful, nostalgic holiday mood. Hand-painted illustration look, muted colors, subtle vintage paper texture.`
-                            }],
-                            parameters: {
-                                sampleCount: 1,
-                                aspectRatio: '9:16',
-                                safetyFilterLevel: 'block_few',
-                                personGeneration: 'allow_adult'
-                            }
-                        })
-                    }
-                );
-                
-                if (fallbackResponse.ok) {
-                    const fallbackResult = await fallbackResponse.json();
-                    if (fallbackResult.predictions && fallbackResult.predictions[0]) {
-                        imageData = fallbackResult.predictions[0].bytesBase64Encoded;
-                    }
-                }
             }
 
             // Generate personalized greeting based on scene analysis
