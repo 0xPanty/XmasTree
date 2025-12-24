@@ -242,19 +242,30 @@ REFERENCE IMAGE:`;
             // Use Gemini 2.5 Flash Image (proven stable model)
             console.log('🎨 Attempting image generation with Gemini 2.5 Flash Image...');
             
-            const visualPrompt = `Create a vintage New Year or Christmas greeting card using the provided photo as a reference for the person's appearance (preserve facial features and likeness).
+            const visualPrompt = `Create a vintage Christmas/New Year postcard illustration using the provided photo as reference.
 
-Inspired by classic illustrated New Year and Christmas postcards by Jenny Nyström, Anton Pieck, or Ellen Clapsaddle.
+COMPOSITION (CRITICAL):
+1. BACKGROUND: Warm cream/beige paper texture (#f8f5ed), like vintage postcard paper
+2. CENTRAL ILLUSTRATION: Arched/oval vignette containing the scene (soft edges fading into background)
+3. BOTTOM SPACE: Leave 15-20% empty cream space at bottom for text overlay
+4. BORDER: Optional subtle ornamental border around the card edges
 
-Scene: ${randomScene}
+ILLUSTRATION STYLE:
+- Inspired by Jenny Nyström, Anton Pieck, Ellen Clapsaddle vintage postcards
+- Scene: ${randomScene}
+- Hand-painted watercolor look, muted vintage colors
+- Soft focus edges (vignette effect)
+- Person in center, wearing timeless winter clothing
+- Festive winter scene, decorated Christmas tree, snowy atmosphere
+- Cozy, nostalgic, storybook illustration feel
 
-Festive winter scene, snowy fairy-tale forest, decorated Christmas tree with warm glowing lights.
-Timeless vintage winter clothing, classic international postcard style.
-Cozy, joyful, nostalgic holiday mood.
-Hand-painted illustration look, muted colors, subtle vintage paper texture.
-Vertical format 9:16.
+LAYOUT:
+- Vertical postcard format 9:16
+- Illustration occupies top 80-85% with arched/oval frame
+- Bottom 15-20% is blank cream paper for text
+- Soft fade from illustration into background
 
-IMPORTANT: No text, no words, no captions, no letters in the image. Pure illustration only.`;
+IMPORTANT: No text, no words, no captions in the image. Leave bottom space blank for text overlay.`;
 
 
             // Build parts array: IMAGE FIRST, then prompt (following farstand3 pattern)
@@ -273,21 +284,31 @@ IMPORTANT: No text, no words, no captions, no letters in the image. Pure illustr
             
             // Then add text prompt that refers to "this person"
             const finalPrompt = senderImg 
-                ? `Create a vintage New Year or Christmas greeting card featuring this person in the photo.
+                ? `Create a vintage Christmas/New Year postcard illustration featuring this person in the photo.
 
-Inspired by classic illustrated New Year and Christmas postcards by Jenny Nyström, Anton Pieck, or Ellen Clapsaddle.
+COMPOSITION (CRITICAL):
+1. BACKGROUND: Warm cream/beige paper texture (#f8f5ed), like vintage postcard paper
+2. CENTRAL ILLUSTRATION: Arched/oval vignette containing the scene (soft edges fading into background)
+3. BOTTOM SPACE: Leave 15-20% empty cream space at bottom for text overlay
+4. BORDER: Optional subtle ornamental border around the card edges
 
-Preserve the person's facial features and likeness in an illustrated vintage style.
+ILLUSTRATION STYLE:
+- Inspired by Jenny Nyström, Anton Pieck, Ellen Clapsaddle vintage postcards
+- Preserve this person's facial features and likeness in illustrated vintage style
+- Scene: ${randomScene}
+- Hand-painted watercolor look, muted vintage colors
+- Soft focus edges (vignette effect)
+- Person in center, wearing timeless winter clothing
+- Festive winter scene, decorated Christmas tree, snowy atmosphere
+- Cozy, nostalgic, storybook illustration feel
 
-Scene: ${randomScene}
+LAYOUT:
+- Vertical postcard format 9:16
+- Illustration occupies top 80-85% with arched/oval frame
+- Bottom 15-20% is blank cream paper for text
+- Soft fade from illustration into background
 
-Festive winter scene, snowy fairy-tale forest, decorated Christmas tree with warm glowing lights.
-Timeless vintage winter clothing, classic international postcard style.
-Cozy, joyful, nostalgic holiday mood.
-Hand-painted illustration look, muted colors, subtle vintage paper texture.
-Vertical format 9:16.
-
-IMPORTANT: No text, no words, no captions, no letters in the image. Pure illustration only.`
+IMPORTANT: No text, no words, no captions in the image. Leave bottom space blank for text overlay.`
                 : visualPrompt; // Fallback if no image
             
             imageParts.push({ text: finalPrompt });
@@ -339,7 +360,11 @@ IMPORTANT: No text, no words, no captions, no letters in the image. Pure illustr
             }
 
             // Generate personalized greeting based on scene analysis
-            const greetingPrompt = `You are writing a heartfelt Christmas greeting card from ${senderName} to ${displayRecipient}. Based on the profile image, write a warm, personal message (80-150 words):
+            const greetingPrompt = `You are writing a heartfelt Christmas greeting card from ${senderName} to ${displayRecipient}.
+
+CRITICAL CONTEXT: The card illustration shows this scene: "${randomScene}"
+
+Your greeting MUST match this scene. Write a warm, personal message (80-150 words) that tells a story about what you've been doing in this exact scene:
 
 Structure:
 - Opening: Address the recipient directly - "Dear ${displayRecipient}," or "Hey ${displayRecipient}!" followed by a warm holiday greeting
