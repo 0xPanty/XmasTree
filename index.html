@@ -6084,12 +6084,9 @@ Write only the reply text, nothing else:`;
         // Generate double-sided postcard (picture front + address back)
         async function compositeStampOnImage(base64Image) {
             return new Promise(async (resolve, reject) => {
-                // Step 1: Resize AI image to match back side dimensions
+                // Resize AI image to match back side dimensions
                 const resizedFrontImage = await resizeAIImage(base64Image);
-                
-                // Step 2: Add greeting text to bottom
-                const frontWithText = await addGreetingTextToImage(resizedFrontImage);
-                currentAIImage = frontWithText;
+                currentAIImage = resizedFrontImage;
                 
                 // Load stamp image for address side
                 const stamp = new Image();
@@ -6107,7 +6104,7 @@ Write only the reply text, nothing else:`;
                         document.getElementById('ai-preview-section').style.display = 'block';
                         
                         // Set both sides (both are now 1080x1920)
-                        document.getElementById('ai-preview-front').src = frontWithText; // Front: AI illustration with greeting text
+                        document.getElementById('ai-preview-front').src = resizedFrontImage; // Front: AI illustration
                         document.getElementById('ai-preview-back').src = backImage; // Back: Letter content + stamp (flip to see)
                         
                         // Reset flip state (start with front cover)
@@ -6129,7 +6126,7 @@ Write only the reply text, nothing else:`;
                             document.getElementById('ai-generate-section').style.display = 'none';
                             document.getElementById('ai-preview-section').style.display = 'block';
                             document.getElementById('ai-preview-back').src = backImage;
-                            document.getElementById('ai-preview-front').src = frontWithText; // Use version with text
+                            document.getElementById('ai-preview-front').src = resizedFrontImage; // Use resized version
                             isPostcardFlipped = false;
                             document.getElementById('postcard-flipper').style.transform = 'rotateY(0deg)';
                             resolve();
