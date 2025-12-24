@@ -4869,18 +4869,18 @@
             showLoading('Creating personalized postcards...');
             
             // Generate personalized address side for each recipient
-            const stamp = new Image();
-            stamp.src = selectedStamp ? `/stamp/${selectedStamp}.png` : '/stamp/neynar.png';
+            const stampImage = new Image();
+            stampImage.src = selectedStamp ? `/stamp/${selectedStamp}.png` : '/stamp/neynar.png';
             
             await new Promise((resolve) => {
-                stamp.onload = async () => {
+                stampImage.onload = async () => {
                     const senderName = currentUser?.username || (TEST_MODE ? 'xqc' : 'Anonymous');
                     
                     // Create a gift for each recipient with personalized address side
                     const links = [];
                     for (const r of selectedRecipients) {
                         // Generate personalized address side (just for this recipient)
-                        const personalizedBack = await generateAddressSide(currentAIGreeting, senderName, r.username, stamp);
+                        const personalizedBack = await generateAddressSide(currentAIGreeting, senderName, r.username, stampImage);
                         
                         const giftId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
                         const giftData = {
@@ -4910,7 +4910,7 @@
                     showShareLinks(links, title, includeGift, amount, token);
                     resolve();
                 };
-                stamp.onerror = () => resolve(); // Continue without stamp if loading fails
+                stampImage.onerror = () => resolve(); // Continue without stamp if loading fails
             });
             
             return; // Early return - all logic handled inside stamp.onload
