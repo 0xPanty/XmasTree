@@ -363,16 +363,20 @@ IMPORTANT: Soft vignette borders with natural fade, NOT hard rectangular edges.`
             // Generate personalized greeting based on scene analysis
             const greetingPrompt = `You are writing a heartfelt Christmas greeting card from ${senderName} to ${displayRecipient}.
 
-CRITICAL REQUIREMENTS:
-1. The card illustration shows: "${randomScene}"
-2. Your greeting MUST tell a story about this exact scene
-3. LENGTH REQUIREMENT: Write 50-80 words (concise but detailed)
-4. DO NOT write a simple one-line greeting
-5. Write 2-3 sentences with vivid details about the scene
+MANDATORY LENGTH RULE: Your response MUST be between 150-200 words. This is a full letter, not a short message.
 
-Structure:
-- Opening: Address the recipient directly - "Dear ${displayRecipient}," or "Hey ${displayRecipient}!" followed by a warm holiday greeting
-- Main body (3-4 sentences): Share what you've been up to based on the detected scene:
+The card illustration shows: "${randomScene}"
+
+Your task:
+1. Write a detailed story about this exact scene - describe what you're doing, how it feels, what you see
+2. Include vivid sensory details (sights, sounds, smells, feelings)
+3. Share your activities and experiences in this scene
+4. Make it personal, warm, and storytelling
+5. MUST be at least 150 words - this should be multiple paragraphs!
+
+Required structure:
+- Opening: "Dear ${displayRecipient}," or "Hey ${displayRecipient}!"
+- Body: 2-3 sentences describing the scene activity with vivid details:
   * Snow/winter → "The mountains have been incredible this season! I've been skiing every weekend and building the most epic snowmen you've ever seen. The crisp air and sparkling snow make everything feel magical."
   * Travel → "I'm currently exploring [destination] and it's absolutely breathtaking! The festive markets, twinkling lights, and local traditions have made this holiday season unforgettable. I wish you could be here to experience it with me."
   * Family → "This holiday season has been all about family for me. We've been baking grandmother's secret recipes, decorating the entire house, and creating memories that will last forever. The house smells like cinnamon and joy."
@@ -383,13 +387,23 @@ Structure:
 - Connection (1-2 sentences): Make it personal to the recipient - "I can't wait to catch up with you soon!" or "Hope you're staying warm and cozy!" or "Miss our adventures together!" or "Would love to share this experience with you!"
 - Closing: "Warmest wishes, ${senderName}" or "With love, ${senderName}" or "Cheers, ${senderName}"
 
-Tone: Warm, genuine, storytelling
-Length: 50-80 words (short but vivid)
-Style: Natural, heartfelt, concise
+VERIFICATION:
+- Count your words before responding
+- Minimum 150 words required
+- Maximum 200 words
+- Write multiple paragraphs with detailed descriptions
+- If your draft is less than 150 words, add more sensory details and activities
 
-IMPORTANT: Write 2-3 sentences about the scene activity. Keep it concise but descriptive. Include opening greeting and closing signature.
+Example length (175 words):
+"Dear Sarah, Merry Christmas! I wanted to share what I've been up to this holiday season. Every evening, I've been heading to the town square where the most magnificent Christmas tree stands tall, adorned with hundreds of twinkling golden lights that dance in the winter breeze. The air is crisp and filled with the joyful sounds of carol singers, and there's always the warm, comforting aroma of hot cocoa and roasted chestnuts wafting from the festive market stalls.
 
-Write only the greeting text, nothing else:`;
+I've been ice skating on the outdoor rink with friends, laughing as we slip and slide across the frozen surface. The whole scene feels like something out of a storybook, with snow gently falling and children building snowmen nearby. It's these simple, magical moments that make this season so special.
+
+I find myself thinking of you during these celebrations and wishing you could be here to experience this festive atmosphere with me. I hope your holidays are filled with equal warmth and joy!
+
+Warmest wishes, John"
+
+Now write your greeting (150-200 words):`;
 
             const textResponse = await fetch(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
@@ -400,7 +414,7 @@ Write only the greeting text, nothing else:`;
                         contents: [{ parts: [{ text: greetingPrompt }] }],
                         generationConfig: {
                             temperature: 0.9,
-                            maxOutputTokens: 250,
+                            maxOutputTokens: 600,
                             candidateCount: 1
                         }
                     })
