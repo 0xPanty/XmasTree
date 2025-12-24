@@ -5991,7 +5991,7 @@ Write only the reply text, nothing else:`;
             });
         }
         
-        // Resize AI image to standard postcard size (1080x1920)
+        // Resize AI image to standard postcard size (1080x1920) with cover fit (no distortion)
         function resizeAIImage(base64Image) {
             return new Promise((resolve) => {
                 const img = new Image();
@@ -6000,11 +6000,33 @@ Write only the reply text, nothing else:`;
                     const ctx = canvas.getContext('2d');
                     
                     // Standard postcard size (9:16 ratio, same as back)
-                    canvas.width = 1080;
-                    canvas.height = 1920;
+                    const targetWidth = 1080;
+                    const targetHeight = 1920;
+                    canvas.width = targetWidth;
+                    canvas.height = targetHeight;
                     
-                    // Draw image to fill canvas (cover style)
-                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    // Calculate scale to cover (like CSS object-fit: cover)
+                    const imgRatio = img.width / img.height;
+                    const targetRatio = targetWidth / targetHeight;
+                    
+                    let drawWidth, drawHeight, offsetX, offsetY;
+                    
+                    if (imgRatio > targetRatio) {
+                        // Image is wider - fit height, crop width
+                        drawHeight = targetHeight;
+                        drawWidth = img.width * (targetHeight / img.height);
+                        offsetX = (targetWidth - drawWidth) / 2;
+                        offsetY = 0;
+                    } else {
+                        // Image is taller - fit width, crop height
+                        drawWidth = targetWidth;
+                        drawHeight = img.height * (targetWidth / img.width);
+                        offsetX = 0;
+                        offsetY = (targetHeight - drawHeight) / 2;
+                    }
+                    
+                    // Draw image centered and cropped (no distortion)
+                    ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
                     
                     resolve(canvas.toDataURL('image/png'));
                 };
