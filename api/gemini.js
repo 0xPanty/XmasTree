@@ -239,29 +239,46 @@ REFERENCE IMAGE:`;
                 });
             }
 
-            // Use Imagen 3 directly for more reliable generation
-            console.log('🎨 Attempting image generation with Imagen 3...');
+            // Use Gemini 2.5 Flash Image (proven stable model)
+            console.log('🎨 Attempting image generation with Gemini 2.5 Flash Image...');
             
-            const simplifiedPrompt = `Create a vintage Christmas or New Year greeting card illustration in the scene: ${randomScene}
+            const visualPrompt = `Create a vintage Christmas or New Year greeting card illustration.
 
-Style: Classic illustrated postcard by Jenny Nyström or Anton Pieck
+SCENE: ${randomScene}
+
+STYLE REQUIREMENTS:
+- Classic illustrated postcard style by Jenny Nyström, Anton Pieck, or Ellen Clapsaddle
 - Hand-drawn vintage look with soft watercolor washes
-- Muted vintage colors: dusty red, sage green, cream, soft brown
+- Muted vintage colors: dusty red, sage green, mustard yellow, cream, soft brown
 - Cozy festive winter atmosphere with snow and warm lights
-- Vertical postcard format, nostalgic holiday mood
-- Simple composition, not overly detailed`;
+- Vertical 9:16 postcard format
+- Nostalgic holiday mood
+- Simple, charming composition (not overly detailed)
+- Vintage paper texture with subtle grain
+
+AVOID:
+- Modern digital art look
+- Photorealistic rendering
+- Dark or dramatic lighting
+- Overly busy composition`;
 
             const imageResponse = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-001:generate?key=${GEMINI_API_KEY}`,
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${GEMINI_API_KEY}`,
                 {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        prompt: simplifiedPrompt,
-                        number_of_images: 1,
-                        aspect_ratio: "9:16",
-                        safety_filter_level: "block_few",
-                        person_generation: "allow_adult"
+                        contents: [{
+                            parts: [
+                                { text: visualPrompt }
+                            ]
+                        }],
+                        generationConfig: {
+                            temperature: 0.7,
+                            topP: 0.95,
+                            topK: 40,
+                            responseModalities: ["IMAGE"]
+                        }
                     })
                 }
             );
@@ -272,12 +289,20 @@ Style: Classic illustrated postcard by Jenny Nyström or Anton Pieck
                 const imageResult = await imageResponse.json();
                 console.log('✅ Image API Response received');
                 
-                // Extract image from Imagen 3 response
-                if (imageResult.generated_images && imageResult.generated_images[0]) {
-                    imageData = imageResult.generated_images[0].image.image_bytes;
-                    console.log('✅ Found image data! Length:', imageData?.length);
-                } else {
-                    console.error('❌ No generated_images in response:', imageResult);
+                // Extract image from Gemini 2.5 Flash Image response
+                const parts = imageResult.candidates?.[0]?.content?.parts;
+                if (parts) {
+                    for (const part of parts) {
+                        if (part.inlineData && part.inlineData.data) {
+                            imageData = part.inlineData.data;
+                            console.log('✅ Found image data! Length:', imageData?.length);
+                            break;
+                        }
+                    }
+                }
+                
+                if (!imageData) {
+                    console.error('❌ No inlineData found in response:', imageResult);
                     imageError = 'No image in response';
                 }
             } else {
