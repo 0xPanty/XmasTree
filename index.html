@@ -1627,14 +1627,14 @@
                 <div id="card-postcard-preview" style="display:none; margin:20px 0;">
                     <div style="perspective:1500px; cursor:pointer;" onclick="flipCardPostcard()">
                         <div id="card-postcard-flipper" style="position:relative; width:100%; height:400px; transition:transform 0.8s; transform-style:preserve-3d;">
-                            <!-- Address Side (Back) -->
-                            <img id="card-postcard-back" src="" style="position:absolute; width:100%; height:100%; object-fit:contain; backface-visibility:hidden; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
-                            <!-- Picture Side (Front) -->
-                            <img id="card-postcard-front" src="" style="position:absolute; width:100%; height:100%; object-fit:contain; backface-visibility:hidden; transform:rotateY(180deg); border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+                            <!-- Picture Side (Front - Shows First) -->
+                            <img id="card-postcard-front" src="" style="position:absolute; width:100%; height:100%; object-fit:contain; backface-visibility:hidden; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+                            <!-- Letter Content Side (Back - Flip to See) -->
+                            <img id="card-postcard-back" src="" style="position:absolute; width:100%; height:100%; object-fit:contain; backface-visibility:hidden; transform:rotateY(180deg); border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.2);">
                         </div>
                     </div>
                     <div id="card-flip-hint" style="text-align:center; margin-top:12px; font-size:0.9rem; color:#8b4513;">
-                        👉 Click to see the picture side
+                        👉 Click to see the message inside
                     </div>
                 </div>
                 
@@ -2038,13 +2038,13 @@
                         <!-- 3D Flip Container -->
                         <div style="perspective:1200px; margin:0 auto 16px; max-width:500px;">
                             <div id="postcard-flipper" style="position:relative; width:100%; aspect-ratio:9/16; transform-style:preserve-3d; transition:transform 0.8s;">
-                                <!-- Address Side (Back) - Shows First -->
+                                <!-- Picture Side (Front) - Shows First (AI Illustration) -->
                                 <div style="position:absolute; width:100%; height:100%; backface-visibility:hidden;">
-                                    <img id="ai-preview-back" src="" style="width:100%; height:100%; object-fit:cover; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4); cursor:pointer;" onclick="flipPostcard()">
-                                </div>
-                                <!-- Picture Side (Front) - Hidden Until Flip -->
-                                <div style="position:absolute; width:100%; height:100%; backface-visibility:hidden; transform:rotateY(180deg);">
                                     <img id="ai-preview-front" src="" style="width:100%; height:100%; object-fit:cover; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4); cursor:pointer;" onclick="flipPostcard()">
+                                </div>
+                                <!-- Content Side (Back) - Hidden Until Flip (Letter + Stamp) -->
+                                <div style="position:absolute; width:100%; height:100%; backface-visibility:hidden; transform:rotateY(180deg);">
+                                    <img id="ai-preview-back" src="" style="width:100%; height:100%; object-fit:cover; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4); cursor:pointer;" onclick="flipPostcard()">
                                 </div>
                             </div>
                         </div>
@@ -2052,10 +2052,10 @@
                         <!-- Flip Button -->
                         <div style="text-align:center; margin-bottom:12px;">
                             <button onclick="flipPostcard()" style="padding:10px 24px; background:linear-gradient(135deg, #667eea, #764ba2); border:none; color:#fff; border-radius:20px; cursor:pointer; font-size:0.9rem; font-weight:bold; box-shadow:0 4px 12px rgba(102,126,234,0.3);">
-                                🔄 Flip Postcard
+                                🔄 Flip Card
                             </button>
                             <div id="flip-hint" style="font-size:0.72rem; color:rgba(255,215,0,0.7); margin-top:6px;">
-                                👉 Click to see the picture side
+                                👉 Click to see the message inside
                             </div>
                         </div>
                         
@@ -5069,20 +5069,20 @@
             document.getElementById('gift-details-wrapper').style.display = 'block';
         }
         
-        // Flip double-sided postcard in card view
+        // Flip double-sided card in card view
         function flipCardPostcard() {
             const flipper = document.getElementById('card-postcard-flipper');
             const hint = document.getElementById('card-flip-hint');
             
             if (!window.isCardPostcardFlipped) {
-                // Flip to front (picture side)
+                // Flip to back (message + stamp)
                 flipper.style.transform = 'rotateY(180deg)';
-                hint.textContent = '👈 Click to see the address side';
+                hint.textContent = '👈 Click to see the cover';
                 window.isCardPostcardFlipped = true;
             } else {
-                // Flip back to address side
+                // Flip back to front (cover)
                 flipper.style.transform = 'rotateY(0deg)';
-                hint.textContent = '👉 Click to see the picture side';
+                hint.textContent = '👉 Click to see the message inside';
                 window.isCardPostcardFlipped = false;
             }
         }
@@ -5102,14 +5102,14 @@
                 document.getElementById('card-inside-loading').style.display = 'none';
                 document.getElementById('card-inside-greeting').textContent = currentCardGift.message || 'Merry Christmas!';
                 
-                // Check if has personalized double-sided postcard
+                // Check if has personalized double-sided card
                 if (currentCardGift.aiImageBack) {
-                    // Show double-sided postcard
+                    // Show double-sided card (front cover first)
                     document.getElementById('card-postcard-preview').style.display = 'block';
-                    document.getElementById('card-postcard-back').src = currentCardGift.aiImageBack;
-                    document.getElementById('card-postcard-front').src = `data:image/png;base64,${currentCardGift.aiImage}`;
+                    document.getElementById('card-postcard-front').src = `data:image/png;base64,${currentCardGift.aiImage}`; // Front: AI illustration
+                    document.getElementById('card-postcard-back').src = currentCardGift.aiImageBack; // Back: Letter + stamp
                     document.getElementById('card-postcard-flipper').style.transform = 'rotateY(0deg)';
-                    document.getElementById('card-flip-hint').textContent = '👉 Click to see the picture side';
+                    document.getElementById('card-flip-hint').textContent = '👉 Click to see the message inside';
                     window.isCardPostcardFlipped = false;
                 } else {
                     document.getElementById('card-postcard-preview').style.display = 'none';
@@ -5859,14 +5859,14 @@ Write only the reply text, nothing else:`;
             
             if (isPostcardFlipped) {
                 flipper.style.transform = 'rotateY(180deg)';
-                hint.textContent = '👉 Click to see the address side';
+                hint.textContent = '👈 Click to see the cover';
             } else {
                 flipper.style.transform = 'rotateY(0deg)';
-                hint.textContent = '👉 Click to see the picture side';
+                hint.textContent = '👉 Click to see the message inside';
             }
         }
         
-        // Generate address side (postcard back) layout
+        // Generate letter content (back side) with stamp
         function generateAddressSide(greeting, senderName, recipientNames, stampImg) {
             return new Promise((resolve) => {
                 const canvas = document.createElement('canvas');
@@ -5890,99 +5890,81 @@ Write only the reply text, nothing else:`;
                 }
                 ctx.globalAlpha = 1.0;
                 
-                // Vertical dividing line (classic postcard style)
-                const divideX = canvas.width / 2;
-                ctx.strokeStyle = '#c4b5a0';
-                ctx.lineWidth = 2;
-                ctx.setLineDash([10, 5]);
-                ctx.beginPath();
-                ctx.moveTo(divideX, canvas.height * 0.15);
-                ctx.lineTo(divideX, canvas.height * 0.85);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                
-                // Right side: Address section
-                const rightX = divideX + 40;
-                
-                // Stamp (top-right corner)
+                // Stamp (top-right corner) with white background to hide transparency
                 if (stampImg) {
-                    const stampSize = 180;
-                    const stampX = canvas.width - stampSize - 40;
+                    const stampSize = 200;
+                    const stampX = canvas.width - stampSize - 50;
                     const stampY = 50;
                     
-                    // Stamp background
+                    // White background for stamp (removes transparency artifacts)
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(stampX - 10, stampY - 10, stampSize + 20, stampSize + 20);
+                    
+                    // Stamp shadow
                     ctx.shadowColor = 'rgba(0,0,0,0.2)';
-                    ctx.shadowBlur = 6;
+                    ctx.shadowBlur = 8;
                     ctx.shadowOffsetX = 3;
                     ctx.shadowOffsetY = 3;
-                    ctx.fillStyle = '#faf8f3';
-                    ctx.fillRect(stampX - 10, stampY - 10, stampSize + 20, stampSize + 20);
-                    ctx.shadowColor = 'transparent';
-                    
                     ctx.drawImage(stampImg, stampX, stampY, stampSize, stampSize);
+                    ctx.shadowColor = 'transparent';
+                    ctx.shadowBlur = 0;
                 }
                 
-                // "To:" label
-                ctx.font = 'bold 32px Arial';
-                ctx.fillStyle = '#3a3a3a';
-                ctx.fillText('To:', rightX, canvas.height * 0.35);
-                
-                // Recipient name (personalized for each recipient)
-                ctx.font = '40px Arial';
-                let yPos = canvas.height * 0.40;
-                
-                // Handle single recipient (personalized) or multiple (preview)
+                // Recipient greeting at top (if personalized)
+                let yPos = 200;
                 if (typeof recipientNames === 'string') {
-                    // Single recipient - personalized
-                    ctx.fillText(`@${recipientNames}`, rightX + 20, yPos);
-                } else if (Array.isArray(recipientNames)) {
+                    // Single recipient - personalized greeting
+                    ctx.font = 'italic 36px Georgia';
+                    ctx.fillStyle = '#3a3a3a';
+                    ctx.fillText(`Dear @${recipientNames},`, 80, yPos);
+                    yPos += 100;
+                } else if (Array.isArray(recipientNames) && recipientNames.length > 0) {
                     // Multiple recipients - preview mode
-                    const count = recipientNames.length;
-                    ctx.fillText(`${count} ${count === 1 ? 'Friend' : 'Friends'}`, rightX + 20, yPos);
+                    ctx.font = 'italic 36px Georgia';
+                    ctx.fillStyle = '#3a3a3a';
+                    ctx.fillText(`To: ${recipientNames.length} Friends`, 80, yPos);
                     ctx.font = '28px Arial';
                     ctx.fillStyle = '#666';
-                    yPos += 45;
-                    ctx.fillText('(Personalized for each)', rightX + 20, yPos);
-                } else {
-                    // Fallback
-                    ctx.fillText('Friend', rightX + 20, yPos);
+                    yPos += 50;
+                    ctx.fillText('(Personalized for each)', 80, yPos);
+                    yPos += 80;
                 }
                 
-                // Left side: Message section
-                const leftX = 60;
-                const leftWidth = divideX - 120;
+                // Main greeting message (centered, word-wrapped)
+                const contentX = 80;
+                const contentWidth = canvas.width - 160;
                 
                 // Greeting text (handwritten style)
-                ctx.font = '28px Dancing Script, cursive';
+                ctx.font = '32px Brush Script MT, cursive';
                 ctx.fillStyle = '#2c2c2c';
+                ctx.textAlign = 'left';
                 
                 // Word wrap the greeting
                 const words = greeting.split(' ');
                 let line = '';
-                yPos = canvas.height * 0.20;
-                const lineHeight = 45;
-                const maxWidth = leftWidth;
+                const lineHeight = 50;
+                const maxWidth = contentWidth;
                 
                 for (let word of words) {
                     const testLine = line + word + ' ';
                     const metrics = ctx.measureText(testLine);
                     if (metrics.width > maxWidth && line !== '') {
-                        ctx.fillText(line, leftX, yPos);
+                        ctx.fillText(line, contentX, yPos);
                         line = word + ' ';
                         yPos += lineHeight;
-                        if (yPos > canvas.height * 0.75) break; // Don't overflow
+                        if (yPos > canvas.height - 300) break; // Leave space for signature
                     } else {
                         line = testLine;
                     }
                 }
-                ctx.fillText(line, leftX, yPos);
+                ctx.fillText(line, contentX, yPos);
                 
-                // Sender signature (bottom right of message area)
-                yPos = canvas.height * 0.82;
-                ctx.font = 'italic 36px Brush Script MT, cursive';
+                // Sender signature (bottom center)
+                yPos = canvas.height - 120;
+                ctx.font = 'italic 42px Brush Script MT, cursive';
                 ctx.fillStyle = '#3a3a3a';
-                ctx.textAlign = 'right';
-                ctx.fillText(`- ${senderName}`, divideX - 60, yPos);
+                ctx.textAlign = 'center';
+                ctx.fillText(`- ${senderName}`, canvas.width / 2, yPos);
                 
                 // Convert to base64
                 resolve(canvas.toDataURL('image/png'));
@@ -5995,27 +5977,27 @@ Write only the reply text, nothing else:`;
                 // Load stamp image for address side
                 const stamp = new Image();
                 stamp.onload = () => {
-                    // Picture side (front) = pure AI illustration
+                    // Picture side (front) = pure AI illustration (cover)
                     const frontImage = base64Image;
                     currentAIImage = frontImage;
                     
-                    // Generate address side (back) with stamp, greeting, and recipient names
+                    // Generate letter content (back) with stamp, greeting, and recipient names
                     const senderName = window.currentUser?.username || (TEST_MODE ? 'xqc' : 'Anonymous');
                     const recipientNames = selectedRecipients.map(r => r.username);
                     
                     generateAddressSide(currentAIGreeting, senderName, recipientNames, stamp).then(backImage => {
-                        // Show double-sided postcard
+                        // Show double-sided card
                         document.getElementById('ai-generate-section').style.display = 'none';
                         document.getElementById('ai-preview-section').style.display = 'block';
                         
                         // Set both sides
-                        document.getElementById('ai-preview-back').src = backImage; // Address side (shows first)
-                        document.getElementById('ai-preview-front').src = `data:image/png;base64,${frontImage}`; // Picture side (pure illustration)
+                        document.getElementById('ai-preview-front').src = `data:image/png;base64,${frontImage}`; // Front: AI illustration (shows first)
+                        document.getElementById('ai-preview-back').src = backImage; // Back: Letter content + stamp (flip to see)
                         
-                        // Reset flip state (start with address side)
+                        // Reset flip state (start with front cover)
                         isPostcardFlipped = false;
                         document.getElementById('postcard-flipper').style.transform = 'rotateY(0deg)';
-                        document.getElementById('flip-hint').textContent = '👉 Click to see the picture side';
+                        document.getElementById('flip-hint').textContent = '👉 Click to see the message inside';
                         
                         resolve();
                     });
