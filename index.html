@@ -5938,6 +5938,18 @@ Write only the reply text, nothing else:`;
                 const contentX = 80;
                 const contentWidth = canvas.width - 160;
                 
+                // Add "Dear @username," greeting (personalized)
+                ctx.font = 'italic 36px Georgia';
+                ctx.fillStyle = '#3a3a3a';
+                ctx.textAlign = 'left';
+                if (typeof recipientNames === 'string') {
+                    ctx.fillText(`Dear @${recipientNames},`, contentX, yPos);
+                    yPos += 80;
+                } else if (Array.isArray(recipientNames) && recipientNames.length > 0) {
+                    ctx.fillText(`Dear Friends,`, contentX, yPos);
+                    yPos += 80;
+                }
+                
                 // Greeting text (handwritten style)
                 ctx.font = '32px Brush Script MT, cursive';
                 ctx.fillStyle = '#2c2c2c';
