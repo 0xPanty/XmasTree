@@ -254,7 +254,14 @@ Cozy, joyful, nostalgic holiday mood.
 Hand-painted illustration look, muted colors, subtle vintage paper texture.
 Vertical format 9:16.
 
-IMPORTANT: No text, no words, no captions, no letters in the image. Pure illustration only.`;
+CRITICAL REQUIREMENTS:
+- NO oval frame, NO decorative borders, NO ornamental lines
+- NO text at bottom, NO words anywhere
+- Pure full-frame illustration filling the entire image
+- Simple, clean composition without frames or borders
+- The illustration should extend to all edges
+
+IMPORTANT: No text, no words, no captions, no letters, no frames, no borders in the image. Pure illustration only.`;
 
 
             // Build parts array: IMAGE FIRST, then prompt (following farstand3 pattern)
@@ -287,7 +294,14 @@ Cozy, joyful, nostalgic holiday mood.
 Hand-painted illustration look, muted colors, subtle vintage paper texture.
 Vertical format 9:16.
 
-IMPORTANT: No text, no words, no captions, no letters in the image. Pure illustration only.`
+CRITICAL REQUIREMENTS:
+- NO oval frame, NO decorative borders, NO ornamental lines
+- NO text at bottom, NO words anywhere
+- Pure full-frame illustration filling the entire image
+- Simple, clean composition without frames or borders
+- The illustration should extend to all edges
+
+IMPORTANT: No text, no words, no captions, no letters, no frames, no borders in the image. Pure illustration only.`
                 : visualPrompt; // Fallback if no image
             
             imageParts.push({ text: finalPrompt });
@@ -341,9 +355,12 @@ IMPORTANT: No text, no words, no captions, no letters in the image. Pure illustr
             // Generate personalized greeting based on scene analysis
             const greetingPrompt = `You are writing a heartfelt Christmas greeting card from ${senderName} to ${displayRecipient}.
 
-CRITICAL CONTEXT: The card illustration shows this scene: "${randomScene}"
-
-Your greeting MUST match this scene. Write a warm, personal message (80-150 words) that tells a story about what you've been doing in this exact scene:
+CRITICAL REQUIREMENTS:
+1. The card illustration shows: "${randomScene}"
+2. Your greeting MUST tell a story about this exact scene
+3. LENGTH REQUIREMENT: Write AT LEAST 80 words, UP TO 150 words
+4. DO NOT write a simple one-line greeting
+5. Tell a vivid story with sensory details about the scene
 
 Structure:
 - Opening: Address the recipient directly - "Dear ${displayRecipient}," or "Hey ${displayRecipient}!" followed by a warm holiday greeting
@@ -359,8 +376,10 @@ Structure:
 - Closing: "Warmest wishes, ${senderName}" or "With love, ${senderName}" or "Cheers, ${senderName}"
 
 Tone: Warm, genuine, storytelling (like a letter from a close friend sharing their life)
-Length: 80-150 words
+Length: MINIMUM 80 words, MAXIMUM 150 words (this is mandatory, not optional)
 Style: Natural, heartfelt, with vivid details
+
+IMPORTANT: Your response must be a complete multi-sentence greeting with detailed storytelling. Do NOT respond with just one sentence. Write at least 3-4 full sentences describing the scene activity, plus opening and closing.
 
 Write only the greeting text, nothing else:`;
 
@@ -372,8 +391,9 @@ Write only the greeting text, nothing else:`;
                     body: JSON.stringify({
                         contents: [{ parts: [{ text: greetingPrompt }] }],
                         generationConfig: {
-                            temperature: 0.8,
-                            maxOutputTokens: 300
+                            temperature: 0.9,
+                            maxOutputTokens: 400,
+                            candidateCount: 1
                         }
                     })
                 }
