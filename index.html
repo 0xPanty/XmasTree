@@ -3375,20 +3375,27 @@
                     statusDiv.style.color = '#ff6b6b';
                     statusDiv.innerHTML = '🔒 Warplet NFT Required ❌';
                 } else {
-                    // Not eligible but can purchase - show reason
+                    // Not eligible but can purchase - show reason + requirement
                     const reason = eligibility?.reason || '';
                     let reasonText = '';
+                    let requirementText = '';
+                    
                     if (stamp.id === 'neynar' && eligibility?.score !== undefined) {
                         reasonText = `Score ${eligibility.score} < 0.6 ❌`;
+                        requirementText = 'Free if Score ≥ 0.6';
                     } else if (stamp.id === 'farcaster') {
                         reasonText = 'No Power Badge ❌';
+                        requirementText = 'Free with Power Badge';
                     } else {
                         reasonText = 'Not Eligible ❌';
+                        requirementText = 'Check requirements';
                     }
+                    
                     statusDiv.style.background = 'rgba(212,175,55,0.15)';
                     statusDiv.style.border = '1px solid rgba(212,175,55,0.3)';
                     statusDiv.innerHTML = `
-                        <div style="color: #ff6b6b; font-size: 0.65rem; margin-bottom: 3px;">${reasonText}</div>
+                        <div style="color: #ff6b6b; font-size: 0.65rem; margin-bottom: 2px;">${reasonText}</div>
+                        <div style="color: rgba(255,255,255,0.6); font-size: 0.6rem; margin-bottom: 3px;">${requirementText}</div>
                         <div style="color: #ffd700; font-size: 0.7rem; font-weight: bold;">💰 Available for Purchase</div>
                     `;
                 }
