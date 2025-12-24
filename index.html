@@ -1912,48 +1912,65 @@
                 <div id="stamp-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;"></div>
                 
                 <!-- How It Works Card (below stamps) -->
-                <div style="margin-top: 16px; padding: 16px; background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px;">
-                    <div style="font-size: 0.8rem; font-weight: bold; color: var(--gold); margin-bottom: 12px; text-align: center;">
-                        📖 How Stamp System Works
+                <div style="margin-top: 16px; padding: 14px; background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px;">
+                    <div style="font-size: 0.75rem; font-weight: bold; color: var(--gold); margin-bottom: 10px; text-align: center; border-bottom: 1px solid rgba(212,175,55,0.2); padding-bottom: 8px;">
+                        📖 How It Works
                     </div>
                     
-                    <!-- What are stamps -->
-                    <div style="margin-bottom: 14px; padding: 10px; background: rgba(212,175,55,0.05); border-radius: 6px;">
-                        <div style="font-size: 0.7rem; color: #ffd700; font-weight: bold; margin-bottom: 4px;">💡 What are Stamps?</div>
-                        <div style="font-size: 0.65rem; color: rgba(255,255,255,0.75); line-height: 1.6;">
-                            Stamps are required to send postcards. <b>1 stamp = 1 friend</b>. You can send to max 5 friends at once.
+                    <!-- Core concept -->
+                    <div style="text-align: center; margin-bottom: 12px; padding: 8px; background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.05)); border-radius: 6px;">
+                        <div style="font-size: 0.8rem; color: #ffd700; font-weight: bold;">
+                            1 Stamp 🎫 = Send to 1 Friend
                         </div>
                     </div>
                     
-                    <!-- How to get stamps -->
-                    <div style="margin-bottom: 14px; padding: 10px; background: rgba(74,222,128,0.05); border-radius: 6px;">
-                        <div style="font-size: 0.7rem; color: #4ade80; font-weight: bold; margin-bottom: 6px;">🎁 Get Stamps (3 Ways)</div>
-                        <div style="font-size: 0.65rem; color: rgba(255,255,255,0.75); line-height: 1.7;">
-                            <b>1. Free Claim</b> (if eligible):<br>
-                            • Neynar: 3 stamps (Score ≥ 0.6)<br>
-                            • Farcaster: 10 stamps (Power Badge)<br>
-                            • Warplet: 5 stamps (Hold NFT)<br>
-                            <br>
-                            <b>2. Purchase</b> (with USDC):<br>
-                            • Neynar: 0.1 USDC → 3 stamps<br>
-                            • Farcaster: 0.37 USDC → 10 stamps<br>
-                            • Warplet: 0.5 USDC → 5 stamps (NFT required)<br>
-                            <br>
-                            <b>3. Based NFT</b> (collector badge):<br>
-                            • Collect all 3 stamps above<br>
-                            • Mint Based NFT: 0.99 USDC<br>
-                            • Get ♾️ unlimited usage
+                    <!-- Stamp table -->
+                    <div style="margin-bottom: 10px;">
+                        <table style="width: 100%; font-size: 0.65rem; color: rgba(255,255,255,0.85); border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid rgba(212,175,55,0.2);">
+                                    <th style="text-align: left; padding: 6px 4px; color: var(--gold); font-size: 0.7rem;">Stamp</th>
+                                    <th style="text-align: center; padding: 6px 4px; color: #4ade80; font-size: 0.7rem;">Free</th>
+                                    <th style="text-align: center; padding: 6px 4px; color: #ffd700; font-size: 0.7rem;">Buy</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <td style="padding: 6px 4px; font-weight: bold;">🟣 Neynar</td>
+                                    <td style="text-align: center; padding: 6px 4px; color: #4ade80;">3<br><span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">Score≥0.6</span></td>
+                                    <td style="text-align: center; padding: 6px 4px; color: #ffd700;">0.1$<br><span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">→ 3</span></td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <td style="padding: 6px 4px; font-weight: bold;">🟪 Farcaster</td>
+                                    <td style="text-align: center; padding: 6px 4px; color: #4ade80;">10<br><span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">Badge</span></td>
+                                    <td style="text-align: center; padding: 6px 4px; color: #ffd700;">0.37$<br><span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">→ 10</span></td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <td style="padding: 6px 4px; font-weight: bold;">🎨 Warplet</td>
+                                    <td style="text-align: center; padding: 6px 4px; color: #4ade80;">5<br><span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">NFT</span></td>
+                                    <td style="text-align: center; padding: 6px 4px; color: #ffd700;">0.5$<br><span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">→ 5</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 6px 4px; font-weight: bold;">🌟 Based</td>
+                                    <td style="text-align: center; padding: 6px 4px; color: rgba(255,255,255,0.4);">-</td>
+                                    <td style="text-align: center; padding: 6px 4px; color: #ffd700;">0.99$<br><span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">→ ♾️</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Based special note -->
+                    <div style="padding: 8px; background: rgba(255,215,0,0.05); border: 1px solid rgba(255,215,0,0.2); border-radius: 4px; margin-bottom: 10px;">
+                        <div style="font-size: 0.6rem; color: rgba(255,255,255,0.7); line-height: 1.5;">
+                            <b style="color: #ffd700;">🎖️ Based NFT:</b> Collect all 3 stamps above → Mint Based → Get unlimited stamps forever
                         </div>
                     </div>
                     
-                    <!-- Usage -->
-                    <div style="padding: 10px; background: rgba(212,175,55,0.05); border-radius: 6px;">
-                        <div style="font-size: 0.7rem; color: #ffd700; font-weight: bold; margin-bottom: 4px;">📮 Usage</div>
-                        <div style="font-size: 0.65rem; color: rgba(255,255,255,0.75); line-height: 1.6;">
-                            1. Select a stamp (must own)<br>
-                            2. Generate AI postcard (free first time)<br>
-                            3. Add friends (max 5)<br>
-                            4. Send → Stamps consumed: 1 per friend
+                    <!-- Usage flow -->
+                    <div style="padding: 8px; background: rgba(212,175,55,0.05); border-radius: 4px;">
+                        <div style="font-size: 0.65rem; color: rgba(255,255,255,0.8); line-height: 1.6; text-align: center;">
+                            Select Stamp → Generate AI Card → Add Friends → Send<br>
+                            <span style="font-size: 0.6rem; color: rgba(255,255,255,0.5);">(Max 5 friends, 1 stamp per friend consumed)</span>
                         </div>
                     </div>
                 </div>
