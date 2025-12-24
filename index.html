@@ -3099,7 +3099,7 @@
                     
                     // Set eligibility
                     stampEligibility = {
-                        neynar: { eligible: true, score: 0.85, reason: 'TEST: Neynar Score: 0.85 (>0.6)' },
+                        neynar: { eligible: false, score: 0.45, reason: 'TEST: Neynar Score: 0.45 (<0.6 不符合)' },
                         farcaster: { eligible: true, reason: 'TEST: Farcaster Power Badge holder' },
                         warplet: { eligible: true, reason: 'TEST: Warplet NFT holder' }
                     };
@@ -3107,7 +3107,7 @@
                     
                     // Auto-grant test stamps with quantities
                     userStamps = {
-                        neynar: { owned: true, quantity: 3, acquired_method: 'test', first_free_claimed: true },
+                        neynar: { owned: false }, // 不符合资格，未拥有 → 显示购买按钮
                         farcaster: { owned: true, quantity: 10, acquired_method: 'test', first_free_claimed: true },
                         warplet: { owned: true, quantity: 5, acquired_method: 'test', first_free_claimed: true },
                         based: { owned: false } // Not minted yet - can test mint flow
