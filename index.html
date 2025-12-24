@@ -1915,19 +1915,19 @@
                 <div style="margin-top: 12px;">
                     <!-- Compact Summary (always visible) -->
                     <div onclick="document.getElementById('stamp-help-detail').style.display = document.getElementById('stamp-help-detail').style.display === 'none' ? 'block' : 'none'; this.querySelector('.toggle-icon').textContent = document.getElementById('stamp-help-detail').style.display === 'none' ? '▶' : '▼';" 
-                         style="padding: 10px 12px; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: all 0.2s;"
-                         onmouseover="this.style.background='rgba(212,175,55,0.15)'"
-                         onmouseout="this.style.background='rgba(212,175,55,0.1)'">
-                        <div style="font-size: 1.2rem;">💡</div>
+                         style="padding: 8px 12px; background: linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.08)); border: 1px solid rgba(212,175,55,0.35); border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s; box-shadow: 0 2px 6px rgba(0,0,0,0.2);"
+                         onmouseover="this.style.background='linear-gradient(135deg, rgba(212,175,55,0.18), rgba(212,175,55,0.12))'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 8px rgba(0,0,0,0.3)';"
+                         onmouseout="this.style.background='linear-gradient(135deg, rgba(212,175,55,0.12), rgba(212,175,55,0.08))'; this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(0,0,0,0.2)';">
+                        <div style="font-size: 1.3rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">💡</div>
                         <div style="flex: 1;">
-                            <div style="font-size: 0.75rem; font-weight: bold; color: #ffd700; margin-bottom: 2px;">
-                                1 Stamp 🎫 = Send to 1 Friend
+                            <div style="font-size: 0.78rem; font-weight: bold; color: #ffd700; margin-bottom: 3px; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">
+                                1 Stamp 🎫 = 1 Friend
                             </div>
-                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.6);">
-                                Click for prices & details
+                            <div style="font-size: 0.62rem; color: rgba(255,255,255,0.7);">
+                                Get free or buy • Click for details
                             </div>
                         </div>
-                        <div class="toggle-icon" style="font-size: 0.8rem; color: var(--gold);">▶</div>
+                        <div class="toggle-icon" style="font-size: 0.9rem; color: var(--gold); font-weight: bold;">▶</div>
                     </div>
                     
                     <!-- Detailed Info (collapsible) -->
