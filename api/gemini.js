@@ -365,7 +365,7 @@ Write only the greeting text, nothing else:`;
                         contents: [{ parts: [{ text: greetingPrompt }] }],
                         generationConfig: {
                             temperature: 0.8,
-                            maxOutputTokens: 150
+                            maxOutputTokens: 300
                         }
                     })
                 }
@@ -375,11 +375,19 @@ Write only the greeting text, nothing else:`;
             let sceneType = 'general';
             let sceneDescription = 'holiday celebration';
             
+            console.log('📝 Text generation response status:', textResponse.status);
             if (textResponse.ok) {
                 const textResult = await textResponse.json();
+                console.log('📝 Text result:', textResult);
                 if (textResult.candidates && textResult.candidates[0]?.content?.parts?.[0]?.text) {
                     greeting = textResult.candidates[0].content.parts[0].text.trim();
+                    console.log('✅ Greeting generated:', greeting.substring(0, 100) + '...');
+                } else {
+                    console.error('❌ No text in candidates:', textResult);
                 }
+            } else {
+                const errorText = await textResponse.text();
+                console.error('❌ Text generation failed:', textResponse.status, errorText);
             }
             
             // Extract scene info from greeting for reply context
