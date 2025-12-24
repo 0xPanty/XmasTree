@@ -5991,16 +5991,37 @@ Write only the reply text, nothing else:`;
             });
         }
         
+        // Resize AI image to standard postcard size (1080x1920)
+        function resizeAIImage(base64Image) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Standard postcard size (9:16 ratio, same as back)
+                    canvas.width = 1080;
+                    canvas.height = 1920;
+                    
+                    // Draw image to fill canvas (cover style)
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.src = `data:image/png;base64,${base64Image}`;
+            });
+        }
+        
         // Generate double-sided postcard (picture front + address back)
         async function compositeStampOnImage(base64Image) {
-            return new Promise((resolve, reject) => {
+            return new Promise(async (resolve, reject) => {
+                // Resize AI image to match back side dimensions
+                const resizedFrontImage = await resizeAIImage(base64Image);
+                currentAIImage = resizedFrontImage;
+                
                 // Load stamp image for address side
                 const stamp = new Image();
                 stamp.onload = () => {
-                    // Picture side (front) = pure AI illustration (cover)
-                    const frontImage = base64Image;
-                    currentAIImage = frontImage;
-                    
                     // Generate letter content (back) with stamp, greeting, and recipient names
                     const senderName = window.currentUser?.username || (TEST_MODE ? 'xqc' : 'Anonymous');
                     const recipientNames = selectedRecipients.map(r => r.username);
@@ -6013,8 +6034,8 @@ Write only the reply text, nothing else:`;
                         document.getElementById('ai-generate-section').style.display = 'none';
                         document.getElementById('ai-preview-section').style.display = 'block';
                         
-                        // Set both sides
-                        document.getElementById('ai-preview-front').src = `data:image/png;base64,${frontImage}`; // Front: AI illustration (shows first)
+                        // Set both sides (both are now 1080x1920)
+                        document.getElementById('ai-preview-front').src = resizedFrontImage; // Front: AI illustration (shows first)
                         document.getElementById('ai-preview-back').src = backImage; // Back: Letter content + stamp (flip to see)
                         
                         // Reset flip state (start with front cover)
@@ -6028,7 +6049,6 @@ Write only the reply text, nothing else:`;
                     stamp.onerror = () => {
                         console.error('Failed to load stamp image');
                         // Fallback: show basic double-sided layout without stamp
-                        currentAIImage = base64Image;
                         const senderName = window.currentUser?.username || (TEST_MODE ? 'xqc' : 'Anonymous');
                         const recipientNames = selectedRecipients.map(r => r.username);
                         
@@ -6037,12 +6057,12 @@ Write only the reply text, nothing else:`;
                             document.getElementById('ai-generate-section').style.display = 'none';
                             document.getElementById('ai-preview-section').style.display = 'block';
                             document.getElementById('ai-preview-back').src = backImage;
-                            document.getElementById('ai-preview-front').src = `data:image/png;base64,${base64Image}`;
+                            document.getElementById('ai-preview-front').src = resizedFrontImage; // Use resized version
                             isPostcardFlipped = false;
                             document.getElementById('postcard-flipper').style.transform = 'rotateY(0deg)';
                             resolve();
                         });
-                };
+                    };
                 // Load stamp image
                 stamp.src = selectedStamp ? `/stamp/${selectedStamp}.png` : '/stamp/neynar.png';
             });
