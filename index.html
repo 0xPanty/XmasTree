@@ -2020,17 +2020,30 @@
                     
                     <!-- AI Generated Preview -->
                     <div id="ai-preview-section" style="display:none; margin-top:12px;">
-                        <div style="position:relative; width:100%; max-width:500px; aspect-ratio:9/16; border-radius:12px; overflow:hidden; box-shadow:0 8px 24px rgba(0,0,0,0.4); margin:0 auto 12px; cursor:pointer;" onclick="enlargeAIImage()">
-                            <img id="ai-preview-image" src="" alt="AI Postcard" style="width:100%; height:100%; object-fit:cover; display:block;">
-                            <!-- Click to enlarge hint -->
-                            <div style="position:absolute; bottom:8px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.6); color:#fff; padding:4px 12px; border-radius:12px; font-size:0.7rem; pointer-events:none;">
-                                🔍 Click to enlarge
+                        <!-- 3D Flip Container -->
+                        <div style="perspective:1200px; margin:0 auto 16px; max-width:500px;">
+                            <div id="postcard-flipper" style="position:relative; width:100%; aspect-ratio:9/16; transform-style:preserve-3d; transition:transform 0.8s;">
+                                <!-- Address Side (Back) - Shows First -->
+                                <div style="position:absolute; width:100%; height:100%; backface-visibility:hidden;">
+                                    <img id="ai-preview-back" src="" style="width:100%; height:100%; object-fit:cover; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4); cursor:pointer;" onclick="flipPostcard()">
+                                </div>
+                                <!-- Picture Side (Front) - Hidden Until Flip -->
+                                <div style="position:absolute; width:100%; height:100%; backface-visibility:hidden; transform:rotateY(180deg);">
+                                    <img id="ai-preview-front" src="" style="width:100%; height:100%; object-fit:cover; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.4); cursor:pointer;" onclick="flipPostcard()">
+                                </div>
                             </div>
                         </div>
-                        <div style="background:rgba(0,0,0,0.3); border:1px solid rgba(212,175,55,0.2); border-radius:8px; padding:16px; margin-bottom:12px;">
-                            <div style="font-size:0.75rem; color:rgba(255,255,255,0.6); margin-bottom:8px;">💌 AI Generated Greeting (Postcard Back):</div>
-                            <div id="ai-preview-greeting" style="font-family:'Dancing Script', cursive; font-size:0.95rem; color:#ffd700; line-height:1.8; max-height:180px; overflow-y:auto;">Loading...</div>
+                        
+                        <!-- Flip Button -->
+                        <div style="text-align:center; margin-bottom:12px;">
+                            <button onclick="flipPostcard()" style="padding:10px 24px; background:linear-gradient(135deg, #667eea, #764ba2); border:none; color:#fff; border-radius:20px; cursor:pointer; font-size:0.9rem; font-weight:bold; box-shadow:0 4px 12px rgba(102,126,234,0.3);">
+                                🔄 Flip Postcard
+                            </button>
+                            <div id="flip-hint" style="font-size:0.72rem; color:rgba(255,215,0,0.7); margin-top:6px;">
+                                👉 Click to see the picture side
+                            </div>
                         </div>
+                        
                         <button type="button" id="regenerate-ai-btn" onclick="regenerateAIPostcard()" style="width:100%; padding:12px; background:linear-gradient(135deg, #f093fb, #f5576c); border:none; color:#fff; border-radius:8px; cursor:pointer; font-weight:bold;">
                             🔄 Regenerate (0.1 USDC)
                         </button>
@@ -5785,21 +5798,122 @@ Write only the reply text, nothing else:`;
                     // Load and draw stamp
                     const stamp = new Image();
                     stamp.onload = () => {
-                        // Calculate stamp size (about 15% of image width)
-                        const stampWidth = aiImg.width * 0.15;
+                        // Calculate stamp size (about 12% of image width, slightly smaller)
+                        const stampWidth = aiImg.width * 0.12;
                         const stampHeight = stamp.height * (stampWidth / stamp.width);
                         
                         // Position: top-right corner with margin
                         const x = aiImg.width - stampWidth - (aiImg.width * 0.05);
                         const y = aiImg.height * 0.03;
                         
-                        // Draw white background for stamp (to remove transparency artifacts)
-                        const padding = stampWidth * 0.08;
-                        ctx.fillStyle = '#f5f5dc'; // Cream/beige color matching vintage postcard
+                        // Draw realistic stamp effect
+                        const padding = stampWidth * 0.06;
+                        
+                        // 1. Draw soft shadow (makes it look raised from paper)
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.25)';
+                        ctx.shadowBlur = 4;
+                        ctx.shadowOffsetX = 2;
+                        ctx.shadowOffsetY = 2;
+                        
+                        // 2. Draw stamp background with slight off-white color
+                        ctx.fillStyle = '#faf8f3'; // Very light cream
                         ctx.fillRect(x - padding, y - padding, stampWidth + padding * 2, stampHeight + padding * 2);
                         
-                        // Draw stamp
+                        // Reset shadow
+                        ctx.shadowColor = 'transparent';
+                        ctx.shadowBlur = 0;
+                        ctx.shadowOffsetX = 0;
+                        ctx.shadowOffsetY = 0;
+                        
+                        // 3. Draw perforated edge effect (zigzag border)
+                        ctx.strokeStyle = '#e8e6e0';
+                        ctx.lineWidth = 1;
+                        const perfSize = 3;
+                        const rect = {
+                            x: x - padding,
+                            y: y - padding,
+                            w: stampWidth + padding * 2,
+                            h: stampHeight + padding * 2
+                        };
+                        
+                        // Draw zigzag perforations
+                        ctx.beginPath();
+                        // Top edge
+                        for (let i = rect.x; i < rect.x + rect.w; i += perfSize * 2) {
+                            ctx.lineTo(i, rect.y);
+                            ctx.lineTo(i + perfSize, rect.y - perfSize/2);
+                        }
+                        // Right edge
+                        for (let i = rect.y; i < rect.y + rect.h; i += perfSize * 2) {
+                            ctx.lineTo(rect.x + rect.w, i);
+                            ctx.lineTo(rect.x + rect.w + perfSize/2, i + perfSize);
+                        }
+                        // Bottom edge
+                        for (let i = rect.x + rect.w; i > rect.x; i -= perfSize * 2) {
+                            ctx.lineTo(i, rect.y + rect.h);
+                            ctx.lineTo(i - perfSize, rect.y + rect.h + perfSize/2);
+                        }
+                        // Left edge
+                        for (let i = rect.y + rect.h; i > rect.y; i -= perfSize * 2) {
+                            ctx.lineTo(rect.x, i);
+                            ctx.lineTo(rect.x - perfSize/2, i - perfSize);
+                        }
+                        ctx.closePath();
+                        ctx.stroke();
+                        
+                        // 4. Draw the actual stamp image
                         ctx.drawImage(stamp, x, y, stampWidth, stampHeight);
+                        
+                        // 5. Add subtle texture overlay for aged paper effect
+                        ctx.globalAlpha = 0.03;
+                        ctx.fillStyle = '#8b7355';
+                        for (let i = 0; i < 50; i++) {
+                            const rx = x - padding + Math.random() * (stampWidth + padding * 2);
+                            const ry = y - padding + Math.random() * (stampHeight + padding * 2);
+                            ctx.fillRect(rx, ry, 1, 1);
+                        }
+                        ctx.globalAlpha = 1.0;
+                        
+                        // 6. Add handwritten sender name at bottom
+                        const senderNameText = window.currentUser?.username || (TEST_MODE ? 'xqc' : 'Anonymous');
+                        
+                        // Random handwriting fonts
+                        const handwritingFonts = [
+                            'Brush Script MT, cursive',
+                            'Lucida Handwriting, cursive',
+                            'Comic Sans MS, cursive',
+                            'Segoe Script, cursive',
+                            'Courier New, monospace' // Typewriter style
+                        ];
+                        const randomFont = handwritingFonts[Math.floor(Math.random() * handwritingFonts.length)];
+                        
+                        // Calculate position (below the greeting text area)
+                        const nameY = aiImg.height * 0.95; // Near bottom
+                        const nameX = aiImg.width * 0.70; // Right side
+                        
+                        // Random slight rotation for natural handwriting feel (-5 to +5 degrees)
+                        const rotation = (Math.random() - 0.5) * 10 * Math.PI / 180;
+                        
+                        ctx.save();
+                        ctx.translate(nameX, nameY);
+                        ctx.rotate(rotation);
+                        
+                        // Handwriting style
+                        ctx.font = `${aiImg.height * 0.04}px ${randomFont}`;
+                        ctx.fillStyle = '#3a3a3a'; // Dark ink
+                        ctx.textAlign = 'right';
+                        ctx.textBaseline = 'bottom';
+                        
+                        // Add subtle shadow for ink depth
+                        ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+                        ctx.shadowBlur = 1;
+                        ctx.shadowOffsetX = 0.5;
+                        ctx.shadowOffsetY = 0.5;
+                        
+                        // Draw name with slight imperfection (multiple strokes for hand-drawn feel)
+                        ctx.fillText(`- ${senderNameText}`, 0, 0);
+                        
+                        ctx.restore();
                         
                         // Convert to base64
                         const compositeImage = canvas.toDataURL('image/png').split(',')[1];

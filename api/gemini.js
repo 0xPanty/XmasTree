@@ -255,12 +255,10 @@ Hand-painted illustration look, muted colors, subtle vintage paper texture.
 Vertical format 9:16.`;
 
 
-            // Build parts array with both prompt and user image
-            const imageParts = [
-                { text: visualPrompt }
-            ];
+            // Build parts array: IMAGE FIRST, then prompt (following farstand3 pattern)
+            const imageParts = [];
             
-            // Add user avatar as reference image if available
+            // Add user avatar as reference image FIRST
             if (senderImg) {
                 imageParts.push({
                     inlineData: {
@@ -268,8 +266,27 @@ Vertical format 9:16.`;
                         data: senderImg.base64
                     }
                 });
-                console.log('✅ Added user avatar as reference image');
+                console.log('✅ Added user avatar as reference image (first)');
             }
+            
+            // Then add text prompt that refers to "this person"
+            const finalPrompt = senderImg 
+                ? `Create a vintage New Year or Christmas greeting card featuring this person in the photo.
+
+Inspired by classic illustrated New Year and Christmas postcards by Jenny Nyström, Anton Pieck, or Ellen Clapsaddle.
+
+Preserve the person's facial features and likeness in an illustrated vintage style.
+
+Scene: ${randomScene}
+
+Festive winter scene, snowy fairy-tale forest, decorated Christmas tree with warm glowing lights.
+Timeless vintage winter clothing, classic international postcard style.
+Cozy, joyful, nostalgic holiday mood.
+Hand-painted illustration look, muted colors, subtle vintage paper texture.
+Vertical format 9:16.`
+                : visualPrompt; // Fallback if no image
+            
+            imageParts.push({ text: finalPrompt });
 
             const imageResponse = await fetch(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${GEMINI_API_KEY}`,
