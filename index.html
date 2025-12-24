@@ -3197,17 +3197,16 @@
             }
         }
         
-        // Render stamp grid inline
-        // Render stamp grid inline - REDESIGNED (Plan B)
+        // Render stamp grid inline - FINAL REDESIGN
         function renderStampGrid() {
             const stampGrid = document.getElementById('stamp-grid');
             stampGrid.innerHTML = '';
             
             const stamps = [
-                { id: 'neynar', icon: '🟣', name: 'Neynar', img: '/stamp/neynar-preview.png', original: '/stamp/neynar.png', price: '0.1', quantity: 3 },
-                { id: 'farcaster', icon: '🟪', name: 'Farcaster', img: '/stamp/farcaster-preview.png', original: '/stamp/farcaster.png', price: '0.37', quantity: 10 },
-                { id: 'warplet', icon: '🎨', name: 'Warplet', img: '/stamp/warplet-preview.png', original: '/stamp/warplet.png', price: '0.5', quantity: 5 },
-                { id: 'based', icon: '🌟', name: 'Based', img: '/stamp/based-preview.png', original: '/stamp/based.png', price: '0.99', quantity: 1 }
+                { id: 'neynar', name: 'Neynar', img: '/stamp/neynar-preview.png', price: '0.1', quantity: 3 },
+                { id: 'farcaster', name: 'Farcaster', img: '/stamp/farcaster-preview.png', price: '0.37', quantity: 10 },
+                { id: 'warplet', name: 'Warplet', img: '/stamp/warplet-preview.png', price: '0.5', quantity: 5 },
+                { id: 'based', name: 'Based', img: '/stamp/based-preview.png', price: '0.99', quantity: 1 }
             ];
             
             stamps.forEach(stamp => {
@@ -3216,258 +3215,252 @@
                 const eligibility = stampEligibility[stamp.id];
                 const isEligible = eligibility?.eligible;
                 const isUnlimited = stamp.id === 'based' && userStamps.based?.permanent;
+                const canMintBased = stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible;
                 
-                // Wrapper for each stamp card
-                const stampWrapper = document.createElement('div');
-                stampWrapper.style.cssText = `
-                    display: flex;
-                    flex-direction: column;
+                // Card wrapper
+                const card = document.createElement('div');
+                card.style.cssText = `
                     position: relative;
-                `;
-                
-                // Main card container
-                const stampCard = document.createElement('div');
-                stampCard.style.cssText = `
-                    position: relative;
-                    border-radius: 8px;
+                    background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.2));
+                    border: 2px solid ${selectedStamp === stamp.id ? 'var(--gold)' : 'rgba(212,175,55,0.3)'};
+                    border-radius: 12px;
                     overflow: hidden;
-                    border: ${selectedStamp === stamp.id ? '2px solid var(--gold)' : '2px solid rgba(212,175,55,0.3)'};
-                    background: rgba(0,0,0,0.3);
                     cursor: ${isOwned ? 'pointer' : 'default'};
-                    transition: all 0.2s ease;
-                    aspect-ratio: 1 / 1;
-                    display: flex;
-                    flex-direction: column;
+                    transition: all 0.3s ease;
+                    box-shadow: ${selectedStamp === stamp.id ? '0 0 20px rgba(212,175,55,0.5)' : '0 2px 8px rgba(0,0,0,0.3)'};
                 `;
                 
                 // Hover effect for owned stamps
                 if (isOwned) {
-                    stampCard.onmouseover = () => {
+                    card.onmouseover = () => {
                         if (selectedStamp !== stamp.id) {
-                            stampCard.style.borderColor = 'rgba(212,175,55,0.6)';
-                            stampCard.style.boxShadow = '0 0 15px rgba(212,175,55,0.3)';
+                            card.style.borderColor = 'rgba(212,175,55,0.6)';
+                            card.style.transform = 'translateY(-2px)';
+                            card.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
                         }
                     };
-                    stampCard.onmouseout = () => {
+                    card.onmouseout = () => {
                         if (selectedStamp !== stamp.id) {
-                            stampCard.style.borderColor = 'rgba(212,175,55,0.3)';
-                            stampCard.style.boxShadow = 'none';
+                            card.style.borderColor = 'rgba(212,175,55,0.3)';
+                            card.style.transform = 'translateY(0)';
+                            card.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
                         }
                     };
-                    stampCard.onclick = () => {
+                    card.onclick = () => {
                         selectedStamp = stamp.id;
                         updateGenerateButtonState();
                         renderStampGrid();
                     };
                 }
                 
-                // Image container
-                const imageContainer = document.createElement('div');
-                imageContainer.style.cssText = `
-                    flex: 1;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    padding: 8px;
-                    opacity: ${isOwned ? '1' : '0.6'};
-                `;
-                
-                // Stamp image with scale adjustments
-                let imageScale = '0.9';
-                if (stamp.id === 'neynar') imageScale = '0.85';
-                else if (stamp.id === 'farcaster') imageScale = '0.9';
-                else if (stamp.id === 'warplet') imageScale = '0.75';
-                else if (stamp.id === 'based') imageScale = '0.82';
-                
-                imageContainer.innerHTML = `
-                    <img src="${stamp.img}" style="max-width: 100%; max-height: 100%; object-fit: contain; transform: scale(${imageScale});">
-                `;
-                
-                // Top-right badges
-                if (isOwned && ownedQuantity > 0) {
-                    const quantityBadge = document.createElement('div');
-                    quantityBadge.style.cssText = `
+                // Top-right badge (quantity or unlimited)
+                if (isOwned) {
+                    const badge = document.createElement('div');
+                    badge.style.cssText = `
                         position: absolute;
-                        top: 6px;
-                        right: 6px;
-                        background: ${isUnlimited ? 'linear-gradient(135deg, #ffd700, #ffed4e)' : 'rgba(74,222,128,0.95)'};
+                        top: 8px;
+                        right: 8px;
+                        background: ${isUnlimited ? 'linear-gradient(135deg, #ffd700, #ffed4e)' : 'linear-gradient(135deg, #4ade80, #22c55e)'};
                         color: ${isUnlimited ? '#2c2c2c' : 'white'};
-                        padding: 4px 8px;
-                        border-radius: 12px;
+                        padding: 4px 10px;
+                        border-radius: 16px;
                         font-size: 0.7rem;
                         font-weight: bold;
-                        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                        z-index: 10;
                     `;
-                    quantityBadge.textContent = isUnlimited ? '♾️' : `🎫 ${ownedQuantity}`;
-                    stampCard.appendChild(quantityBadge);
+                    badge.textContent = isUnlimited ? '♾️ 无限' : `🎫 ${ownedQuantity}`;
+                    card.appendChild(badge);
                 }
                 
-                // Selected indicator
+                // Selected badge
                 if (selectedStamp === stamp.id) {
                     const selectedBadge = document.createElement('div');
                     selectedBadge.style.cssText = `
                         position: absolute;
-                        top: 6px;
-                        left: 6px;
+                        top: 8px;
+                        left: 8px;
                         background: var(--gold);
                         color: #2c2c2c;
-                        padding: 3px 8px;
-                        border-radius: 10px;
+                        padding: 4px 10px;
+                        border-radius: 16px;
                         font-size: 0.65rem;
                         font-weight: bold;
-                        box-shadow: 0 2px 6px rgba(212,175,55,0.4);
+                        box-shadow: 0 2px 8px rgba(212,175,55,0.5);
+                        z-index: 10;
                     `;
-                    selectedBadge.textContent = '✓ SELECTED';
-                    stampCard.appendChild(selectedBadge);
+                    selectedBadge.textContent = '✓ 已选';
+                    card.appendChild(selectedBadge);
                 }
                 
-                stampCard.appendChild(imageContainer);
+                // Image container (fixed height for alignment)
+                const imageContainer = document.createElement('div');
+                imageContainer.style.cssText = `
+                    height: 140px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 16px;
+                    background: rgba(255,255,255,0.02);
+                `;
                 
-                // Status bar
-                const statusBar = document.createElement('div');
-                statusBar.style.cssText = `
-                    padding: 8px 10px;
-                    border-top: 1px solid rgba(212,175,55,0.2);
-                    background: rgba(0,0,0,0.4);
+                const img = document.createElement('img');
+                img.src = stamp.img;
+                img.style.cssText = `
+                    max-width: 100%;
+                    max-height: 100%;
+                    object-fit: contain;
+                    opacity: ${isOwned ? '1' : '0.7'};
+                    filter: ${isOwned ? 'none' : 'grayscale(20%)'};
+                `;
+                imageContainer.appendChild(img);
+                card.appendChild(imageContainer);
+                
+                // Info section
+                const infoSection = document.createElement('div');
+                infoSection.style.cssText = `
+                    padding: 12px 14px;
+                    background: rgba(0,0,0,0.3);
+                    border-top: 1px solid rgba(212,175,55,0.15);
+                `;
+                
+                // Name
+                const nameDiv = document.createElement('div');
+                nameDiv.style.cssText = `
+                    font-size: 0.85rem;
+                    font-weight: bold;
+                    color: var(--gold);
+                    margin-bottom: 8px;
                     text-align: center;
+                `;
+                nameDiv.textContent = stamp.name;
+                infoSection.appendChild(nameDiv);
+                
+                // Status
+                const statusDiv = document.createElement('div');
+                statusDiv.style.cssText = `
+                    font-size: 0.7rem;
+                    text-align: center;
+                    padding: 6px 8px;
+                    border-radius: 6px;
+                    margin-bottom: 10px;
+                    font-weight: 500;
                 `;
                 
                 if (isOwned) {
-                    // Owned status
-                    statusBar.style.background = 'linear-gradient(to right, rgba(74,222,128,0.15), rgba(34,197,94,0.15))';
-                    statusBar.innerHTML = `
-                        <div style="font-size: 0.75rem; font-weight: bold; color: #4ade80;">
-                            ✅ ${isUnlimited ? '已拥有' : `拥有 ${ownedQuantity} 张`}
-                        </div>
-                        <div style="font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-top: 2px;">
-                            点击选择使用
-                        </div>
-                    `;
-                } else {
-                    // Not owned status
-                    if (stamp.id === 'based') {
-                        // Based stamp special case
-                        const canMint = eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible;
-                        if (canMint) {
-                            statusBar.style.background = 'linear-gradient(to right, rgba(255,215,0,0.2), rgba(255,237,78,0.2))';
-                            statusBar.innerHTML = `
-                                <div style="font-size: 0.75rem; font-weight: bold; color: #ffd700;">
-                                    🎖️ 可铸造 NFT
-                                </div>
-                                <div style="font-size: 0.65rem; color: rgba(255,255,255,0.7); margin-top: 2px;">
-                                    收集3张邮票解锁
-                                </div>
-                            `;
-                        } else {
-                            statusBar.innerHTML = `
-                                <div style="font-size: 0.75rem; font-weight: bold; color: rgba(255,255,255,0.5);">
-                                    🔒 未解锁
-                                </div>
-                                <div style="font-size: 0.65rem; color: rgba(255,255,255,0.4); margin-top: 2px;">
-                                    需要收集前3张邮票
-                                </div>
-                            `;
-                        }
-                    } else if (isEligible) {
-                        // Eligible for free claim
-                        statusBar.style.background = 'linear-gradient(to right, rgba(74,222,128,0.15), rgba(34,197,94,0.15))';
-                        statusBar.innerHTML = `
-                            <div style="font-size: 0.75rem; font-weight: bold; color: #4ade80;">
-                                🎁 可免费领取
-                            </div>
-                            <div style="font-size: 0.65rem; color: rgba(255,255,255,0.6); margin-top: 2px;">
-                                获得 ${stamp.quantity} 张邮票
-                            </div>
-                        `;
-                    } else if (stamp.id === 'warplet') {
-                        // Warplet not eligible
-                        statusBar.innerHTML = `
-                            <div style="font-size: 0.75rem; font-weight: bold; color: #ff6b6b;">
-                                🔒 需要 NFT
-                            </div>
-                            <div style="font-size: 0.65rem; color: rgba(255,255,255,0.5); margin-top: 2px;">
-                                需持有 Warplet NFT
-                            </div>
-                        `;
+                    statusDiv.style.background = 'linear-gradient(to right, rgba(74,222,128,0.2), rgba(34,197,94,0.2))';
+                    statusDiv.style.border = '1px solid rgba(74,222,128,0.4)';
+                    statusDiv.style.color = '#4ade80';
+                    statusDiv.innerHTML = isUnlimited ? '✅ 已拥有（无限使用）' : `✅ 已拥有 ${ownedQuantity} 张`;
+                } else if (stamp.id === 'based') {
+                    if (canMintBased) {
+                        statusDiv.style.background = 'linear-gradient(to right, rgba(255,215,0,0.2), rgba(255,237,78,0.2))';
+                        statusDiv.style.border = '1px solid rgba(255,215,0,0.4)';
+                        statusDiv.style.color = '#ffd700';
+                        statusDiv.innerHTML = '🎖️ 可铸造 NFT';
                     } else {
-                        // Not eligible, can purchase
-                        statusBar.innerHTML = `
-                            <div style="font-size: 0.75rem; font-weight: bold; color: rgba(255,255,255,0.7);">
-                                🛒 可购买
-                            </div>
-                            <div style="font-size: 0.65rem; color: rgba(255,255,255,0.5); margin-top: 2px;">
-                                ${stamp.price} USDC → ${stamp.quantity} 张
-                            </div>
-                        `;
+                        statusDiv.style.background = 'rgba(100,100,100,0.2)';
+                        statusDiv.style.border = '1px solid rgba(150,150,150,0.3)';
+                        statusDiv.style.color = 'rgba(255,255,255,0.5)';
+                        statusDiv.innerHTML = '🔒 未解锁';
                     }
+                } else if (isEligible) {
+                    statusDiv.style.background = 'linear-gradient(to right, rgba(74,222,128,0.2), rgba(34,197,94,0.2))';
+                    statusDiv.style.border = '1px solid rgba(74,222,128,0.4)';
+                    statusDiv.style.color = '#4ade80';
+                    statusDiv.innerHTML = '🎁 符合免费领取条件';
+                } else if (stamp.id === 'warplet') {
+                    statusDiv.style.background = 'rgba(255,107,107,0.15)';
+                    statusDiv.style.border = '1px solid rgba(255,107,107,0.3)';
+                    statusDiv.style.color = '#ff6b6b';
+                    statusDiv.innerHTML = '🔒 需要 Warplet NFT';
+                } else {
+                    statusDiv.style.background = 'rgba(212,175,55,0.15)';
+                    statusDiv.style.border = '1px solid rgba(212,175,55,0.3)';
+                    statusDiv.style.color = 'rgba(255,255,255,0.8)';
+                    statusDiv.innerHTML = '🛒 可购买';
                 }
                 
-                stampCard.appendChild(statusBar);
+                infoSection.appendChild(statusDiv);
                 
-                // Action button (only for not owned stamps)
-                if (!isOwned) {
-                    const actionBtn = document.createElement('button');
-                    actionBtn.style.cssText = `
-                        width: 100%;
-                        padding: 10px;
-                        border: none;
-                        font-size: 0.75rem;
-                        font-weight: bold;
-                        cursor: pointer;
-                        transition: all 0.2s;
-                        border-top: 1px solid rgba(212,175,55,0.2);
-                    `;
-                    
-                    if (stamp.id === 'based') {
-                        const canMint = eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible;
-                        if (canMint) {
-                            actionBtn.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
-                            actionBtn.style.color = '#2c2c2c';
-                            actionBtn.textContent = `🎖️ 铸造 NFT (${stamp.price} USDC)`;
-                            actionBtn.onclick = () => openBasedMintModal();
-                        } else {
-                            actionBtn.style.background = 'rgba(100,100,100,0.3)';
-                            actionBtn.style.color = 'rgba(255,255,255,0.4)';
-                            actionBtn.style.cursor = 'not-allowed';
-                            actionBtn.textContent = '🔒 未解锁';
-                            actionBtn.disabled = true;
-                        }
-                    } else if (isEligible) {
-                        actionBtn.style.background = 'linear-gradient(135deg, #4ade80, #22c55e)';
-                        actionBtn.style.color = 'white';
-                        actionBtn.textContent = `🎁 免费领取 ${stamp.quantity} 张`;
-                        actionBtn.onclick = () => claimStampInline(stamp.id);
-                    } else if (stamp.id === 'warplet') {
+                // Action button (ALL states have buttons)
+                const actionBtn = document.createElement('button');
+                actionBtn.style.cssText = `
+                    width: 100%;
+                    padding: 10px;
+                    border: none;
+                    border-radius: 8px;
+                    font-size: 0.75rem;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    text-transform: none;
+                `;
+                
+                if (isOwned) {
+                    // Owned: Show "Details" button
+                    actionBtn.style.background = 'linear-gradient(135deg, rgba(212,175,55,0.3), rgba(212,175,55,0.2))';
+                    actionBtn.style.border = '1px solid rgba(212,175,55,0.5)';
+                    actionBtn.style.color = 'var(--gold)';
+                    actionBtn.textContent = '📋 查看详情';
+                    actionBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        openStampDetailsModal(stamp.id, stamp.name);
+                    };
+                } else if (stamp.id === 'based') {
+                    if (canMintBased) {
+                        actionBtn.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
+                        actionBtn.style.color = '#2c2c2c';
+                        actionBtn.textContent = `🎖️ 铸造 NFT (${stamp.price} USDC)`;
+                        actionBtn.onclick = () => openBasedMintModal();
+                    } else {
                         actionBtn.style.background = 'rgba(100,100,100,0.3)';
                         actionBtn.style.color = 'rgba(255,255,255,0.4)';
                         actionBtn.style.cursor = 'not-allowed';
-                        actionBtn.textContent = '需要 Warplet NFT';
+                        actionBtn.textContent = '🔒 需收集前 3 张邮票';
                         actionBtn.disabled = true;
-                    } else {
-                        actionBtn.style.background = 'linear-gradient(135deg, #d4af37, #ffd700)';
-                        actionBtn.style.color = '#2c2c2c';
-                        actionBtn.textContent = `💰 购买 (${stamp.price} USDC)`;
-                        actionBtn.onclick = () => openPurchaseModal(stamp.id, stamp.name, { price: stamp.price, quantity: stamp.quantity });
                     }
-                    
-                    if (!actionBtn.disabled) {
-                        actionBtn.onmouseover = () => {
-                            actionBtn.style.transform = 'translateY(-1px)';
-                            actionBtn.style.boxShadow = '0 4px 8px rgba(0,0,0,0.3)';
-                        };
-                        actionBtn.onmouseout = () => {
-                            actionBtn.style.transform = 'translateY(0)';
-                            actionBtn.style.boxShadow = 'none';
-                        };
-                    }
-                    
-                    stampCard.appendChild(actionBtn);
+                } else if (isEligible) {
+                    actionBtn.style.background = 'linear-gradient(135deg, #4ade80, #22c55e)';
+                    actionBtn.style.color = 'white';
+                    actionBtn.textContent = `🎁 免费领取 ${stamp.quantity} 张`;
+                    actionBtn.onclick = () => claimStampInline(stamp.id);
+                } else if (stamp.id === 'warplet') {
+                    actionBtn.style.background = 'rgba(100,100,100,0.3)';
+                    actionBtn.style.color = 'rgba(255,255,255,0.4)';
+                    actionBtn.style.cursor = 'not-allowed';
+                    actionBtn.textContent = '🔒 查看 NFT 要求';
+                    actionBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        alert('需要持有 Warplet NFT 才能使用此邮票\n\n请前往 OpenSea 或 Zora 购买 Warplet NFT');
+                    };
+                } else {
+                    actionBtn.style.background = 'linear-gradient(135deg, #d4af37, #ffd700)';
+                    actionBtn.style.color = '#2c2c2c';
+                    actionBtn.textContent = `💰 购买 (${stamp.price} USDC)`;
+                    actionBtn.onclick = () => openPurchaseModal(stamp.id, stamp.name, { price: stamp.price, quantity: stamp.quantity });
                 }
                 
-                stampWrapper.appendChild(stampCard);
-                stampGrid.appendChild(stampWrapper);
+                // Hover effect for active buttons
+                if (!actionBtn.disabled) {
+                    actionBtn.onmouseover = () => {
+                        actionBtn.style.transform = 'translateY(-2px)';
+                        actionBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.4)';
+                    };
+                    actionBtn.onmouseout = () => {
+                        actionBtn.style.transform = 'translateY(0)';
+                        actionBtn.style.boxShadow = 'none';
+                    };
+                }
+                
+                infoSection.appendChild(actionBtn);
+                card.appendChild(infoSection);
+                stampGrid.appendChild(card);
             });
             
+            // Render Based progress
+            renderBasedProgress();
+        }
             // Render Based progress
             renderBasedProgress();
         }
