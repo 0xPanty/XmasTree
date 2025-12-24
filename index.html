@@ -1512,10 +1512,6 @@
             </div>
             <div class="mode-hint" id="mode-hint">Send directly to specific Farcaster user(s)</div>
             <div class="gift-form">
-                <div class="form-group">
-                    <label>Gift Title</label>
-                    <input type="text" id="gift-title" placeholder="Merry Christmas!" maxlength="50">
-                </div>
                 <div class="form-group" id="recipient-group" style="position:relative;">
                     <label>Recipient (max 10)</label>
                     <input type="text" id="gift-recipient" placeholder="Search Farcaster username..." oninput="searchUsersPlaza(this.value)">
@@ -2016,10 +2012,6 @@
             </div>
             
             <div class="gift-form">
-                <div class="form-group">
-                    <label>Gift Title</label>
-                    <input type="text" id="direct-gift-title" placeholder="Merry Christmas!" maxlength="50">
-                </div>
                 <div class="form-group">
                     <label>AI Postcard Preview (Required)</label>
                     <div style="font-size:0.75rem; color:rgba(255,255,255,0.5); margin-bottom:12px;">✨ AI will analyze your profile and create a personalized vintage postcard with a heartfelt greeting</div>
@@ -2911,10 +2903,26 @@
             }
         }
 
+        // Auto-generate beautiful gift title
+        function generateGiftTitle() {
+            const titles = [
+                '🎄 Merry Christmas!',
+                '✨ Season\'s Greetings',
+                '❄️ Warm Winter Wishes',
+                '🎅 Happy Holidays!',
+                '🎁 Christmas Blessings',
+                '⭐ Joy & Peace',
+                '🔔 Joyful Tidings',
+                '🕯️ Light & Love',
+                '🎊 Festive Cheer',
+                '💫 Magical Season'
+            ];
+            return titles[Math.floor(Math.random() * titles.length)];
+        }
+        
         // Modal functions
         function openGiftModal() { 
             document.getElementById('gift-modal').classList.add('visible');
-            document.getElementById('gift-title').value = '';
             document.getElementById('gift-token').value = 'USDC';
             document.getElementById('gift-amount').value = '0.1';
             document.getElementById('gift-shares').value = '5';
@@ -4430,7 +4438,6 @@
             document.getElementById('user-search').value = '';
             document.getElementById('selected-users').innerHTML = '';
             document.getElementById('user-results').style.display = 'none';
-            document.getElementById('direct-gift-title').value = '';
             document.getElementById('direct-gift-amount').value = '0.5';
             document.getElementById('direct-gift-token').value = 'USDC';
             document.getElementById('custom-token-group').style.display = 'none';
@@ -4808,7 +4815,7 @@
         }
         
         async function createDirectGift() {
-            const title = document.getElementById('direct-gift-title').value || 'Merry Christmas!';
+            const title = generateGiftTitle(); // Auto-generate beautiful title
             const includeGift = document.getElementById('include-gift-money').checked;
             const token = includeGift ? document.getElementById('direct-gift-token').value : null;
             const amount = includeGift ? document.getElementById('direct-gift-amount').value : '0';
@@ -5362,7 +5369,7 @@
                 return;
             }
             
-            const title = document.getElementById('gift-title').value || 'Merry Christmas!';
+            const title = generateGiftTitle(); // Auto-generate beautiful title
             const token = document.getElementById('gift-token').value;
             const amount = document.getElementById('gift-amount').value;
             const shares = document.getElementById('gift-shares').value || '5';
