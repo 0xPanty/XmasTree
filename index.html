@@ -5876,139 +5876,47 @@ Write only the reply text, nothing else:`;
                 canvas.width = 1080;
                 canvas.height = 1920;
                 
-                // Background: vintage aged paper (参考图一质感)
-                ctx.fillStyle = '#f4ead5';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
-                // Add vintage paper texture with aged spots
-                ctx.globalAlpha = 0.05;
-                for (let i = 0; i < 300; i++) {
-                    ctx.fillStyle = Math.random() > 0.5 ? '#c9b896' : '#d4c4b0';
-                    const x = Math.random() * canvas.width;
-                    const y = Math.random() * canvas.height;
-                    const size = Math.random() * 4 + 1;
-                    ctx.fillRect(x, y, size, size);
-                }
-                ctx.globalAlpha = 1.0;
-                
-                // Add vintage border with Christmas decorative corners (参考图一边框)
-                ctx.strokeStyle = '#b8342f';
-                ctx.lineWidth = 4;
-                ctx.strokeRect(50, 50, canvas.width - 100, canvas.height - 100);
-                
-                // Corner decorations (Christmas ornaments style)
-                const cornerSize = 60;
-                ctx.fillStyle = '#2d5f3f';
-                // Top-left corner
-                ctx.fillRect(50, 50, cornerSize, 4);
-                ctx.fillRect(50, 50, 4, cornerSize);
-                // Top-right corner
-                ctx.fillRect(canvas.width - 50 - cornerSize, 50, cornerSize, 4);
-                ctx.fillRect(canvas.width - 50 - 4, 50, 4, cornerSize);
-                // Bottom-left corner
-                ctx.fillRect(50, canvas.height - 50 - 4, cornerSize, 4);
-                ctx.fillRect(50, canvas.height - 50 - cornerSize, 4, cornerSize);
-                // Bottom-right corner
-                ctx.fillRect(canvas.width - 50 - cornerSize, canvas.height - 50 - 4, cornerSize, 4);
-                ctx.fillRect(canvas.width - 50 - 4, canvas.height - 50 - cornerSize, 4, cornerSize);
-                
-                // Top decorations: Pine branches and stars (参考图二)
-                ctx.fillStyle = '#2d5f3f';
-                ctx.font = '60px Arial';
-                ctx.textAlign = 'left';
-                ctx.fillText('🌲', 100, 140);
-                ctx.fillText('🌲', 180, 155);
-                
-                // Gold stars
-                ctx.fillStyle = '#d4af37';
-                ctx.font = '40px Arial';
-                ctx.fillText('✨', 250, 130);
-                ctx.fillText('✨', 320, 145);
-                
-                // Stamp area (top-right corner) - 参考图二位置
-                if (stampImg) {
-                    const stampSize = 240;
-                    const stampX = canvas.width - stampSize - 100;
-                    const stampY = 100;
+                // Load Christmas background image
+                const bgImage = new Image();
+                bgImage.crossOrigin = 'anonymous';
+                bgImage.onload = () => {
+                    // Draw background
+                    ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
                     
-                    // Add "North Pole" postmark before stamp (参考图二)
-                    ctx.strokeStyle = '#2c1810';
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.arc(stampX - 150, stampY + 100, 80, 0, Math.PI * 2);
-                    ctx.stroke();
-                    
-                    // Wavy lines (postmark cancellation)
-                    ctx.beginPath();
-                    for (let i = 0; i < 4; i++) {
-                        const y = stampY + 60 + i * 20;
-                        ctx.moveTo(stampX - 230, y);
-                        for (let x = stampX - 230; x < stampX - 70; x += 15) {
-                            ctx.lineTo(x, y + (x % 30 === 0 ? -5 : 5));
-                        }
+                    // Draw stamp on background (right position to match background)
+                    if (stampImg) {
+                        const stampSize = 200;
+                        const stampX = canvas.width - stampSize - 80;
+                        const stampY = 80;
+                        
+                        // Draw stamp directly (no background, blend with bg)
+                        ctx.globalAlpha = 1.0;
+                        ctx.drawImage(stampImg, stampX, stampY, stampSize, stampSize);
                     }
-                    ctx.stroke();
                     
-                    // "NORTH POLE" text in postmark
-                    ctx.font = 'bold 24px Arial';
-                    ctx.fillStyle = '#2c1810';
-                    ctx.textAlign = 'center';
-                    ctx.fillText('NORTH', stampX - 150, stampY + 85);
-                    ctx.fillText('POLE', stampX - 150, stampY + 110);
-                    
-                    // Stamp background matching paper
-                    ctx.fillStyle = '#f4ead5';
-                    ctx.fillRect(stampX - 12, stampY - 12, stampSize + 24, stampSize + 24);
-                    
-                    // Stamp shadow
-                    ctx.shadowColor = 'rgba(0,0,0,0.2)';
-                    ctx.shadowBlur = 8;
-                    ctx.shadowOffsetX = 3;
-                    ctx.shadowOffsetY = 3;
-                    ctx.drawImage(stampImg, stampX, stampY, stampSize, stampSize);
-                    ctx.shadowColor = 'transparent';
-                    ctx.shadowBlur = 0;
-                    
-                    // More stars near stamp (参考图二)
-                    ctx.fillStyle = '#d4af37';
-                    ctx.font = '35px Arial';
-                    ctx.fillText('✨', stampX - 50, stampY - 20);
-                    ctx.fillText('✨', stampX + stampSize + 10, stampY + 80);
-                    
-                    // Add "To: @username" below stamp area
-                    let toYPos = stampY + stampSize + 50;
-                    ctx.font = 'bold 40px Georgia';
+                    // Add "To: @username" below stamp area (top-right)
+                    let toYPos = 340;
+                    ctx.font = 'bold 36px Georgia';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'right';
-                    ctx.fillText('To:', canvas.width - 100, toYPos);
+                    ctx.fillText('To:', canvas.width - 80, toYPos);
                     
-                    toYPos += 60;
-                    ctx.font = '44px Georgia';
+                    toYPos += 50;
+                    ctx.font = '40px Georgia';
                     if (typeof recipientNames === 'string') {
                         // Single recipient - personalized
-                        ctx.fillText(`@${recipientNames}`, canvas.width - 100, toYPos);
+                        ctx.fillText(`@${recipientNames}`, canvas.width - 80, toYPos);
                     } else if (Array.isArray(recipientNames) && recipientNames.length > 0) {
                         // Multiple recipients - preview
-                        ctx.fillText(`${recipientNames.length} Friends`, canvas.width - 100, toYPos);
-                        ctx.font = '30px Georgia';
+                        ctx.fillText(`${recipientNames.length} Friends`, canvas.width - 80, toYPos);
+                        ctx.font = '28px Georgia';
                         ctx.fillStyle = '#5a4a3a';
-                        toYPos += 45;
-                        ctx.fillText('(Personalized)', canvas.width - 100, toYPos);
+                        toYPos += 40;
+                        ctx.fillText('(Personalized)', canvas.width - 80, toYPos);
                     }
-                }
-                
-                // Bottom decorations: More pine branches (参考图二)
-                ctx.fillStyle = '#2d5f3f';
-                ctx.font = '60px Arial';
-                ctx.textAlign = 'right';
-                ctx.fillText('🌲', canvas.width - 150, canvas.height - 180);
-                ctx.fillStyle = '#d4af37';
-                ctx.font = '35px Arial';
-                ctx.fillText('✨', canvas.width - 220, canvas.height - 200);
-                ctx.fillText('✨', 150, canvas.height - 150);
-                
-                // Letter content starts below
-                let yPos = 580;
+                    
+                    // Letter content starts below
+                    let yPos = 520;
                 
                 // Main greeting message
                 const contentX = 100;
@@ -6057,15 +5965,33 @@ Write only the reply text, nothing else:`;
                     ctx.fillText(line, contentX, yPos);
                 }
                 
-                // Sender signature (bottom center) - 更大更明显
-                yPos = canvas.height - 150;
-                ctx.font = 'italic 52px Brush Script MT, cursive';
-                ctx.fillStyle = '#2c1810';
-                ctx.textAlign = 'center';
-                ctx.fillText(`- ${senderName}`, canvas.width / 2, yPos);
+                    // Sender signature (bottom right) - 更大更明显
+                    yPos = canvas.height - 200;
+                    ctx.font = 'italic 50px Brush Script MT, cursive';
+                    ctx.fillStyle = '#2c1810';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(`- ${senderName}`, canvas.width - 120, yPos);
+                    
+                    // Convert to base64
+                    resolve(canvas.toDataURL('image/png'));
+                };
                 
-                // Convert to base64
-                resolve(canvas.toDataURL('image/png'));
+                // Background image URL (temporary - will upload user's image)
+                bgImage.src = 'https://i.imgur.com/bZhDZ7J.png'; // Placeholder - needs user's actual image
+                
+                // Fallback if image fails to load
+                bgImage.onerror = () => {
+                    console.error('Failed to load background image, using fallback');
+                    ctx.fillStyle = '#f4ead5';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    // Draw simple border
+                    ctx.strokeStyle = '#b8342f';
+                    ctx.lineWidth = 4;
+                    ctx.strokeRect(50, 50, canvas.width - 100, canvas.height - 100);
+                    
+                    resolve(canvas.toDataURL('image/png'));
+                };
             });
         }
         
