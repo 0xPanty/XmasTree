@@ -449,12 +449,27 @@ Now write your greeting (200-250 words, aim for 220-240 words for perfect fit):`
             console.log('📝 Text generation response status:', textResponse.status);
             if (textResponse.ok) {
                 const textResult = await textResponse.json();
-                console.log('📝 Text result:', textResult);
-                if (textResult.candidates && textResult.candidates[0]?.content?.parts?.[0]?.text) {
-                    greeting = textResult.candidates[0].content.parts[0].text.trim();
-                    console.log('✅ Greeting generated:', greeting.substring(0, 100) + '...');
+                console.log('📝 Text result:', JSON.stringify(textResult).substring(0, 500));
+                
+                if (textResult.candidates && textResult.candidates[0]) {
+                    const candidate = textResult.candidates[0];
+                    console.log('📝 Finish reason:', candidate.finishReason);
+                    console.log('📝 Safety ratings:', candidate.safetyRatings);
+                    
+                    if (candidate.content?.parts?.[0]?.text) {
+                        greeting = candidate.content.parts[0].text.trim();
+                        console.log('✅ Greeting generated:', greeting.length, 'characters');
+                        console.log('✅ Preview:', greeting.substring(0, 200));
+                        
+                        // Check if truncated
+                        if (candidate.finishReason !== 'STOP') {
+                            console.warn('⚠️ Generation may be incomplete. Finish reason:', candidate.finishReason);
+                        }
+                    } else {
+                        console.error('❌ No text in candidate.content.parts');
+                    }
                 } else {
-                    console.error('❌ No text in candidates:', textResult);
+                    console.error('❌ No candidates in response:', textResult);
                 }
             } else {
                 const errorText = await textResponse.text();
