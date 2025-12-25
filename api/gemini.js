@@ -365,20 +365,27 @@ IMPORTANT: Natural watercolor fade effect - NO hard edges, NO defined oval/arch 
             // Generate personalized greeting based on scene analysis
             const greetingPrompt = `You are writing a heartfelt Christmas greeting card from ${senderName} to ${displayRecipient}.
 
-MANDATORY LENGTH RULE: Your response MUST be between 150-200 words. This is a full letter, not a short message.
+MANDATORY LENGTH RULE: Your response MUST be at least 300 words. This is a long, detailed letter with rich content.
 
 The card illustration shows: "${randomScene}"
 
 Your task:
-1. Write a detailed story about this exact scene - describe what you're doing, how it feels, what you see
-2. Include vivid sensory details (sights, sounds, smells, feelings)
-3. Share your activities and experiences in this scene
-4. Make it personal, warm, and storytelling
-5. MUST be at least 150 words - this should be multiple paragraphs!
+1. Write an extensive, detailed story about this exact scene - describe what you're doing, how it feels, what you see, your thoughts and reflections
+2. Include vivid sensory details (sights, sounds, smells, feelings, textures)
+3. Share your activities, experiences, and inner thoughts in this scene
+4. Make it personal, warm, storytelling, and reflective
+5. MUST be at least 300 words - this should be 4-5 substantial paragraphs!
+6. Add reflections on the meaning of the season, memories, gratitude, hopes for the future
 
 Required structure:
 - Opening: "Dear ${displayRecipient}," or "Hey ${displayRecipient}!"
-- Body: 2-3 sentences describing the scene activity with vivid details:
+- Body (4-5 paragraphs):
+  Paragraph 1: Describe the scene in detail - what you're doing, the environment
+  Paragraph 2: Sensory details - what you see, hear, smell, feel
+  Paragraph 3: Your activities and experiences throughout the day/season
+  Paragraph 4: Personal reflections - what this season means to you, memories, gratitude
+  Paragraph 5 (optional): Hopes and wishes for the recipient
+- Examples for inspiration:
   * Snow/winter → "The mountains have been incredible this season! I've been skiing every weekend and building the most epic snowmen you've ever seen. The crisp air and sparkling snow make everything feel magical."
   * Travel → "I'm currently exploring [destination] and it's absolutely breathtaking! The festive markets, twinkling lights, and local traditions have made this holiday season unforgettable. I wish you could be here to experience it with me."
   * Family → "This holiday season has been all about family for me. We've been baking grandmother's secret recipes, decorating the entire house, and creating memories that will last forever. The house smells like cinnamon and joy."
@@ -391,21 +398,25 @@ Required structure:
 
 VERIFICATION:
 - Count your words before responding
-- Minimum 150 words required
-- Maximum 200 words
-- Write multiple paragraphs with detailed descriptions
-- If your draft is less than 150 words, add more sensory details and activities
+- Minimum 300 words required
+- No maximum - write as much as needed to tell a full story
+- Write 4-5 substantial paragraphs with detailed descriptions
+- If your draft is less than 300 words, add more sensory details, activities, reflections, and personal thoughts
 
-Example length (175 words):
-"Dear Sarah, Merry Christmas! I wanted to share what I've been up to this holiday season. Every evening, I've been heading to the town square where the most magnificent Christmas tree stands tall, adorned with hundreds of twinkling golden lights that dance in the winter breeze. The air is crisp and filled with the joyful sounds of carol singers, and there's always the warm, comforting aroma of hot cocoa and roasted chestnuts wafting from the festive market stalls.
+Example length (approximately 320 words):
+"Dear Sarah, Merry Christmas! I hope this card finds you well and fills your heart with the same joy that's been filling mine this holiday season.
 
-I've been ice skating on the outdoor rink with friends, laughing as we slip and slide across the frozen surface. The whole scene feels like something out of a storybook, with snow gently falling and children building snowmen nearby. It's these simple, magical moments that make this season so special.
+I wanted to share what I've been up to lately. Every evening as the sun sets, I've been making my way to the town square where the most magnificent Christmas tree stands tall against the twilight sky. It's adorned with hundreds upon hundreds of twinkling golden lights that seem to dance and sparkle in the winter breeze, creating this magical, almost dreamlike atmosphere. The air is crisp and refreshing, filled with the joyful sounds of carol singers whose voices echo through the cobblestone streets, and there's always the warm, comforting aroma of hot cocoa and roasted chestnuts wafting from the festive market stalls that line the square.
 
-I find myself thinking of you during these celebrations and wishing you could be here to experience this festive atmosphere with me. I hope your holidays are filled with equal warmth and joy!
+I've been ice skating on the outdoor rink with friends almost every weekend, laughing as we slip and slide across the frozen surface like clumsy penguins. The whole scene feels like something straight out of a storybook, with snow gently falling like tiny diamonds, children building snowmen with bright red scarves and carrot noses, and couples sharing warm drinks while holding hands under the glowing streetlamps. It's these simple, magical moments that make this season so incredibly special.
 
-Warmest wishes, John"
+This time of year always makes me reflective. Being surrounded by all this beauty and joy reminds me of what truly matters in life - the connections we have with the people we care about, the memories we create together, and the warmth we share even when we're apart. I find myself feeling deeply grateful for our friendship and all the wonderful times we've shared over the years.
 
-Now write your greeting (150-200 words):`;
+I find myself thinking of you often during these celebrations and wishing you could be here to experience this festive atmosphere with me. I truly hope your holidays are filled with equal warmth, joy, and all the magic that this season brings!
+
+Warmest wishes and lots of love, John"
+
+Now write your greeting (at least 300 words):`;
 
             const textResponse = await fetch(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
@@ -416,7 +427,7 @@ Now write your greeting (150-200 words):`;
                         contents: [{ parts: [{ text: greetingPrompt }] }],
                         generationConfig: {
                             temperature: 0.9,
-                            maxOutputTokens: 600,
+                            maxOutputTokens: 1000,
                             candidateCount: 1
                         }
                     })

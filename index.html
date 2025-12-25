@@ -6060,8 +6060,8 @@ Write only the reply text, nothing else:`;
                         yPos += 90;
                     }
                     
-                    // Greeting text (larger hand-written style)
-                    ctx.font = '40px Brush Script MT, cursive';
+                    // Greeting text (hand-written style, optimized for 300+ words)
+                    ctx.font = '36px Brush Script MT, cursive';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'left';
                 
@@ -6072,7 +6072,7 @@ Write only the reply text, nothing else:`;
                     // Word wrap the greeting (确保显示完整内容)
                     const words = (greeting || 'Wishing you a wonderful Christmas season filled with joy and warmth!').split(' ');
                     let line = '';
-                    const lineHeight = 60;
+                    const lineHeight = 55;
                     const maxWidth = contentWidth;
                 
                     for (let word of words) {
@@ -6082,7 +6082,7 @@ Write only the reply text, nothing else:`;
                             ctx.fillText(line, contentX, yPos);
                             line = word + ' ';
                             yPos += lineHeight;
-                            if (yPos > canvas.height - 300) break; // Leave space for signature
+                            if (yPos > canvas.height - 200) break; // Leave space for signature (reduced for more content)
                         } else {
                             line = testLine;
                         }
