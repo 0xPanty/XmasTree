@@ -6141,8 +6141,8 @@ Write only the reply text, nothing else:`;
                     const contentX = 120;
                     const contentWidth = canvas.width - 240;
                 
-                    // Add "Dear @username," greeting (elegant, visible)
-                    ctx.font = 'italic 56px Georgia, "Times New Roman", serif';
+                    // Add "Dear @username," greeting (elegant, readable)
+                    ctx.font = 'italic 56px Georgia, "Palatino Linotype", "Book Antiqua", serif';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'left';
                     if (typeof recipientNames === 'string') {
@@ -6153,8 +6153,8 @@ Write only the reply text, nothing else:`;
                         yPos += 80;
                     }
                     
-                    // Greeting text (larger handwritten style)
-                    ctx.font = '50px "Brush Script MT", "Lucida Handwriting", "Apple Chancery", cursive';
+                    // Greeting text (clear, readable serif font)
+                    ctx.font = '50px Georgia, "Palatino Linotype", "Book Antiqua", "Times New Roman", serif';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'left';
                 
@@ -6184,9 +6184,9 @@ Write only the reply text, nothing else:`;
                         ctx.fillText(line, contentX, yPos);
                     }
                 
-                    // Sender signature (elegant handwritten style)
+                    // Sender signature (elegant, readable italic)
                     yPos += 70; // Balanced spacing
-                    ctx.font = 'italic 62px "Brush Script MT", "Lucida Handwriting", cursive';
+                    ctx.font = 'italic 62px Georgia, "Palatino Linotype", "Book Antiqua", serif';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'right';
                     ctx.fillText(`- ${senderName}`, canvas.width - contentX, yPos);
