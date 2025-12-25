@@ -3161,11 +3161,39 @@
             // Open modal first
             openOriginalDirectGiftModal();
             
-            // Image caching removed due to localStorage quota limits
-            // User needs to generate new postcard each time
-            setTimeout(() => {
-                updateSendGiftButtonState();
-            }, 100);
+            // Try to restore cached postcard from IndexedDB
+            const userFid = window.currentUser?.fid || 3;
+            loadAIPostcardCache(userFid).then(cache => {
+                if (cache && !isAIGenerated) {
+                    console.log('📦 Restoring cached postcard on modal open...');
+                    currentAIImage = cache.image;
+                    currentAIGreeting = cache.greeting;
+                    currentAIScene = cache.scene;
+                    isAIGenerated = true;
+                    aiGenerationCount = 1;
+                    
+                    // Update UI
+                    setTimeout(() => {
+                        document.getElementById('ai-preview-front').src = `data:image/png;base64,${currentAIImage}`;
+                        document.getElementById('ai-preview-greeting').textContent = currentAIGreeting;
+                        document.getElementById('ai-generate-section').style.display = 'none';
+                        document.getElementById('ai-preview-section').style.display = 'block';
+                        
+                        // Enable Send Gift button
+                        updateSendGiftButtonState();
+                    }, 100);
+                } else {
+                    // No cache - update button state
+                    setTimeout(() => {
+                        updateSendGiftButtonState();
+                    }, 100);
+                }
+            }).catch(err => {
+                console.error('Failed to load cache on modal open:', err);
+                setTimeout(() => {
+                    updateSendGiftButtonState();
+                }, 100);
+            });
             
             // Then load stamps inline
             await checkStampEligibilityInline();
@@ -4640,52 +4668,103 @@
         const REGENERATE_COST = 0.1;
         const PAYMENT_ADDRESS = '0x0f540466695cf91203ed8cbca3065fe7232154b9';
         
-        // Save AI postcard cache (lightweight - no image data to avoid quota exceeded)
-        function saveAIPostcardCache(fid) {
+        // ===== IndexedDB Cache System (supports large images) =====
+        const DB_NAME = 'XmasTreeDB';
+        const DB_VERSION = 1;
+        const STORE_NAME = 'postcards';
+        
+        // Initialize IndexedDB
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                
+                request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result);
+                
+                request.onupgradeneeded = (event) => {
+                    const db = event.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: 'fid' });
+                    }
+                };
+            });
+        }
+        
+        // Save AI postcard to IndexedDB (supports large images)
+        async function saveAIPostcardCache(fid) {
             try {
+                const db = await openDB();
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                
                 const cache = {
-                    // Don't cache image - it's too large (2-3MB base64)
-                    // image: currentAIImage,  // REMOVED to prevent quota exceeded
+                    fid: fid,
+                    image: currentAIImage,  // Now we can store large images!
                     greeting: currentAIGreeting,
                     scene: currentAIScene,
                     generatedAt: Date.now(),
                     stampUsed: selectedStamp
                 };
-                localStorage.setItem(`aiPostcard_${fid}`, JSON.stringify(cache));
-                console.log('💾 Cached greeting and scene (without image data)');
+                
+                store.put(cache);
+                
+                await new Promise((resolve, reject) => {
+                    transaction.oncomplete = () => resolve();
+                    transaction.onerror = () => reject(transaction.error);
+                });
+                
+                console.log('💾 Cached postcard to IndexedDB (with image data)');
             } catch (e) {
-                console.warn('⚠️ Failed to cache postcard:', e.message);
-                // If still quota exceeded, clear old cache
-                if (e.name === 'QuotaExceededError') {
-                    localStorage.removeItem(`aiPostcard_${fid}`);
-                }
+                console.warn('⚠️ Failed to cache postcard to IndexedDB:', e.message);
             }
         }
         
-        // Load AI postcard cache
-        function loadAIPostcardCache(fid) {
+        // Load AI postcard from IndexedDB
+        async function loadAIPostcardCache(fid) {
             try {
-                const cacheStr = localStorage.getItem(`aiPostcard_${fid}`);
-                if (!cacheStr) return null;
+                const db = await openDB();
+                const transaction = db.transaction([STORE_NAME], 'readonly');
+                const store = transaction.objectStore(STORE_NAME);
+                const request = store.get(fid);
                 
-                const cache = JSON.parse(cacheStr);
+                const cache = await new Promise((resolve, reject) => {
+                    request.onsuccess = () => resolve(request.result);
+                    request.onerror = () => reject(request.error);
+                });
+                
+                if (!cache) return null;
+                
                 // Cache expires after 7 days
                 const age = Date.now() - cache.generatedAt;
                 if (age > 7 * 24 * 60 * 60 * 1000) {
-                    localStorage.removeItem(`aiPostcard_${fid}`);
+                    await clearAIPostcardCache(fid);
                     return null;
                 }
                 
                 return cache;
             } catch (e) {
-                console.error('Failed to load AI cache:', e);
+                console.error('Failed to load AI cache from IndexedDB:', e);
                 return null;
             }
         }
         
-        // Clear AI postcard cache
-        function clearAIPostcardCache(fid) {
-            localStorage.removeItem(`aiPostcard_${fid}`);
+        // Clear AI postcard from IndexedDB
+        async function clearAIPostcardCache(fid) {
+            try {
+                const db = await openDB();
+                const transaction = db.transaction([STORE_NAME], 'readwrite');
+                const store = transaction.objectStore(STORE_NAME);
+                store.delete(fid);
+                
+                await new Promise((resolve, reject) => {
+                    transaction.oncomplete = () => resolve();
+                    transaction.onerror = () => reject(transaction.error);
+                });
+                
+                console.log('🗑️ Cleared postcard cache from IndexedDB');
+            } catch (e) {
+                console.warn('⚠️ Failed to clear cache from IndexedDB:', e.message);
+            }
         }
         
         // Update Send Gift button state
@@ -4722,8 +4801,31 @@
                 return;
             }
             
-            // ===== CHECK CACHE (no longer caching image due to quota limits) =====
-            // Cache only stores greeting/scene metadata, image must be regenerated
+            // ===== CHECK INDEXEDDB CACHE FIRST =====
+            const userFid = window.currentUser?.fid || 3;
+            const cache = await loadAIPostcardCache(userFid);
+            
+            if (cache && !isAIGenerated) {
+                // Found cached postcard - restore it
+                console.log('📦 Loading cached AI postcard from IndexedDB...');
+                currentAIImage = cache.image;
+                currentAIGreeting = cache.greeting;
+                currentAIScene = cache.scene;
+                isAIGenerated = true;
+                aiGenerationCount = 1;
+                
+                // Update UI with cached data
+                document.getElementById('ai-preview-image').src = `data:image/png;base64,${currentAIImage}`;
+                document.getElementById('ai-preview-greeting').textContent = currentAIGreeting;
+                document.getElementById('ai-generate-section').style.display = 'none';
+                document.getElementById('ai-preview-section').style.display = 'block';
+                
+                // Enable Send Gift button
+                updateSendGiftButtonState();
+                
+                alert('📦 已加载之前生成的明信片！\nLoaded your previous postcard!\n\n💡 Click "🔄 Regenerate" to create a new one.');
+                return;
+            }
             
             // If already generated (user clicked back somehow), show reminder
             if (isAIGenerated) {
