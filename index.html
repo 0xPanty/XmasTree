@@ -3512,36 +3512,22 @@
                     statusDiv.style.background = 'linear-gradient(to right, rgba(74,222,128,0.2), rgba(34,197,94,0.2))';
                     statusDiv.style.border = '1px solid rgba(74,222,128,0.4)';
                     statusDiv.style.color = '#4ade80';
-                    statusDiv.innerHTML = '🎁 Eligible for Free Claim';
+                    statusDiv.style.fontSize = '0.8rem';
+                    statusDiv.style.fontWeight = 'bold';
+                    statusDiv.innerHTML = '🎁 Ready to Claim!';
                 } else if (stamp.id === 'warplet') {
                     statusDiv.style.background = 'rgba(255,107,107,0.15)';
                     statusDiv.style.border = '1px solid rgba(255,107,107,0.3)';
                     statusDiv.style.color = '#ff6b6b';
-                    statusDiv.innerHTML = '🔒 Warplet NFT Required ❌';
+                    statusDiv.style.fontSize = '0.7rem';
+                    statusDiv.innerHTML = '🔒 Warplet NFT Required';
                 } else {
-                    // Not eligible but can purchase - show reason + requirement
-                    const reason = eligibility?.reason || '';
-                    let reasonText = '';
-                    let requirementText = '';
-                    
-                    if (stamp.id === 'neynar' && eligibility?.score !== undefined) {
-                        reasonText = `Score ${eligibility.score} < 0.6 ❌`;
-                        requirementText = 'Free if Score ≥ 0.6';
-                    } else if (stamp.id === 'farcaster') {
-                        reasonText = 'No Power Badge ❌';
-                        requirementText = 'Free with Power Badge';
-                    } else {
-                        reasonText = 'Not Eligible ❌';
-                        requirementText = 'Check requirements';
-                    }
-                    
+                    // Not eligible but can purchase - simplified
                     statusDiv.style.background = 'rgba(212,175,55,0.15)';
                     statusDiv.style.border = '1px solid rgba(212,175,55,0.3)';
-                    statusDiv.innerHTML = `
-                        <div style="color: #ff6b6b; font-size: 0.65rem; margin-bottom: 2px;">${reasonText}</div>
-                        <div style="color: rgba(255,255,255,0.6); font-size: 0.6rem; margin-bottom: 3px;">${requirementText}</div>
-                        <div style="color: #ffd700; font-size: 0.7rem; font-weight: bold;">💰 Available for Purchase</div>
-                    `;
+                    statusDiv.style.color = '#ffd700';
+                    statusDiv.style.fontSize = '0.75rem';
+                    statusDiv.innerHTML = '💰 Available for Purchase';
                 }
                 
                 infoSection.appendChild(statusDiv);
@@ -3589,8 +3575,10 @@
                 } else if (isEligible) {
                     actionBtn.style.background = 'linear-gradient(135deg, #4ade80, #22c55e)';
                     actionBtn.style.color = 'white';
-                    actionBtn.textContent = `🎁 Free Claim ${stamp.quantity} stamps`;
-                    actionBtn.onclick = () => claimStampInline(stamp.id);
+                    actionBtn.style.fontSize = '0.85rem';
+                    actionBtn.style.fontWeight = 'bold';
+                    actionBtn.textContent = `🎁 领取 Claim`;
+                    actionBtn.onclick = () => claimStampInline(stamp.id, stamp.name, stamp.quantity);
                 } else if (stamp.id === 'warplet') {
                     actionBtn.style.background = 'rgba(100,100,100,0.3)';
                     actionBtn.style.color = 'rgba(255,255,255,0.4)';
@@ -3672,27 +3660,29 @@
         }
         
         // Claim stamp inline
-        function claimStampInline(stampId) {
+        function claimStampInline(stampId, stampName, quantity) {
             const userFid = window.currentUser?.fid || 3;
             
-            // Stamp quantities: Neynar=1, others=5
+            // Stamp quantities from config
             const quantities = {
-                neynar: 1,
-                farcaster: 5,
+                neynar: 3,
+                farcaster: 10,
                 warplet: 5
             };
             
+            const claimQuantity = quantities[stampId] || quantity || 1;
+            
             userStamps[stampId] = {
                 owned: true,
-                quantity: quantities[stampId] || 1,
+                quantity: claimQuantity,
                 acquired_method: 'free',
                 acquired_at: new Date().toISOString(),
                 first_free_claimed: true
             };
             saveUserStamps(userFid);
             
-            // Based is now mint-only, not auto-unlocked
-            // Users need to mint it after meeting requirements
+            // Show success message with celebration
+            alert(`🎉 领取成功！Claimed Successfully!\n\n✅ ${stampName}: +${claimQuantity} stamps\n\n🎁 Free reward unlocked!`);
             
             // Auto-select if first stamp
             if (!selectedStamp) {
