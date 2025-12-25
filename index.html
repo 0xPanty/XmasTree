@@ -2119,7 +2119,10 @@
                     <div class="preview-amount" id="direct-preview-amount">0 ETH</div>
                     <div class="preview-info" id="direct-preview-info">Select recipient(s) above</div>
                 </div>
-                <button class="btn-gift" onclick="createDirectGift()">Send Gift</button>
+                <button id="send-gift-btn" class="btn-gift" onclick="createDirectGift()" disabled style="opacity: 0.5; cursor: not-allowed;">
+                    <span>🎁 Send Gift</span>
+                    <div style="font-size: 0.7rem; margin-top: 4px; color: rgba(255,255,255,0.7);">Generate AI postcard first</div>
+                </button>
                 <button style="background:transparent; border:1px solid rgba(212,175,55,0.3); color:var(--gold); padding:8px; margin-top:4px; cursor:pointer; width:100%;" onclick="closeDirectGiftModal()">Cancel</button>
             </div>
         </div>
@@ -3175,6 +3178,14 @@
                     document.getElementById('ai-preview-greeting').textContent = currentAIGreeting;
                     document.getElementById('ai-generate-section').style.display = 'none';
                     document.getElementById('ai-preview-section').style.display = 'block';
+                    
+                    // Enable Send Gift button
+                    updateSendGiftButtonState();
+                }, 100);
+            } else {
+                // No cache - disable Send Gift button
+                setTimeout(() => {
+                    updateSendGiftButtonState();
                 }, 100);
             }
             
@@ -4677,6 +4688,26 @@
             localStorage.removeItem(`aiPostcard_${fid}`);
         }
         
+        // Update Send Gift button state
+        function updateSendGiftButtonState() {
+            const btn = document.getElementById('send-gift-btn');
+            if (!btn) return;
+            
+            if (isAIGenerated && currentAIImage) {
+                // Enable button
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                btn.innerHTML = '<span>🎁 Send Gift</span>';
+            } else {
+                // Disable button
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+                btn.innerHTML = '<span>🎁 Send Gift</span><div style="font-size: 0.7rem; margin-top: 4px; color: rgba(255,255,255,0.7);">Generate AI postcard first</div>';
+            }
+        }
+        
         async function generateAIPostcard() {
             // ===== STAMP VERIFICATION =====
             // Check if user has selected a stamp
@@ -4709,6 +4740,9 @@
                 document.getElementById('ai-preview-greeting').textContent = currentAIGreeting;
                 document.getElementById('ai-generate-section').style.display = 'none';
                 document.getElementById('ai-preview-section').style.display = 'block';
+                
+                // Enable Send Gift button
+                updateSendGiftButtonState();
                 
                 alert('📦 已加载之前生成的明信片！\nLoaded your previous postcard!\n\n💡 Click "🔄 Regenerate" to create a new one.');
                 return;
@@ -4797,6 +4831,9 @@
                     // Save to cache for next time
                     saveAIPostcardCache(userFid);
                     console.log('💾 Saved AI postcard to cache');
+                    
+                    // Enable Send Gift button
+                    updateSendGiftButtonState();
                 } else {
                     throw new Error(data.error || 'Generation failed - no image returned');
                 }
@@ -5046,6 +5083,9 @@
             document.getElementById('ai-preview-section').style.display = 'none';
             document.getElementById('generate-ai-btn').disabled = false;
             document.getElementById('generate-ai-btn').innerHTML = '🎨 Generate AI Postcard';
+            
+            // Disable Send Gift button
+            updateSendGiftButtonState();
         }
         
         // Claim by code/link
