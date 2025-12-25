@@ -365,7 +365,7 @@ IMPORTANT: Natural watercolor fade effect - NO hard edges, NO defined oval/arch 
             // Generate personalized greeting based on scene analysis
             const greetingPrompt = `You are writing a heartfelt Christmas greeting card from ${senderName} to ${displayRecipient}.
 
-MANDATORY LENGTH RULE: Your response MUST be at least 400-500 words. This is a long, very detailed letter with rich, extensive content.
+MANDATORY LENGTH RULE: Your response MUST be 200-250 words. This is a warm, personal letter that fits perfectly on a postcard.
 
 The card illustration shows: "${randomScene}"
 
@@ -376,24 +376,21 @@ IMPORTANT - GENDER-APPROPRIATE TONE:
 - Be authentic - women and men often describe experiences differently
 
 Your task:
-1. Write an extensive, detailed story about this exact scene - describe what you're doing, how it feels, what you see, your thoughts and reflections
-2. Include vivid sensory details (sights, sounds, smells, feelings, textures)
-3. Share your activities, experiences, and inner thoughts in this scene
-4. Make it personal, warm, storytelling, and reflective
-5. MUST be at least 400-500 words - this should be 5-6 substantial paragraphs with rich details!
-6. Add reflections on the meaning of the season, memories, gratitude, hopes for the future
-7. Tell stories, share anecdotes, describe multiple experiences and moments
-8. Use gender-appropriate language and perspective based on the scene description
+1. Write a warm, detailed story about this exact scene - describe what you're doing, how it feels, what you see
+2. Include vivid sensory details (sights, sounds, smells, feelings)
+3. Share your activities and experiences in this scene
+4. Make it personal, warm, and reflective
+5. MUST be 200-250 words - this should be 3-4 well-crafted paragraphs!
+6. Add reflections on the meaning of the season and hopes for the recipient
+7. Use gender-appropriate language and perspective based on the scene description
 
 Required structure:
 - Opening: "Dear ${displayRecipient}," or "Hey ${displayRecipient}!"
-- Body (5-6 substantial paragraphs with rich details):
-  Paragraph 1: Set the scene with vivid description - what you're doing, the environment, the atmosphere
-  Paragraph 2: Deep sensory immersion - what you see, hear, smell, feel, taste in detail
-  Paragraph 3: Your activities and experiences throughout the day/season - tell stories and share moments
-  Paragraph 4: More experiences - describe other activities, interactions, special moments you've had
-  Paragraph 5: Personal reflections - what this season means to you, memories, gratitude, growth
-  Paragraph 6: Hopes and wishes for the recipient, connection to your friendship/relationship
+- Body (3-4 concise paragraphs):
+  Paragraph 1: Set the scene - what you're doing, the atmosphere, vivid sensory details
+  Paragraph 2: Your activities and experiences - personal stories and moments from this scene
+  Paragraph 3: Personal reflections - what this season means, gratitude, memories
+  Paragraph 4 (optional): Warm wishes and hopes for the recipient
 - Examples for inspiration (adapt tone to match character's gender):
   * Snow/winter (masculine) → "The mountains have been incredible this season! I've been skiing every weekend and building the most epic snowmen you've ever seen. The crisp air and sparkling snow make everything feel magical."
   * Snow/winter (feminine) → "The snow has been absolutely magical this season! I've been ice skating nearly every day, and yesterday I spent hours making the most adorable snow angels with my nieces. There's something so enchanting about fresh snowfall."
@@ -409,12 +406,12 @@ Required structure:
 
 VERIFICATION:
 - Count your words before responding
-- Minimum 400-500 words required (aim for 450+ words)
-- No maximum - write as much as needed to tell a full, rich story
-- Write 5-6 substantial paragraphs with detailed descriptions
-- If your draft is less than 400 words, add more stories, sensory details, activities, reflections, anecdotes, and personal thoughts
+- Target 200-250 words (aim for 220-240 words for best fit)
+- This should fit perfectly on a postcard - concise but heartfelt
+- Write 3-4 well-crafted paragraphs
+- If your draft exceeds 250 words, trim it down while keeping the warmth and personal touch
 
-Example length (approximately 450+ words):
+Example length (approximately 230 words):
 "Dear Sarah, Merry Christmas! I hope this card finds you well and fills your heart with the same joy that's been filling mine this holiday season.
 
 I wanted to share what I've been up to lately. Every evening as the sun sets, I've been making my way to the town square where the most magnificent Christmas tree stands tall against the twilight sky. It's adorned with hundreds upon hundreds of twinkling golden lights that seem to dance and sparkle in the winter breeze, creating this magical, almost dreamlike atmosphere. The air is crisp and refreshing, filled with the joyful sounds of carol singers whose voices echo through the cobblestone streets, and there's always the warm, comforting aroma of hot cocoa and roasted chestnuts wafting from the festive market stalls that line the square.
@@ -427,7 +424,7 @@ I find myself thinking of you often during these celebrations and wishing you co
 
 Warmest wishes and lots of love, John"
 
-Now write your greeting (at least 400-500 words, aim for 450+ words):`;
+Now write your greeting (200-250 words, aim for 220-240 words for perfect fit):`;
 
             const textResponse = await fetch(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
