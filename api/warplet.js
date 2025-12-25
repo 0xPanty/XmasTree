@@ -101,40 +101,73 @@ module.exports = async function handler(req, res) {
             }
         }
 
-        // Fallback: Use OpenSea API (no key required, but rate limited)
+        // Use Basescan-like API to query NFTs (simple approach)
+        // OpenSea API v2 often has rate limits, let's try a simpler approach
         try {
-            const openseaUrl = `https://api.opensea.io/api/v2/chain/base/account/${allAddresses[0]}/nfts?collection=the-warplets-farcaster&limit=1`;
-            
-            const openseaRes = await fetch(openseaUrl, {
-                headers: {
-                    'accept': 'application/json',
-                    'X-API-KEY': '' // OpenSea API key optional for read operations
-                }
-            });
+            // Try each address until we find Warplets
+            for (const address of allAddresses) {
+                console.log(`[warplet] Checking address: ${address}`);
+                
+                // Method 1: Try OpenSea API v2 with contract address filter
+                const openseaUrl = `https://api.opensea.io/api/v2/chain/base/account/${address}/nfts?contract_addresses=${WARPLET_CONTRACT}&limit=1`;
+                console.log(`[warplet] OpenSea URL:`, openseaUrl);
+                
+                const openseaRes = await fetch(openseaUrl, {
+                    headers: {
+                        'accept': 'application/json',
+                        'User-Agent': 'XmasTree-App'
+                    }
+                });
 
-            if (openseaRes.ok) {
-                const openseaData = await openseaRes.json();
-                const warplets = openseaData.nfts || [];
+                console.log(`[warplet] OpenSea response status:`, openseaRes.status);
 
-                if (warplets.length > 0) {
-                    const warplet = warplets[0];
-                    return res.status(200).json({
-                        hasWarplet: true,
-                        imageUrl: warplet.image_url || warplet.display_image_url,
-                        tokenId: warplet.identifier,
-                        name: warplet.name || `Warplet #${warplet.identifier}`,
-                        contractAddress: warplet.contract
-                    });
+                if (openseaRes.ok) {
+                    const openseaData = await openseaRes.json();
+                    console.log(`[warplet] OpenSea response:`, JSON.stringify(openseaData).substring(0, 500));
+                    
+                    const warplets = openseaData.nfts || [];
+
+                    if (warplets.length > 0) {
+                        const warplet = warplets[0];
+                        console.log(`[warplet] ✅ Found Warplet:`, warplet.name || warplet.identifier);
+                        
+                        // Get best quality image
+                        const imageUrl = warplet.image_url || 
+                                        warplet.display_image_url || 
+                                        warplet.display_animation_url ||
+                                        warplet.metadata?.image;
+                        
+                        return res.status(200).json({
+                            hasWarplet: true,
+                            imageUrl: imageUrl,
+                            tokenId: warplet.identifier,
+                            name: warplet.name || `Warplet #${warplet.identifier}`,
+                            contractAddress: WARPLET_CONTRACT,
+                            address: address
+                        });
+                    } else {
+                        console.log(`[warplet] No NFTs found for ${address}`);
+                    }
+                } else {
+                    const errorText = await openseaRes.text();
+                    console.warn(`[warplet] OpenSea API error for ${address}:`, openseaRes.status, errorText.substring(0, 200));
                 }
             }
         } catch (error) {
-            console.warn('[warplet] OpenSea API error:', error.message);
+            console.error('[warplet] API error:', error.message, error.stack);
         }
 
-        // No Warplet found
+        // No Warplet found - return debug info
+        console.log('[warplet] No Warplet NFT found');
         return res.status(200).json({
             hasWarplet: false,
-            message: 'No Warplet NFT found for this user'
+            message: 'No Warplet NFT found for this user',
+            debug: {
+                fid: fid,
+                addresses: allAddresses,
+                checkedContract: '0x699727f9e01a822efdcf7333073f0461e5914b4e',
+                chain: 'base'
+            }
         });
 
     } catch (error) {
