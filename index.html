@@ -5924,10 +5924,10 @@
             const container = document.getElementById('snowfall-container');
             if (!container) return;
             
-            // Generate snowflakes (reduced from 50 to 30 for performance)
+            // Generate snowflakes (GPU accelerated with will-change and translate3d)
             let snowflakes = '';
             const symbols = ['❄', '❅', '❆', '✻', '✼', '•'];
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 50; i++) {
                 const left = Math.random() * 100;
                 const delay = Math.random() * 10;
                 const duration = 8 + Math.random() * 12;
