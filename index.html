@@ -6317,8 +6317,31 @@ Write only the reply text, nothing else:`;
                 const frontWithText = await addGreetingTextToImage(resizedFrontImage);
                 currentAIImage = frontWithText;
                 
+                // Step 3: Load stamp image (or user's Warplet NFT if applicable)
+                let stampImageSrc = selectedStamp ? `/stamp/${selectedStamp}.png` : '/stamp/neynar.png';
+                
+                // If Warplet stamp is selected, try to fetch user's actual Warplet NFT
+                if (selectedStamp === 'warplet' && window.currentUser?.fid) {
+                    console.log('[compositeStampOnImage] Fetching user Warplet NFT...');
+                    try {
+                        const warpletRes = await fetch(`/api/warplet?fid=${window.currentUser.fid}`);
+                        if (warpletRes.ok) {
+                            const warpletData = await warpletRes.json();
+                            if (warpletData.hasWarplet && warpletData.imageUrl) {
+                                console.log('[compositeStampOnImage] Using user Warplet NFT:', warpletData.name);
+                                stampImageSrc = warpletData.imageUrl;
+                            } else {
+                                console.log('[compositeStampOnImage] No Warplet NFT found, using default stamp');
+                            }
+                        }
+                    } catch (error) {
+                        console.warn('[compositeStampOnImage] Failed to fetch Warplet NFT, using default stamp:', error);
+                    }
+                }
+                
                 // Load stamp image for address side
                 const stamp = new Image();
+                stamp.crossOrigin = 'anonymous'; // Enable CORS for external NFT images
                 stamp.onload = () => {
                     // Generate letter content (back) with stamp, greeting, and recipient names
                     const senderName = window.currentUser?.username || (TEST_MODE ? 'xqc' : 'Anonymous');
@@ -6360,8 +6383,8 @@ Write only the reply text, nothing else:`;
                             resolve();
                         });
                     };
-                // Load stamp image
-                stamp.src = selectedStamp ? `/stamp/${selectedStamp}.png` : '/stamp/neynar.png';
+                // Load stamp image (or Warplet NFT)
+                stamp.src = stampImageSrc;
             });
         }
         
