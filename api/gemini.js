@@ -365,7 +365,7 @@ IMPORTANT: Natural watercolor fade effect - NO hard edges, NO defined oval/arch 
             // Generate personalized greeting based on scene analysis
             const greetingPrompt = `You are writing a heartfelt Christmas greeting card from ${senderName} to ${displayRecipient}.
 
-MANDATORY LENGTH RULE: Your response MUST be 200-250 words. This is a warm, personal letter that fits perfectly on a postcard.
+MANDATORY LENGTH RULE: Your response MUST be 120-150 words maximum. This is a concise, warm postcard message that must fit perfectly on the card without overflow.
 
 The card illustration shows: "${randomScene}"
 
@@ -377,22 +377,22 @@ IMPORTANT - WRITING STYLE:
 - Write like you're composing a thoughtful letter to a friend, not a casual text message
 
 Your task:
-1. Write a warm, detailed story about this exact scene - describe what you're doing, how it feels, what you see
-2. Include vivid sensory details (sights, sounds, smells, feelings)
-3. Share your activities and experiences in this scene
-4. Make it personal, warm, and reflective
-5. MUST be 200-250 words - this should be 3-4 well-crafted paragraphs!
-6. Add reflections on the meaning of the season and hopes for the recipient
+1. Write a concise, warm story about this exact scene - describe what you're doing, how it feels
+2. Include vivid sensory details but be concise
+3. Share your experience in this scene briefly
+4. Make it personal and warm
+5. MUST be 120-150 words MAXIMUM - this should be 2-3 short paragraphs!
+6. Add brief reflections and warm wishes
 7. Use elegant letter-writing language - avoid casual slang
 8. Match perspective to character's gender naturally
 
 Required structure:
 - Opening: "Dear ${displayRecipient}," or "Dear Friend," (warm but elegant, never use "Hey man" or casual slang)
-- Body (3-4 concise paragraphs):
-  Paragraph 1: Set the scene - what you're doing, the atmosphere, vivid sensory details
-  Paragraph 2: Your activities and experiences - personal stories and moments from this scene
-  Paragraph 3: Personal reflections - what this season means, gratitude, memories
-  Paragraph 4 (optional): Warm wishes and hopes for the recipient
+- Body (2-3 SHORT paragraphs ONLY):
+  Paragraph 1: Brief scene description and what you're doing (3-4 sentences max)
+  Paragraph 2: Personal reflection and warm wishes (2-3 sentences max)
+  
+CRITICAL: Keep it SHORT - you have very limited space on a postcard!
 - Examples for inspiration (elegant letter style):
   * Winter → "The mountains have been absolutely wonderful this season! I have been skiing every weekend, and the crisp air and sparkling snow make everything feel truly magical."
   * Travel → "I am currently exploring [destination], and it has been absolutely breathtaking. The festive markets and twinkling lights have made this holiday season unforgettable."
@@ -403,25 +403,21 @@ Required structure:
 
 VERIFICATION:
 - Count your words before responding
-- Target 200-250 words (aim for 220-240 words for best fit)
-- This should fit perfectly on a postcard - concise but heartfelt
-- Write 3-4 well-crafted paragraphs
-- If your draft exceeds 250 words, trim it down while keeping the warmth and personal touch
+- MAXIMUM 120-150 words - NO MORE!
+- This must fit on a small postcard - be CONCISE
+- Write 2-3 SHORT paragraphs ONLY
+- If your draft exceeds 150 words, CUT IT DOWN immediately
 
-Example length (approximately 230 words):
+Example length (approximately 130 words):
 "Dear Sarah, Merry Christmas! I hope this card finds you well and fills your heart with the same joy that's been filling mine this holiday season.
 
-I wanted to share what I've been up to lately. Every evening as the sun sets, I've been making my way to the town square where the most magnificent Christmas tree stands tall against the twilight sky. It's adorned with hundreds upon hundreds of twinkling golden lights that seem to dance and sparkle in the winter breeze, creating this magical, almost dreamlike atmosphere. The air is crisp and refreshing, filled with the joyful sounds of carol singers whose voices echo through the cobblestone streets, and there's always the warm, comforting aroma of hot cocoa and roasted chestnuts wafting from the festive market stalls that line the square.
+I have been visiting the town square each evening, where a magnificent Christmas tree stands adorned with twinkling lights. The air is crisp, filled with carol singers and the aroma of hot cocoa. It feels truly magical.
 
-I've been ice skating on the outdoor rink with friends almost every weekend, laughing as we slip and slide across the frozen surface like clumsy penguins. The whole scene feels like something straight out of a storybook, with snow gently falling like tiny diamonds, children building snowmen with bright red scarves and carrot noses, and couples sharing warm drinks while holding hands under the glowing streetlamps. It's these simple, magical moments that make this season so incredibly special.
+This season reminds me of what matters most—friendship and warmth. I hope your holidays are filled with joy and peace!
 
-This time of year always makes me reflective. Being surrounded by all this beauty and joy reminds me of what truly matters in life - the connections we have with the people we care about, the memories we create together, and the warmth we share even when we're apart. I find myself feeling deeply grateful for our friendship and all the wonderful times we've shared over the years.
+Warmest wishes, John"
 
-I find myself thinking of you often during these celebrations and wishing you could be here to experience this festive atmosphere with me. I truly hope your holidays are filled with equal warmth, joy, and all the magic that this season brings!
-
-Warmest wishes and lots of love, John"
-
-Now write your greeting (200-250 words, aim for 220-240 words for perfect fit):`;
+Now write your greeting (120-150 words MAXIMUM):`;
 
             const textResponse = await fetch(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
