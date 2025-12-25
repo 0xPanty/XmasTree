@@ -3158,6 +3158,26 @@
             // Open modal first
             openOriginalDirectGiftModal();
             
+            // Try to restore cached postcard if exists
+            const userFid = window.currentUser?.fid || 3;
+            const cache = loadAIPostcardCache(userFid);
+            if (cache && !isAIGenerated) {
+                console.log('📦 Restoring cached postcard on modal open...');
+                currentAIImage = cache.image;
+                currentAIGreeting = cache.greeting;
+                currentAIScene = cache.scene;
+                isAIGenerated = true;
+                aiGenerationCount = 1;
+                
+                // Update UI
+                setTimeout(() => {
+                    document.getElementById('ai-preview-front').src = `data:image/png;base64,${currentAIImage}`;
+                    document.getElementById('ai-preview-greeting').textContent = currentAIGreeting;
+                    document.getElementById('ai-generate-section').style.display = 'none';
+                    document.getElementById('ai-preview-section').style.display = 'block';
+                }, 100);
+            }
+            
             // Then load stamps inline
             await checkStampEligibilityInline();
         }
@@ -4619,6 +4639,44 @@
         const REGENERATE_COST = 0.1;
         const PAYMENT_ADDRESS = '0x0f540466695cf91203ed8cbca3065fe7232154b9';
         
+        // Save AI postcard cache
+        function saveAIPostcardCache(fid) {
+            const cache = {
+                image: currentAIImage,
+                greeting: currentAIGreeting,
+                scene: currentAIScene,
+                generatedAt: Date.now(),
+                stampUsed: selectedStamp
+            };
+            localStorage.setItem(`aiPostcard_${fid}`, JSON.stringify(cache));
+        }
+        
+        // Load AI postcard cache
+        function loadAIPostcardCache(fid) {
+            try {
+                const cacheStr = localStorage.getItem(`aiPostcard_${fid}`);
+                if (!cacheStr) return null;
+                
+                const cache = JSON.parse(cacheStr);
+                // Cache expires after 7 days
+                const age = Date.now() - cache.generatedAt;
+                if (age > 7 * 24 * 60 * 60 * 1000) {
+                    localStorage.removeItem(`aiPostcard_${fid}`);
+                    return null;
+                }
+                
+                return cache;
+            } catch (e) {
+                console.error('Failed to load AI cache:', e);
+                return null;
+            }
+        }
+        
+        // Clear AI postcard cache
+        function clearAIPostcardCache(fid) {
+            localStorage.removeItem(`aiPostcard_${fid}`);
+        }
+        
         async function generateAIPostcard() {
             // ===== STAMP VERIFICATION =====
             // Check if user has selected a stamp
@@ -4630,6 +4688,29 @@
             // Check if user owns the selected stamp
             if (!userStamps[selectedStamp]?.owned) {
                 alert('⚠️ You don\'t own this stamp!\n\nPlease claim or buy a stamp first.');
+                return;
+            }
+            
+            // ===== CHECK CACHE FIRST =====
+            const userFid = window.currentUser?.fid || 3;
+            const cache = loadAIPostcardCache(userFid);
+            
+            if (cache && !isAIGenerated) {
+                // Found cached postcard - restore it
+                console.log('📦 Loading cached AI postcard...');
+                currentAIImage = cache.image;
+                currentAIGreeting = cache.greeting;
+                currentAIScene = cache.scene;
+                isAIGenerated = true;
+                aiGenerationCount++;
+                
+                // Update UI with cached data
+                document.getElementById('ai-preview-image').src = `data:image/png;base64,${currentAIImage}`;
+                document.getElementById('ai-preview-greeting').textContent = currentAIGreeting;
+                document.getElementById('ai-generate-section').style.display = 'none';
+                document.getElementById('ai-preview-section').style.display = 'block';
+                
+                alert('📦 已加载之前生成的明信片！\nLoaded your previous postcard!\n\n💡 Click "🔄 Regenerate" to create a new one.');
                 return;
             }
             
@@ -4712,6 +4793,10 @@
                     
                     // Composite stamp onto AI image using Canvas
                     await compositeStampOnImage(data.image);
+                    
+                    // Save to cache for next time
+                    saveAIPostcardCache(userFid);
+                    console.log('💾 Saved AI postcard to cache');
                 } else {
                     throw new Error(data.error || 'Generation failed - no image returned');
                 }
@@ -4792,6 +4877,11 @@
                     // Update preview
                     document.getElementById('ai-preview-image').src = `data:image/png;base64,${currentAIImage}`;
                     document.getElementById('ai-preview-greeting').textContent = currentAIGreeting;
+                    
+                    // Save new generation to cache
+                    const userFid = window.currentUser?.fid || 3;
+                    saveAIPostcardCache(userFid);
+                    console.log('💾 Saved regenerated postcard to cache');
                     
                     btn.disabled = false;
                     btn.innerHTML = '🔄 Regenerate (0.1 USDC)';
@@ -4940,7 +5030,11 @@
                 alert(`Personalized postcard(s) created for ${links.length} friend(s)!\nEach will see their own name!\nLink(s) copied to clipboard!`);
             } else { alert(shareText); }
             
-            // Reset
+            // Reset and clear cache (so user can generate new postcard next time)
+            const userFid = window.currentUser?.fid || 3;
+            clearAIPostcardCache(userFid);
+            console.log('🗑️ Cleared AI postcard cache after sending');
+            
             selectedRecipients = [];
             renderSelectedUsers();
             isAIGenerated = false;
