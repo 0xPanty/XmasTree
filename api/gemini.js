@@ -255,17 +255,18 @@ Hand-painted illustration look, muted colors, subtle vintage paper texture.
 Vertical format 9:16.
 
 CRITICAL COMPOSITION REQUIREMENTS:
-- Central illustration with soft ARCHED or OVAL vignette frame
-- Gentle fade from the scene into cream/beige background at the edges
-- Soft, natural vignette effect (NOT hard edges)
-- The illustration should have rounded/arched borders that blend naturally into the paper background
-- Leave cream-colored space around the edges (like a vintage postcard)
-- Smooth transition between illustration and background
+- Watercolor-style natural edge transition
+- The scene should fade gently into the cream/beige background like watercolor bleeding into paper
+- NO defined oval or arched border shape - just natural, organic fading
+- Edges should have soft, irregular watercolor wash effect
+- Think: watercolor painting on cream paper where the colors naturally fade and blend at the edges
+- The transition should be so smooth and natural that there's no visible "frame" or "border line"
+- Vary the fade distance - some areas can fade sooner, some later (organic, not uniform)
 - NO text, NO words, NO captions in the image
 
-Think: Classic vintage postcard with soft oval/arched illustration that fades naturally into the paper.
+Think: Watercolor illustration that naturally bleeds into the paper background, NOT a framed picture with defined edges.
 
-IMPORTANT: Soft vignette borders with natural fade, NOT hard rectangular edges.`;
+IMPORTANT: Natural watercolor fade effect - NO hard edges, NO defined oval/arch shapes, just gentle color blending.`;
 
 
             // Build parts array: IMAGE FIRST, then prompt (following farstand3 pattern)
@@ -299,17 +300,18 @@ Hand-painted illustration look, muted colors, subtle vintage paper texture.
 Vertical format 9:16.
 
 CRITICAL COMPOSITION REQUIREMENTS:
-- Central illustration with soft ARCHED or OVAL vignette frame
-- Gentle fade from the scene into cream/beige background at the edges
-- Soft, natural vignette effect (NOT hard edges)
-- The illustration should have rounded/arched borders that blend naturally into the paper background
-- Leave cream-colored space around the edges (like a vintage postcard)
-- Smooth transition between illustration and background
+- Watercolor-style natural edge transition
+- The scene should fade gently into the cream/beige background like watercolor bleeding into paper
+- NO defined oval or arched border shape - just natural, organic fading
+- Edges should have soft, irregular watercolor wash effect
+- Think: watercolor painting on cream paper where the colors naturally fade and blend at the edges
+- The transition should be so smooth and natural that there's no visible "frame" or "border line"
+- Vary the fade distance - some areas can fade sooner, some later (organic, not uniform)
 - NO text, NO words, NO captions in the image
 
-Think: Classic vintage postcard with soft oval/arched illustration that fades naturally into the paper.
+Think: Watercolor illustration that naturally bleeds into the paper background, NOT a framed picture with defined edges.
 
-IMPORTANT: Soft vignette borders with natural fade, NOT hard rectangular edges.`
+IMPORTANT: Natural watercolor fade effect - NO hard edges, NO defined oval/arch shapes, just gentle color blending.`
                 : visualPrompt; // Fallback if no image
             
             imageParts.push({ text: finalPrompt });
