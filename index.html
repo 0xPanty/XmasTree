@@ -3172,7 +3172,7 @@
             // Try to restore cached postcard from IndexedDB
             const userFid = window.currentUser?.fid || 3;
             loadAIPostcardCache(userFid).then(cache => {
-                if (cache && !isAIGenerated) {
+                if (cache && cache.image && !isAIGenerated) {
                     console.log('📦 Restoring cached postcard on modal open...');
                     currentAIImage = cache.image;
                     currentAIGreeting = cache.greeting;
@@ -3191,7 +3191,7 @@
                         updateSendGiftButtonState();
                     }, 100);
                 } else {
-                    // No cache - update button state
+                    // No cache or incomplete data - update button state
                     setTimeout(() => {
                         updateSendGiftButtonState();
                     }, 100);
@@ -4810,8 +4810,8 @@
             const userFid = window.currentUser?.fid || 3;
             const cache = await loadAIPostcardCache(userFid);
             
-            if (cache && !isAIGenerated) {
-                // Found cached postcard - restore it
+            if (cache && cache.image && !isAIGenerated) {
+                // Found cached postcard with valid image - restore it
                 console.log('📦 Loading cached AI postcard from IndexedDB...');
                 currentAIImage = cache.image;
                 currentAIGreeting = cache.greeting;
@@ -4832,13 +4832,20 @@
                 return;
             }
             
-            // If already generated (user clicked back somehow), show reminder
-            if (isAIGenerated) {
+            // If already generated AND has valid image data, show reminder
+            if (isAIGenerated && currentAIImage) {
                 alert('📦 图片已生成！\nPostcard already generated!\n\n💡 Click "🔄 Regenerate" to create a new one.');
                 // Show preview section
                 document.getElementById('ai-generate-section').style.display = 'none';
                 document.getElementById('ai-preview-section').style.display = 'block';
                 return;
+            }
+            
+            // If flag is set but no image data, reset state (corrupted state)
+            if (isAIGenerated && !currentAIImage) {
+                console.warn('⚠️ Corrupted state: isAIGenerated=true but no image data. Resetting...');
+                isAIGenerated = false;
+                aiGenerationCount = 0;
             }
             
             const btn = document.getElementById('generate-ai-btn');
