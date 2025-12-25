@@ -2843,6 +2843,9 @@
         // Toggle Plaza Mode
         function togglePlazaMode() {
             if (!isPlazaMode) {
+                // Immediately activate plaza UI to avoid button disappearing
+                activatePlazaMode(true);
+                
                 // 1. Switch to side view + scatter tree
                 if (window.setSideView) window.setSideView();
                 if (window.scatterTree) window.scatterTree();
@@ -2854,8 +2857,7 @@
                     // 3. After tree assembles, play comet animation
                     setTimeout(() => {
                         playPlazaTransition(() => {
-                            // 4. Activate plaza with snowfall
-                            activatePlazaMode(true);
+                            // Animation complete - UI already active
                         });
                     }, 1500);
                 }, 500);
@@ -3516,14 +3518,14 @@
                 nameDiv.textContent = stamp.name;
                 infoSection.appendChild(nameDiv);
                 
-                // Status
+                // Status (compact)
                 const statusDiv = document.createElement('div');
                 statusDiv.style.cssText = `
-                    font-size: 0.7rem;
+                    font-size: 0.68rem;
                     text-align: center;
-                    padding: 6px 8px;
-                    border-radius: 6px;
-                    margin-bottom: 10px;
+                    padding: 5px 6px;
+                    border-radius: 5px;
+                    margin-bottom: 8px;
                     font-weight: 500;
                 `;
                 
@@ -3569,14 +3571,14 @@
                 
                 infoSection.appendChild(statusDiv);
                 
-                // Action button (ALL states have buttons)
+                // Action button (ALL states have buttons - compact style)
                 const actionBtn = document.createElement('button');
                 actionBtn.style.cssText = `
                     width: 100%;
-                    padding: 10px;
+                    padding: 8px;
                     border: none;
-                    border-radius: 8px;
-                    font-size: 0.75rem;
+                    border-radius: 6px;
+                    font-size: 0.7rem;
                     font-weight: bold;
                     cursor: pointer;
                     transition: all 0.2s;
@@ -6102,49 +6104,29 @@ Write only the reply text, nothing else:`;
                     ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
                     
                     // Stamp is already in the background image, no need to draw it separately
+                    // "To:" removed - background already has postal elements
                     
-                    // Add "To: @username" below stamp area (top-right)
-                    let toYPos = 340;
-                    ctx.font = 'bold 36px Georgia';
-                    ctx.fillStyle = '#2c1810';
-                    ctx.textAlign = 'right';
-                    ctx.fillText('To:', canvas.width - 80, toYPos);
-                    
-                    toYPos += 50;
-                    ctx.font = '40px Georgia';
-                    if (typeof recipientNames === 'string') {
-                        // Single recipient - personalized
-                        ctx.fillText(`@${recipientNames}`, canvas.width - 80, toYPos);
-                    } else if (Array.isArray(recipientNames) && recipientNames.length > 0) {
-                        // Multiple recipients - preview
-                        ctx.fillText(`${recipientNames.length} Friends`, canvas.width - 80, toYPos);
-                        ctx.font = '28px Georgia';
-                        ctx.fillStyle = '#5a4a3a';
-                        toYPos += 40;
-                        ctx.fillText('(Personalized)', canvas.width - 80, toYPos);
-                    }
-                    
-                    // Letter content starts below
-                    let yPos = 550;
+                    // Letter content starts from top
+                    let yPos = 480;
                     
                     // Main greeting message (adjust margins to stay within border)
-                    const contentX = 120;
-                    const contentWidth = canvas.width - 240;
+                    const contentX = 100;
+                    const contentWidth = canvas.width - 200;
                 
-                    // Add "Dear @username," greeting (larger, more visible)
-                    ctx.font = 'italic 52px Georgia';
+                    // Add "Dear @username," greeting (much larger)
+                    ctx.font = 'italic 60px Georgia';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'left';
                     if (typeof recipientNames === 'string') {
                         ctx.fillText(`Dear @${recipientNames},`, contentX, yPos);
-                        yPos += 95;
+                        yPos += 100;
                     } else if (Array.isArray(recipientNames) && recipientNames.length > 0) {
                         ctx.fillText(`Dear Friends,`, contentX, yPos);
-                        yPos += 95;
+                        yPos += 100;
                     }
                     
-                    // Greeting text (larger font for better readability, optimized for 300+ words)
-                    ctx.font = '44px Brush Script MT, cursive';
+                    // Greeting text (much larger font for mobile readability, optimized for 300+ words)
+                    ctx.font = '52px Brush Script MT, cursive';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'left';
                 
@@ -6155,7 +6137,7 @@ Write only the reply text, nothing else:`;
                     // Word wrap the greeting (确保显示完整内容)
                     const words = (greeting || 'Wishing you a wonderful Christmas season filled with joy and warmth!').split(' ');
                     let line = '';
-                    const lineHeight = 65;
+                    const lineHeight = 75;
                     const maxWidth = contentWidth;
                 
                     for (let word of words) {
@@ -6165,7 +6147,7 @@ Write only the reply text, nothing else:`;
                             ctx.fillText(line, contentX, yPos);
                             line = word + ' ';
                             yPos += lineHeight;
-                            if (yPos > canvas.height - 150) break; // Leave space for signature (more room for content)
+                            if (yPos > canvas.height - 130) break; // Leave space for signature
                         } else {
                             line = testLine;
                         }
@@ -6175,8 +6157,8 @@ Write only the reply text, nothing else:`;
                     }
                 
                     // Sender signature (below content, right-aligned like formal letter)
-                    yPos += 80; // Space after content (reduced to fit more)
-                    ctx.font = 'italic 56px Brush Script MT, cursive';
+                    yPos += 70; // Space after content
+                    ctx.font = 'italic 64px Brush Script MT, cursive';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'right';
                     ctx.fillText(`- ${senderName}`, canvas.width - contentX, yPos);
