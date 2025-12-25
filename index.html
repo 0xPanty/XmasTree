@@ -4745,7 +4745,7 @@
                 currentAIGreeting = cache.greeting;
                 currentAIScene = cache.scene;
                 isAIGenerated = true;
-                aiGenerationCount++;
+                aiGenerationCount = 1;
                 
                 // Update UI with cached data
                 document.getElementById('ai-preview-image').src = `data:image/png;base64,${currentAIImage}`;
@@ -4760,8 +4760,12 @@
                 return;
             }
             
-            if (aiGenerationCount > 0) {
-                alert('Please use "Regenerate" button');
+            // If already generated (user clicked back somehow), show reminder
+            if (isAIGenerated) {
+                alert('📦 图片已生成！\nPostcard already generated!\n\n💡 Click "🔄 Regenerate" to create a new one.');
+                // Show preview section
+                document.getElementById('ai-generate-section').style.display = 'none';
+                document.getElementById('ai-preview-section').style.display = 'block';
                 return;
             }
             
