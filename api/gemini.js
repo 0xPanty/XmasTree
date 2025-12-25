@@ -369,11 +369,12 @@ MANDATORY LENGTH RULE: Your response MUST be 200-250 words. This is a warm, pers
 
 The card illustration shows: "${randomScene}"
 
-IMPORTANT - GENDER-APPROPRIATE TONE:
-- If the scene describes a woman/lady/girl (e.g., "young woman", "lady", "girl with"): Use feminine tone, words, and perspective naturally
-- If the scene describes a man/guy/boy (e.g., "young man", "guy", "boy with"): Use masculine tone, words, and perspective naturally
-- Match your language, activities, and expressions to fit the character's gender naturally
-- Be authentic - women and men often describe experiences differently
+IMPORTANT - WRITING STYLE:
+- Use elegant, warm letter-writing style (like a handwritten letter with pen and ink)
+- Avoid casual slang like "man", "bro", "dude", "hey man" - use formal yet warm greetings
+- If the scene shows a woman/lady/girl: Use feminine perspective naturally
+- If the scene shows a man/gentleman/boy: Use masculine perspective naturally
+- Write like you're composing a thoughtful letter to a friend, not a casual text message
 
 Your task:
 1. Write a warm, detailed story about this exact scene - describe what you're doing, how it feels, what you see
@@ -382,25 +383,21 @@ Your task:
 4. Make it personal, warm, and reflective
 5. MUST be 200-250 words - this should be 3-4 well-crafted paragraphs!
 6. Add reflections on the meaning of the season and hopes for the recipient
-7. Use gender-appropriate language and perspective based on the scene description
+7. Use elegant letter-writing language - avoid casual slang
+8. Match perspective to character's gender naturally
 
 Required structure:
-- Opening: "Dear ${displayRecipient}," or "Hey ${displayRecipient}!"
+- Opening: "Dear ${displayRecipient}," or "Dear Friend," (warm but elegant, never use "Hey man" or casual slang)
 - Body (3-4 concise paragraphs):
   Paragraph 1: Set the scene - what you're doing, the atmosphere, vivid sensory details
   Paragraph 2: Your activities and experiences - personal stories and moments from this scene
   Paragraph 3: Personal reflections - what this season means, gratitude, memories
   Paragraph 4 (optional): Warm wishes and hopes for the recipient
-- Examples for inspiration (adapt tone to match character's gender):
-  * Snow/winter (masculine) → "The mountains have been incredible this season! I've been skiing every weekend and building the most epic snowmen you've ever seen. The crisp air and sparkling snow make everything feel magical."
-  * Snow/winter (feminine) → "The snow has been absolutely magical this season! I've been ice skating nearly every day, and yesterday I spent hours making the most adorable snow angels with my nieces. There's something so enchanting about fresh snowfall."
-  * Travel → "I'm currently exploring [destination] and it's absolutely breathtaking! The festive markets, twinkling lights, and local traditions have made this holiday season unforgettable. I wish you could be here to experience it with me."
-  * Family → "This holiday season has been all about family for me. We've been baking grandmother's secret recipes, decorating the entire house, and creating memories that will last forever. The house smells like cinnamon and joy."
-  * Pets → "My furry companion and I have been having the coziest winter! We spend our days by the fireplace, taking snowy walks, and he's been 'helping' me wrap presents (by which I mean sitting on the wrapping paper)."
-  * Indoor/cozy (feminine) → "I've turned into a complete homebody this winter! Wrapped in my coziest blanket, sipping endless cups of hot cocoa, reading by the fireplace. It's been absolutely dreamy and so peaceful."
-  * Indoor/cozy (masculine) → "Been having the chillest winter at home. Gaming, watching holiday movies, and just vibing by the fire. It's been the perfect low-key season, exactly what I needed."
-  * Urban → "The city is absolutely magical right now! Every street corner has twinkling lights, holiday music fills the air, and there's this incredible energy that only happens this time of year. I love walking through it all."
-  * Nature → "I've been spending every free moment hiking through snow-covered forests and frozen lakes. Nature in winter is so peaceful and beautiful - it reminds me what's truly important in life."
+- Examples for inspiration (elegant letter style):
+  * Winter → "The mountains have been absolutely wonderful this season! I have been skiing every weekend, and the crisp air and sparkling snow make everything feel truly magical."
+  * Travel → "I am currently exploring [destination], and it has been absolutely breathtaking. The festive markets and twinkling lights have made this holiday season unforgettable."
+  * Family → "This holiday season has been all about family for me. We have been baking grandmother's secret recipes and creating memories that will last forever."
+  * Cozy → "I have been enjoying the coziest winter at home. Wrapped in blankets, sipping hot cocoa by the fireplace - it has been wonderfully peaceful and restorative."
 - Connection (1-2 sentences): Make it personal to the recipient - "I can't wait to catch up with you soon!" or "Hope you're staying warm and cozy!" or "Miss our adventures together!" or "Would love to share this experience with you!"
 - Closing: "Warmest wishes, ${senderName}" or "With love, ${senderName}" or "Cheers, ${senderName}"
 
@@ -435,9 +432,27 @@ Now write your greeting (200-250 words, aim for 220-240 words for perfect fit):`
                         contents: [{ parts: [{ text: greetingPrompt }] }],
                         generationConfig: {
                             temperature: 0.9,
-                            maxOutputTokens: 1000,
+                            maxOutputTokens: 2048,
                             candidateCount: 1
-                        }
+                        },
+                        safetySettings: [
+                            {
+                                category: "HARM_CATEGORY_HARASSMENT",
+                                threshold: "BLOCK_NONE"
+                            },
+                            {
+                                category: "HARM_CATEGORY_HATE_SPEECH",
+                                threshold: "BLOCK_NONE"
+                            },
+                            {
+                                category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                                threshold: "BLOCK_NONE"
+                            },
+                            {
+                                category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                                threshold: "BLOCK_NONE"
+                            }
+                        ]
                     })
                 }
             );

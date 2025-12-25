@@ -6153,8 +6153,8 @@ Write only the reply text, nothing else:`;
                         yPos += 75;
                     }
                     
-                    // Greeting text (readable handwritten style - Comic Sans is clearest)
-                    ctx.font = '48px "Comic Sans MS", "Marker Felt", "Segoe Print", "Bradley Hand", cursive';
+                    // Greeting text (elegant pen handwriting style)
+                    ctx.font = '48px "Brush Script MT", "Lucida Handwriting", "Segoe Script", "Apple Chancery", cursive';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'left';
                 
@@ -6184,9 +6184,9 @@ Write only the reply text, nothing else:`;
                         ctx.fillText(line, contentX, yPos);
                     }
                 
-                    // Sender signature (handwritten style)
+                    // Sender signature (elegant pen style)
                     yPos += 65; // Compact spacing
-                    ctx.font = 'italic 60px "Comic Sans MS", "Marker Felt", "Segoe Print", cursive';
+                    ctx.font = 'italic 60px "Brush Script MT", "Lucida Handwriting", "Segoe Script", cursive';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'right';
                     ctx.fillText(`- ${senderName}`, canvas.width - contentX, yPos);
