@@ -2355,7 +2355,7 @@
                 meshRef.current.userData.progress = THREE.MathUtils.lerp(
                     meshRef.current.userData.progress || 0,
                     isTree ? 1 : 0,
-                    delta * 1.5
+                    delta * 0.6
                 );
                 const p = meshRef.current.userData.progress;
 
@@ -2449,7 +2449,7 @@
                     meshRef.current.material.uniforms.uProgress.value = THREE.MathUtils.lerp(
                         meshRef.current.material.uniforms.uProgress.value,
                         targetProgress,
-                        delta * 1.5
+                        delta * 0.6
                     );
                     const normalizedAudio = Math.min(audioFreq.current / 128.0, 1.0); 
                     meshRef.current.material.uniforms.uAudio.value = THREE.MathUtils.lerp(
@@ -2529,7 +2529,7 @@
                 meshRef.current.userData.progress = THREE.MathUtils.lerp(
                     meshRef.current.userData.progress || 0,
                     target,
-                    delta * 1.2
+                    delta * 0.5
                 );
                 
                 const p = meshRef.current.userData.progress;
@@ -2607,9 +2607,9 @@
                 if(ref.current) {
                     const targetY = isTree ? 9 : 15; 
                     const targetScale = isTree ? 1 : 0.1;
-                    ref.current.position.y = THREE.MathUtils.lerp(ref.current.position.y, targetY, delta * 2);
-                    ref.current.scale.setScalar(THREE.MathUtils.lerp(ref.current.scale.x, targetScale, delta * 2));
-                    ref.current.rotation.y += delta;
+                    ref.current.position.y = THREE.MathUtils.lerp(ref.current.position.y, targetY, delta * 0.8);
+                    ref.current.scale.setScalar(THREE.MathUtils.lerp(ref.current.scale.x, targetScale, delta * 0.8));
+                    ref.current.rotation.y += delta * 0.5;
                 }
             });
 
