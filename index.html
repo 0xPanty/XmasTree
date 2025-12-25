@@ -4527,7 +4527,19 @@
                 }, 3000);
             }
         }
-        function closeDirectGiftModal() { document.getElementById('direct-gift-modal').classList.remove('visible'); }
+        function closeDirectGiftModal() { 
+            document.getElementById('direct-gift-modal').classList.remove('visible');
+            
+            // Reset AI generation state (but keep cache for next time)
+            // Don't reset currentAIImage, currentAIGreeting, currentAIScene - keep them cached
+            // But reset the generation flags so modal can reload properly next time
+            isAIGenerated = false;
+            aiGenerationCount = 0;
+            
+            // Reset UI state
+            document.getElementById('ai-generate-section').style.display = 'block';
+            document.getElementById('ai-preview-section').style.display = 'none';
+        }
         
         async function searchUsers(query) {
             if (searchTimeout) clearTimeout(searchTimeout);
