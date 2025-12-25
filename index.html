@@ -461,6 +461,8 @@
             animation: orbit3d var(--orbit-duration, 15s) linear infinite;
             animation-delay: var(--orbit-delay, 0s);
             transform-style: preserve-3d;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
         }
         .plaza-gift:hover {
             z-index: 100;
@@ -521,10 +523,12 @@
             opacity: 0.8;
             animation: snowFall linear infinite;
             text-shadow: 0 0 5px rgba(255,255,255,0.5);
+            will-change: transform;
+            backface-visibility: hidden;
         }
         @keyframes snowFall {
-            0% { transform: translateY(-50px) rotate(0deg); opacity: 0.8; }
-            100% { transform: translateY(100vh) rotate(360deg); opacity: 0.2; }
+            0% { transform: translate3d(0, -50px, 0) rotate(0deg); opacity: 0.8; }
+            100% { transform: translate3d(0, 100vh, 0) rotate(360deg); opacity: 0.2; }
         }
 
         /* Background Shooting Star Effect */
@@ -547,12 +551,14 @@
             opacity: 0;
             box-shadow: 0 0 6px 2px rgba(255,255,255,0.8), 0 0 12px 4px rgba(255,215,0,0.5);
             animation: meteorFly var(--duration, 1s) linear forwards, meteorTwinkle 0.1s ease-in-out infinite;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
         }
         @keyframes meteorFly {
-            0% { opacity: 0; transform: translate(0, 0) scale(1); }
+            0% { opacity: 0; transform: translate3d(0, 0, 0) scale(1); }
             5% { opacity: 1; }
             85% { opacity: 0.9; }
-            100% { opacity: 0; transform: translate(var(--travel-x, -120vw), var(--travel-y, 80vh)) scale(0.5); }
+            100% { opacity: 0; transform: translate3d(var(--travel-x, -120vw), var(--travel-y, 80vh), 0) scale(0.5); }
         }
         @keyframes meteorTwinkle {
             0%, 100% { box-shadow: 0 0 6px 2px rgba(255,255,255,0.8), 0 0 12px 4px rgba(255,215,0,0.5); }
@@ -5707,11 +5713,17 @@
             }
         }
 
-        // Render orbiting avatars around the tree
+        // Render orbiting avatars around the tree (optimized to reduce reflows)
         function renderPlaza() {
             const plaza = document.getElementById('gift-plaza');
+            if (!plaza) return;
+            
             // Only show plaza gifts, not direct gifts
             const activeGifts = plazaGifts.filter(g => g.claimed < g.shares && g.mode !== 'direct').slice(0, MAX_PLAZA_GIFTS);
+            
+            // Skip re-render if gift count hasn't changed (optimization)
+            const currentGiftCount = plaza.children.length;
+            if (currentGiftCount === activeGifts.length) return;
             
             // Responsive orbit radius based on viewport - closer to tree
             const baseRadius = Math.min(window.innerWidth, window.innerHeight) * 0.12;
@@ -5728,20 +5740,32 @@
                 { duration: 16, delay: -9, y: 50, radius: baseRadius * 0.98 }
             ];
             
-            plaza.innerHTML = activeGifts.map((gift, index) => {
+            // Use DocumentFragment for better performance
+            const fragment = document.createDocumentFragment();
+            activeGifts.forEach((gift, index) => {
                 const pos = positions[index];
-                return `
-                    <div class="plaza-gift" 
-                         style="--orbit-duration: ${pos.duration}s; --orbit-delay: ${pos.delay}s; --orbit-radius: ${pos.radius}px; top: ${pos.y}px;"
-                         onclick="openClaimModal('${gift.id}')"
-                         title="Click to claim mystery gift from @${gift.sender.username}">
-                        <img src="${gift.sender.pfp || 'https://i.imgur.com/HeIi0wU.png'}" 
-                             onerror="this.src='https://i.imgur.com/HeIi0wU.png'"
-                             alt="${gift.sender.username}">
-                        <div class="santa-emoji">🎅</div>
-                    </div>
-                `;
-            }).join('');
+                const div = document.createElement('div');
+                div.className = 'plaza-gift';
+                div.style.cssText = `--orbit-duration: ${pos.duration}s; --orbit-delay: ${pos.delay}s; --orbit-radius: ${pos.radius}px; top: ${pos.y}px;`;
+                div.onclick = () => openClaimModal(gift.id);
+                div.title = `Click to claim mystery gift from @${gift.sender.username}`;
+                
+                const img = document.createElement('img');
+                img.src = gift.sender.pfp || 'https://i.imgur.com/HeIi0wU.png';
+                img.onerror = () => img.src = 'https://i.imgur.com/HeIi0wU.png';
+                img.alt = gift.sender.username;
+                
+                const santa = document.createElement('div');
+                santa.className = 'santa-emoji';
+                santa.textContent = '🎅';
+                
+                div.appendChild(img);
+                div.appendChild(santa);
+                fragment.appendChild(div);
+            });
+            
+            plaza.innerHTML = '';
+            plaza.appendChild(fragment);
         }
 
         // Open claim modal for specific gift
@@ -5900,10 +5924,10 @@
             const container = document.getElementById('snowfall-container');
             if (!container) return;
             
-            // Generate snowflakes
+            // Generate snowflakes (reduced from 50 to 30 for performance)
             let snowflakes = '';
             const symbols = ['❄', '❅', '❆', '✻', '✼', '•'];
-            for (let i = 0; i < 50; i++) {
+            for (let i = 0; i < 30; i++) {
                 const left = Math.random() * 100;
                 const delay = Math.random() * 10;
                 const duration = 8 + Math.random() * 12;
