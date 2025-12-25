@@ -6135,26 +6135,26 @@ Write only the reply text, nothing else:`;
                     // "To:" removed - background already has postal elements
                     
                     // Letter content starts safely within border (avoid stamp area)
-                    let yPos = 490;
+                    let yPos = 480;
                     
-                    // Main greeting message (larger, elegant font)
-                    const contentX = 120;
-                    const contentWidth = canvas.width - 240;
+                    // Main greeting message (handwritten style, more content space)
+                    const contentX = 110;
+                    const contentWidth = canvas.width - 220;
                 
-                    // Add "Dear @username," greeting (elegant, readable)
-                    ctx.font = 'italic 56px Georgia, "Palatino Linotype", "Book Antiqua", serif';
+                    // Add "Dear @username," greeting (clear handwritten)
+                    ctx.font = 'italic 54px Georgia, serif';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'left';
                     if (typeof recipientNames === 'string') {
                         ctx.fillText(`Dear @${recipientNames},`, contentX, yPos);
-                        yPos += 80;
+                        yPos += 75;
                     } else if (Array.isArray(recipientNames) && recipientNames.length > 0) {
                         ctx.fillText(`Dear Friends,`, contentX, yPos);
-                        yPos += 80;
+                        yPos += 75;
                     }
                     
-                    // Greeting text (clear, readable serif font)
-                    ctx.font = '50px Georgia, "Palatino Linotype", "Book Antiqua", "Times New Roman", serif';
+                    // Greeting text (readable handwritten style - Comic Sans is clearest)
+                    ctx.font = '48px "Comic Sans MS", "Marker Felt", "Segoe Print", "Bradley Hand", cursive';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'left';
                 
@@ -6162,10 +6162,10 @@ Write only the reply text, nothing else:`;
                 console.log('[generateAddressSide] Greeting:', greeting);
                 console.log('[generateAddressSide] Greeting length:', greeting?.length || 0);
                 
-                    // Word wrap the greeting (balanced for 400+ word content)
+                    // Word wrap the greeting (maximize space for 400+ words)
                     const words = (greeting || 'Wishing you a wonderful Christmas season filled with joy and warmth!').split(' ');
                     let line = '';
-                    const lineHeight = 68;
+                    const lineHeight = 64;
                     const maxWidth = contentWidth;
                 
                     for (let word of words) {
@@ -6175,7 +6175,7 @@ Write only the reply text, nothing else:`;
                             ctx.fillText(line, contentX, yPos);
                             line = word + ' ';
                             yPos += lineHeight;
-                            if (yPos > canvas.height - 170) break; // Space for signature
+                            if (yPos > canvas.height - 150) break; // Minimal signature space
                         } else {
                             line = testLine;
                         }
@@ -6184,9 +6184,9 @@ Write only the reply text, nothing else:`;
                         ctx.fillText(line, contentX, yPos);
                     }
                 
-                    // Sender signature (elegant, readable italic)
-                    yPos += 70; // Balanced spacing
-                    ctx.font = 'italic 62px Georgia, "Palatino Linotype", "Book Antiqua", serif';
+                    // Sender signature (handwritten style)
+                    yPos += 65; // Compact spacing
+                    ctx.font = 'italic 60px "Comic Sans MS", "Marker Felt", "Segoe Print", cursive';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'right';
                     ctx.fillText(`- ${senderName}`, canvas.width - contentX, yPos);

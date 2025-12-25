@@ -369,6 +369,12 @@ MANDATORY LENGTH RULE: Your response MUST be at least 400-500 words. This is a l
 
 The card illustration shows: "${randomScene}"
 
+IMPORTANT - GENDER-APPROPRIATE TONE:
+- If the scene describes a woman/lady/girl (e.g., "young woman", "lady", "girl with"): Use feminine tone, words, and perspective naturally
+- If the scene describes a man/guy/boy (e.g., "young man", "guy", "boy with"): Use masculine tone, words, and perspective naturally
+- Match your language, activities, and expressions to fit the character's gender naturally
+- Be authentic - women and men often describe experiences differently
+
 Your task:
 1. Write an extensive, detailed story about this exact scene - describe what you're doing, how it feels, what you see, your thoughts and reflections
 2. Include vivid sensory details (sights, sounds, smells, feelings, textures)
@@ -377,6 +383,7 @@ Your task:
 5. MUST be at least 400-500 words - this should be 5-6 substantial paragraphs with rich details!
 6. Add reflections on the meaning of the season, memories, gratitude, hopes for the future
 7. Tell stories, share anecdotes, describe multiple experiences and moments
+8. Use gender-appropriate language and perspective based on the scene description
 
 Required structure:
 - Opening: "Dear ${displayRecipient}," or "Hey ${displayRecipient}!"
@@ -387,12 +394,14 @@ Required structure:
   Paragraph 4: More experiences - describe other activities, interactions, special moments you've had
   Paragraph 5: Personal reflections - what this season means to you, memories, gratitude, growth
   Paragraph 6: Hopes and wishes for the recipient, connection to your friendship/relationship
-- Examples for inspiration:
-  * Snow/winter → "The mountains have been incredible this season! I've been skiing every weekend and building the most epic snowmen you've ever seen. The crisp air and sparkling snow make everything feel magical."
+- Examples for inspiration (adapt tone to match character's gender):
+  * Snow/winter (masculine) → "The mountains have been incredible this season! I've been skiing every weekend and building the most epic snowmen you've ever seen. The crisp air and sparkling snow make everything feel magical."
+  * Snow/winter (feminine) → "The snow has been absolutely magical this season! I've been ice skating nearly every day, and yesterday I spent hours making the most adorable snow angels with my nieces. There's something so enchanting about fresh snowfall."
   * Travel → "I'm currently exploring [destination] and it's absolutely breathtaking! The festive markets, twinkling lights, and local traditions have made this holiday season unforgettable. I wish you could be here to experience it with me."
   * Family → "This holiday season has been all about family for me. We've been baking grandmother's secret recipes, decorating the entire house, and creating memories that will last forever. The house smells like cinnamon and joy."
   * Pets → "My furry companion and I have been having the coziest winter! We spend our days by the fireplace, taking snowy walks, and he's been 'helping' me wrap presents (by which I mean sitting on the wrapping paper)."
-  * Indoor/cozy → "I've turned into a complete homebody this winter! Curled up with endless hot cocoa, good books, and the fireplace crackling away. It's been the perfect season for reflection and gratitude."
+  * Indoor/cozy (feminine) → "I've turned into a complete homebody this winter! Wrapped in my coziest blanket, sipping endless cups of hot cocoa, reading by the fireplace. It's been absolutely dreamy and so peaceful."
+  * Indoor/cozy (masculine) → "Been having the chillest winter at home. Gaming, watching holiday movies, and just vibing by the fire. It's been the perfect low-key season, exactly what I needed."
   * Urban → "The city is absolutely magical right now! Every street corner has twinkling lights, holiday music fills the air, and there's this incredible energy that only happens this time of year. I love walking through it all."
   * Nature → "I've been spending every free moment hiking through snow-covered forests and frozen lakes. Nature in winter is so peaceful and beautiful - it reminds me what's truly important in life."
 - Connection (1-2 sentences): Make it personal to the recipient - "I can't wait to catch up with you soon!" or "Hope you're staying warm and cozy!" or "Miss our adventures together!" or "Would love to share this experience with you!"
