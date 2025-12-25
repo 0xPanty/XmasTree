@@ -365,7 +365,7 @@ IMPORTANT: Natural watercolor fade effect - NO hard edges, NO defined oval/arch 
             // Generate personalized greeting based on scene analysis
             const greetingPrompt = `You are writing a heartfelt Christmas greeting card from ${senderName} to ${displayRecipient}.
 
-MANDATORY LENGTH RULE: Your response MUST be at least 300 words. This is a long, detailed letter with rich content.
+MANDATORY LENGTH RULE: Your response MUST be at least 400-500 words. This is a long, very detailed letter with rich, extensive content.
 
 The card illustration shows: "${randomScene}"
 
@@ -374,17 +374,19 @@ Your task:
 2. Include vivid sensory details (sights, sounds, smells, feelings, textures)
 3. Share your activities, experiences, and inner thoughts in this scene
 4. Make it personal, warm, storytelling, and reflective
-5. MUST be at least 300 words - this should be 4-5 substantial paragraphs!
+5. MUST be at least 400-500 words - this should be 5-6 substantial paragraphs with rich details!
 6. Add reflections on the meaning of the season, memories, gratitude, hopes for the future
+7. Tell stories, share anecdotes, describe multiple experiences and moments
 
 Required structure:
 - Opening: "Dear ${displayRecipient}," or "Hey ${displayRecipient}!"
-- Body (4-5 paragraphs):
-  Paragraph 1: Describe the scene in detail - what you're doing, the environment
-  Paragraph 2: Sensory details - what you see, hear, smell, feel
-  Paragraph 3: Your activities and experiences throughout the day/season
-  Paragraph 4: Personal reflections - what this season means to you, memories, gratitude
-  Paragraph 5 (optional): Hopes and wishes for the recipient
+- Body (5-6 substantial paragraphs with rich details):
+  Paragraph 1: Set the scene with vivid description - what you're doing, the environment, the atmosphere
+  Paragraph 2: Deep sensory immersion - what you see, hear, smell, feel, taste in detail
+  Paragraph 3: Your activities and experiences throughout the day/season - tell stories and share moments
+  Paragraph 4: More experiences - describe other activities, interactions, special moments you've had
+  Paragraph 5: Personal reflections - what this season means to you, memories, gratitude, growth
+  Paragraph 6: Hopes and wishes for the recipient, connection to your friendship/relationship
 - Examples for inspiration:
   * Snow/winter → "The mountains have been incredible this season! I've been skiing every weekend and building the most epic snowmen you've ever seen. The crisp air and sparkling snow make everything feel magical."
   * Travel → "I'm currently exploring [destination] and it's absolutely breathtaking! The festive markets, twinkling lights, and local traditions have made this holiday season unforgettable. I wish you could be here to experience it with me."
@@ -398,12 +400,12 @@ Required structure:
 
 VERIFICATION:
 - Count your words before responding
-- Minimum 300 words required
-- No maximum - write as much as needed to tell a full story
-- Write 4-5 substantial paragraphs with detailed descriptions
-- If your draft is less than 300 words, add more sensory details, activities, reflections, and personal thoughts
+- Minimum 400-500 words required (aim for 450+ words)
+- No maximum - write as much as needed to tell a full, rich story
+- Write 5-6 substantial paragraphs with detailed descriptions
+- If your draft is less than 400 words, add more stories, sensory details, activities, reflections, anecdotes, and personal thoughts
 
-Example length (approximately 320 words):
+Example length (approximately 450+ words):
 "Dear Sarah, Merry Christmas! I hope this card finds you well and fills your heart with the same joy that's been filling mine this holiday season.
 
 I wanted to share what I've been up to lately. Every evening as the sun sets, I've been making my way to the town square where the most magnificent Christmas tree stands tall against the twilight sky. It's adorned with hundreds upon hundreds of twinkling golden lights that seem to dance and sparkle in the winter breeze, creating this magical, almost dreamlike atmosphere. The air is crisp and refreshing, filled with the joyful sounds of carol singers whose voices echo through the cobblestone streets, and there's always the warm, comforting aroma of hot cocoa and roasted chestnuts wafting from the festive market stalls that line the square.
@@ -416,7 +418,7 @@ I find myself thinking of you often during these celebrations and wishing you co
 
 Warmest wishes and lots of love, John"
 
-Now write your greeting (at least 300 words):`;
+Now write your greeting (at least 400-500 words, aim for 450+ words):`;
 
             const textResponse = await fetch(
                 `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,

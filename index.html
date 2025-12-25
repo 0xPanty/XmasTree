@@ -6135,26 +6135,26 @@ Write only the reply text, nothing else:`;
                     // "To:" removed - background already has postal elements
                     
                     // Letter content starts safely within border (avoid stamp area)
-                    let yPos = 550;
+                    let yPos = 500;
                     
-                    // Main greeting message (larger margins for safety)
-                    const contentX = 130;
-                    const contentWidth = canvas.width - 260;
+                    // Main greeting message (optimized for 300+ word content)
+                    const contentX = 120;
+                    const contentWidth = canvas.width - 240;
                 
-                    // Add "Dear @username," greeting (larger for visibility)
-                    ctx.font = 'italic 68px Georgia';
+                    // Add "Dear @username," greeting (compact for more content space)
+                    ctx.font = 'italic 52px Georgia';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'left';
                     if (typeof recipientNames === 'string') {
                         ctx.fillText(`Dear @${recipientNames},`, contentX, yPos);
-                        yPos += 110;
+                        yPos += 75;
                     } else if (Array.isArray(recipientNames) && recipientNames.length > 0) {
                         ctx.fillText(`Dear Friends,`, contentX, yPos);
-                        yPos += 110;
+                        yPos += 75;
                     }
                     
-                    // Greeting text (much larger for mobile, 300+ words)
-                    ctx.font = '60px Brush Script MT, cursive';
+                    // Greeting text (smaller font to fit 300+ words)
+                    ctx.font = '44px Brush Script MT, cursive';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'left';
                 
@@ -6162,10 +6162,10 @@ Write only the reply text, nothing else:`;
                 console.log('[generateAddressSide] Greeting:', greeting);
                 console.log('[generateAddressSide] Greeting length:', greeting?.length || 0);
                 
-                    // Word wrap the greeting (stay within safe area)
+                    // Word wrap the greeting (maximize displayable content for 300+ words)
                     const words = (greeting || 'Wishing you a wonderful Christmas season filled with joy and warmth!').split(' ');
                     let line = '';
-                    const lineHeight = 85;
+                    const lineHeight = 62;
                     const maxWidth = contentWidth;
                 
                     for (let word of words) {
@@ -6175,7 +6175,7 @@ Write only the reply text, nothing else:`;
                             ctx.fillText(line, contentX, yPos);
                             line = word + ' ';
                             yPos += lineHeight;
-                            if (yPos > canvas.height - 250) break; // More space for signature
+                            if (yPos > canvas.height - 160) break; // Minimal signature space
                         } else {
                             line = testLine;
                         }
@@ -6184,9 +6184,9 @@ Write only the reply text, nothing else:`;
                         ctx.fillText(line, contentX, yPos);
                     }
                 
-                    // Sender signature (below content, right-aligned)
-                    yPos += 90; // More space after content
-                    ctx.font = 'italic 72px Brush Script MT, cursive';
+                    // Sender signature (below content, compact)
+                    yPos += 65; // Tight spacing
+                    ctx.font = 'italic 56px Brush Script MT, cursive';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'right';
                     ctx.fillText(`- ${senderName}`, canvas.width - contentX, yPos);
