@@ -2815,6 +2815,43 @@
         const MAX_PLAZA_GIFTS = 10;
         let plazaGifts = JSON.parse(localStorage.getItem('plaza_gifts') || '[]');
         let isPlazaMode = false;
+        
+        // 🧪 TEMP: Add test gifts for screenshot
+        if (plazaGifts.length === 0) {
+            plazaGifts = [
+                {
+                    id: 'test1',
+                    sender: { fid: 3, username: 'dwr', displayName: 'Dan', pfp: 'https://i.imgur.com/HeIi0wU.png' },
+                    token: 'USDC',
+                    totalAmount: '0.5',
+                    shares: 5,
+                    type: 'equal',
+                    claimedBy: [],
+                    timestamp: Date.now()
+                },
+                {
+                    id: 'test2',
+                    sender: { fid: 2, username: 'v', displayName: 'Vitalik', pfp: 'https://i.imgur.com/fR2HuVH.png' },
+                    token: 'ETH',
+                    totalAmount: '0.01',
+                    shares: 3,
+                    type: 'lucky',
+                    claimedBy: [],
+                    timestamp: Date.now() - 1000000
+                },
+                {
+                    id: 'test3',
+                    sender: { fid: 5, username: 'jessepollak', displayName: 'Jesse', pfp: 'https://i.imgur.com/nk4tiGl.png' },
+                    token: 'USDC',
+                    totalAmount: '1.0',
+                    shares: 10,
+                    type: 'equal',
+                    claimedBy: [],
+                    timestamp: Date.now() - 2000000
+                }
+            ];
+            localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+        }
 
         // Plaza transition animation (simplified)
         function playPlazaTransition(callback) {
