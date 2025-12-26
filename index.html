@@ -3163,11 +3163,23 @@
         
         // Open direct gift modal and load stamps inline
         async function openDirectGiftModal() {
+            console.log('🎁 Button clicked');
+            
+            // Set demo user if no Farcaster user
+            if (!window.currentUser?.fid) {
+                window.currentUser = {
+                    fid: 3,
+                    username: 'dwr',
+                    displayName: 'Dan Romero',
+                    pfpUrl: 'https://i.imgur.com/xqc.jpg'
+                };
+            }
+            
             // Open modal first
             openOriginalDirectGiftModal();
             
             // Try to restore cached postcard from IndexedDB
-            const userFid = window.currentUser?.fid || 3;
+            const userFid = window.currentUser.fid;
             loadAIPostcardCache(userFid).then(cache => {
                 if (cache && cache.image && !isAIGenerated) {
                     console.log('📦 Restoring cached postcard on modal open...');
