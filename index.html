@@ -2764,6 +2764,20 @@
                 window.farcasterSDK = sdk;
                 sdk.actions.ready();
                 console.log('Farcaster Mini App ready');
+                
+                // Get user from SDK context
+                const context = sdk.context;
+                if (context && context.user) {
+                    window.currentUser = {
+                        fid: context.user.fid,
+                        username: context.user.username,
+                        displayName: context.user.displayName,
+                        pfp_url: context.user.pfpUrl
+                    };
+                    console.log('✅ User set from SDK:', window.currentUser);
+                } else {
+                    console.warn('⚠️ No user in SDK context');
+                }
             }).catch(err => console.log('SDK error:', err));
         }, 100);
     </script>
