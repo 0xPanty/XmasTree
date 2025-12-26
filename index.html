@@ -3347,7 +3347,10 @@
                 const eligibility = stampEligibility[stamp.id];
                 const isEligible = eligibility?.eligible;
                 const isUnlimited = stamp.id === 'based' && userStamps.based?.permanent;
-                const canMintBased = stamp.id === 'based' && eligibility?.neynar?.eligible && eligibility?.farcaster?.eligible && eligibility?.warplet?.eligible;
+                const canMintBased = stamp.id === 'based' && 
+                    stampEligibility.neynar?.eligible && 
+                    stampEligibility.farcaster?.eligible && 
+                    stampEligibility.warplet?.eligible;
                 
                 // Card wrapper
                 const card = document.createElement('div');
