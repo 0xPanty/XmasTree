@@ -2826,9 +2826,11 @@
                     token: 'USDC',
                     totalAmount: '0.5',
                     shares: 5,
+                    claimed: 0,
                     type: 'equal',
                     claimedBy: [],
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    title: 'Merry Christmas! 🎄'
                 },
                 {
                     id: 'test2',
@@ -2836,9 +2838,11 @@
                     token: 'ETH',
                     totalAmount: '0.01',
                     shares: 3,
+                    claimed: 0,
                     type: 'lucky',
                     claimedBy: [],
-                    timestamp: Date.now() - 1000000
+                    timestamp: Date.now() - 1000000,
+                    title: 'Happy Holidays! 🎁'
                 },
                 {
                     id: 'test3',
@@ -2846,9 +2850,11 @@
                     token: 'USDC',
                     totalAmount: '1.0',
                     shares: 10,
+                    claimed: 0,
                     type: 'equal',
                     claimedBy: [],
-                    timestamp: Date.now() - 2000000
+                    timestamp: Date.now() - 2000000,
+                    title: 'Season\'s Greetings! ✨'
                 }
             ];
             localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
