@@ -3886,32 +3886,6 @@
             
             // TODO: Implement real payment
             alert('购买功能开发中...');
-            return;
-            
-            /*
-            if (!userStamps[stampId]) {
-                    userStamps[stampId] = {
-                        owned: true,
-                        quantity: totalStamps,
-                        acquired_method: 'purchase',
-                        acquired_at: new Date().toISOString()
-                    };
-                } else {
-                    userStamps[stampId].quantity = (userStamps[stampId].quantity || 0) + totalStamps;
-                }
-                
-                saveUserStamps(userFid);
-                renderStampGrid();
-                
-                alert(`✅ Purchase Successful!\n\n• Added ${totalStamps} stamp${totalStamps > 1 ? 's' : ''} 🎫\n• New balance: ${userStamps[stampId].quantity} stamps`);
-            } else {
-                // PRODUCTION MODE: Real payment
-                alert(`Payment integration coming soon!\n\nYour order:\n• ${totalStamps} stamps\n• ${totalPrice} USDC`);
-                
-                // TODO: Implement payment flow
-                // After payment verified:
-                // userStamps[stampId].quantity += totalStamps;
-            }
         }
         
         // Show stamp preview modal
