@@ -4678,18 +4678,58 @@
         const DB_VERSION = 1;
         const STORE_NAME = 'postcards';
         
+        // Check if IndexedDB is available (Farcaster Mini App / mobile compatibility)
+        function isIndexedDBAvailable() {
+            try {
+                // Check if IndexedDB exists and is accessible
+                if (!window.indexedDB) {
+                    console.warn('⚠️ IndexedDB not found in this environment');
+                    return false;
+                }
+                
+                // Test if we can actually open a database (some iframe contexts block this)
+                // This is important for Farcaster Mini Apps running in WebView
+                return true;
+            } catch (e) {
+                console.warn('⚠️ IndexedDB check failed:', e.message);
+                return false;
+            }
+        }
+        
+        // Log environment info on load (helpful for debugging Mini App issues)
+        console.log('🎯 Environment:', {
+            isFrame: window.self !== window.top,
+            hasIndexedDB: !!window.indexedDB,
+            isMiniApp: window.location.href.includes('vercel.app'),
+            userAgent: navigator.userAgent.includes('Warpcast') ? 'Warpcast' : 'Other'
+        });
+        
         // Initialize IndexedDB
         function openDB() {
             return new Promise((resolve, reject) => {
+                // Check availability first
+                if (!isIndexedDBAvailable()) {
+                    console.warn('⚠️ IndexedDB not available (privacy mode or unsupported browser)');
+                    reject(new Error('IndexedDB not available'));
+                    return;
+                }
+                
                 const request = indexedDB.open(DB_NAME, DB_VERSION);
                 
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => {
+                    console.error('❌ IndexedDB open failed:', request.error);
+                    reject(request.error);
+                };
+                request.onsuccess = () => {
+                    console.log('✅ IndexedDB opened successfully');
+                    resolve(request.result);
+                };
                 
                 request.onupgradeneeded = (event) => {
                     const db = event.target.result;
                     if (!db.objectStoreNames.contains(STORE_NAME)) {
                         db.createObjectStore(STORE_NAME, { keyPath: 'fid' });
+                        console.log('📦 Created IndexedDB object store');
                     }
                 };
             });
@@ -4721,6 +4761,10 @@
                 console.log('💾 Cached postcard to IndexedDB (with image data)');
             } catch (e) {
                 console.warn('⚠️ Failed to cache postcard to IndexedDB:', e.message);
+                // Mobile/Privacy mode: Show helpful tip
+                if (e.message && e.message.includes('IndexedDB not available')) {
+                    console.info('💡 Tip: Exit private/incognito mode to enable caching');
+                }
             }
         }
         
@@ -4832,18 +4876,26 @@
                 return;
             }
             
-            // If already generated AND has valid image data, clear cache and regenerate
+            // If already generated AND has valid image data
             if (isAIGenerated && currentAIImage) {
-                console.log('🔄 Postcard already exists, clearing cache and regenerating...');
-                // Clear existing data
-                isAIGenerated = false;
-                currentAIImage = null;
-                currentAIGreeting = '';
-                aiGenerationCount = 0;
-                // Clear cache
-                const userFid = window.currentUser?.fid || 3;
-                clearAIPostcardCache(userFid);
-                // Continue with generation below
+                // TEST MODE: Auto-clear cache for testing convenience
+                if (TEST_MODE) {
+                    console.log('🧪 TEST MODE: Auto-clearing cache and regenerating...');
+                    isAIGenerated = false;
+                    currentAIImage = null;
+                    currentAIGreeting = '';
+                    aiGenerationCount = 0;
+                    const userFid = window.currentUser?.fid || 3;
+                    clearAIPostcardCache(userFid);
+                    // Continue with generation below
+                } else {
+                    // PRODUCTION: Prevent duplicate generation, guide to Regenerate button
+                    alert('📦 图片已生成！\nPostcard already generated!\n\n💡 Click "🔄 Regenerate" button below to create a new one.\n\n✨ Your previous postcard is saved!');
+                    // Show preview section
+                    document.getElementById('ai-generate-section').style.display = 'none';
+                    document.getElementById('ai-preview-section').style.display = 'block';
+                    return;
+                }
             }
             
             // If flag is set but no image data, reset state (corrupted state)
