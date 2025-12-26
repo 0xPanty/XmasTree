@@ -145,7 +145,7 @@ module.exports = async function handler(req, res) {
                 
                 if (verifiedAddresses.length > 0) {
                     const ALCHEMY_API_KEY = process.env.ALCHEMY_API_KEY || 'demo';
-                    const WARPLET_CONTRACT = '0x532Cd2d1db5901694eAF0ad86Ed81a6614925a42'; // Replace with actual address
+                    const WARPLET_CONTRACT = '0x699727f9e01a822efdcf7333073f0461e5914b4e';
                     
                     for (const address of verifiedAddresses) {
                         try {
