@@ -6198,19 +6198,7 @@ Write only the reply text, nothing else:`;
                     const contentX = 110;
                     const contentWidth = canvas.width - 220;
                 
-                    // Add "Dear @username," greeting (clear handwritten)
-                    ctx.font = 'italic 54px Georgia, serif';
-                    ctx.fillStyle = '#2c1810';
-                    ctx.textAlign = 'left';
-                    if (typeof recipientNames === 'string') {
-                        ctx.fillText(`Dear @${recipientNames},`, contentX, yPos);
-                        yPos += 75;
-                    } else if (Array.isArray(recipientNames) && recipientNames.length > 0) {
-                        ctx.fillText(`Dear Friends,`, contentX, yPos);
-                        yPos += 75;
-                    }
-                    
-                    // Greeting text (elegant pen handwriting style)
+                    // Greeting text (elegant pen handwriting style) - AI already includes "Dear XXX"
                     ctx.font = '48px "Brush Script MT", "Lucida Handwriting", "Segoe Script", "Apple Chancery", cursive';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'left';
@@ -6219,20 +6207,31 @@ Write only the reply text, nothing else:`;
                 console.log('[generateAddressSide] Greeting:', greeting);
                 console.log('[generateAddressSide] Greeting length:', greeting?.length || 0);
                 
-                    // Word wrap the greeting (maximize space for 400+ words)
+                    // Word wrap the greeting with better spacing for readability
                     const words = (greeting || 'Wishing you a wonderful Christmas season filled with joy and warmth!').split(' ');
                     let line = '';
-                    const lineHeight = 64;
+                    const lineHeight = 75; // Increased from 64 to 75 for better readability
+                    const paragraphSpacing = 95; // Extra spacing for paragraph breaks
                     const maxWidth = contentWidth;
                 
                     for (let word of words) {
                         const testLine = line + word + ' ';
                         const metrics = ctx.measureText(testLine);
-                        if (metrics.width > maxWidth && line !== '') {
+                        
+                        // Check for paragraph break (double newline or single newline)
+                        if (word.includes('\n')) {
+                            // Draw current line
+                            if (line.trim()) {
+                                ctx.fillText(line.replace(/\n/g, ''), contentX, yPos);
+                            }
+                            line = '';
+                            yPos += paragraphSpacing; // Extra spacing for new paragraph
+                            if (yPos > canvas.height - 200) break; // Reserve space for signature
+                        } else if (metrics.width > maxWidth && line !== '') {
                             ctx.fillText(line, contentX, yPos);
                             line = word + ' ';
                             yPos += lineHeight;
-                            if (yPos > canvas.height - 150) break; // Minimal signature space
+                            if (yPos > canvas.height - 200) break; // Reserve space for signature
                         } else {
                             line = testLine;
                         }
@@ -6241,8 +6240,8 @@ Write only the reply text, nothing else:`;
                         ctx.fillText(line, contentX, yPos);
                     }
                 
-                    // Sender signature (elegant pen style)
-                    yPos += 65; // Compact spacing
+                    // Sender signature (elegant pen style) - only one signature added here
+                    yPos += 90; // Increased spacing before signature
                     ctx.font = 'italic 60px "Brush Script MT", "Lucida Handwriting", "Segoe Script", cursive';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'right';

@@ -399,7 +399,7 @@ CRITICAL: Keep it SHORT - you have very limited space on a postcard!
   * Family → "This holiday season has been all about family for me. We have been baking grandmother's secret recipes and creating memories that will last forever."
   * Cozy → "I have been enjoying the coziest winter at home. Wrapped in blankets, sipping hot cocoa by the fireplace - it has been wonderfully peaceful and restorative."
 - Connection (1-2 sentences): Make it personal to the recipient - "I can't wait to catch up with you soon!" or "Hope you're staying warm and cozy!" or "Miss our adventures together!" or "Would love to share this experience with you!"
-- Closing: "Warmest wishes, ${senderName}" or "With love, ${senderName}" or "Cheers, ${senderName}"
+- IMPORTANT: DO NOT include a closing signature like "Warmest wishes, ${senderName}" - the signature will be added separately by the frontend
 
 VERIFICATION:
 - Count your words before responding
@@ -408,14 +408,12 @@ VERIFICATION:
 - Write 2-3 SHORT paragraphs ONLY
 - If your draft exceeds 150 words, CUT IT DOWN immediately
 
-Example length (approximately 130 words):
+Example length (approximately 130 words - NO signature at end):
 "Dear Sarah, Merry Christmas! I hope this card finds you well and fills your heart with the same joy that's been filling mine this holiday season.
 
 I have been visiting the town square each evening, where a magnificent Christmas tree stands adorned with twinkling lights. The air is crisp, filled with carol singers and the aroma of hot cocoa. It feels truly magical.
 
-This season reminds me of what matters most—friendship and warmth. I hope your holidays are filled with joy and peace!
-
-Warmest wishes, John"
+This season reminds me of what matters most—friendship and warmth. I hope your holidays are filled with joy and peace!"
 
 Now write your greeting (120-150 words MAXIMUM):`;
 
