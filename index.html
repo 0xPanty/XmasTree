@@ -4832,13 +4832,18 @@
                 return;
             }
             
-            // If already generated AND has valid image data, show reminder
+            // If already generated AND has valid image data, clear cache and regenerate
             if (isAIGenerated && currentAIImage) {
-                alert('📦 图片已生成！\nPostcard already generated!\n\n💡 Click "🔄 Regenerate" to create a new one.');
-                // Show preview section
-                document.getElementById('ai-generate-section').style.display = 'none';
-                document.getElementById('ai-preview-section').style.display = 'block';
-                return;
+                console.log('🔄 Postcard already exists, clearing cache and regenerating...');
+                // Clear existing data
+                isAIGenerated = false;
+                currentAIImage = null;
+                currentAIGreeting = '';
+                aiGenerationCount = 0;
+                // Clear cache
+                const userFid = window.currentUser?.fid || 3;
+                clearAIPostcardCache(userFid);
+                // Continue with generation below
             }
             
             // If flag is set but no image data, reset state (corrupted state)
