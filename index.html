@@ -2759,26 +2759,31 @@
         root.render(<App />);
         
         // Farcaster Mini App SDK - signal ready after render
-        setTimeout(() => {
-            import('https://esm.sh/@farcaster/miniapp-sdk').then(({ sdk }) => {
+        setTimeout(async () => {
+            try {
+                const { sdk } = await import('https://esm.sh/@farcaster/miniapp-sdk');
                 window.farcasterSDK = sdk;
                 sdk.actions.ready();
                 console.log('Farcaster Mini App ready');
                 
-                // Get user from SDK context
-                const context = sdk.context;
-                if (context && context.user) {
+                // Get user from SDK context (may need to await)
+                const context = await sdk.context;
+                console.log('SDK context:', context);
+                
+                if (context && context.user && context.user.fid) {
                     window.currentUser = {
-                        fid: context.user.fid,
-                        username: context.user.username,
-                        displayName: context.user.displayName,
-                        pfp_url: context.user.pfpUrl
+                        fid: Number(context.user.fid),
+                        username: context.user.username || 'unknown',
+                        displayName: context.user.displayName || 'Unknown User',
+                        pfp_url: context.user.pfpUrl || ''
                     };
                     console.log('✅ User set from SDK:', window.currentUser);
                 } else {
-                    console.warn('⚠️ No user in SDK context');
+                    console.warn('⚠️ No valid user in SDK context:', context);
                 }
-            }).catch(err => console.log('SDK error:', err));
+            } catch (err) {
+                console.error('SDK error:', err);
+            }
         }, 100);
     </script>
 
