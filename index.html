@@ -3492,73 +3492,16 @@
                     background: rgba(255,255,255,0.02);
                 `;
                 
-                // Special handling for Warplet stamp when owned - show NFT + avatar
-                if (stamp.id === 'warplet' && isOwned) {
-                    // Create container for NFT + Avatar layout
-                    const warpletContainer = document.createElement('div');
-                    warpletContainer.style.cssText = `
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        gap: 12px;
-                        width: 100%;
-                        height: 100%;
-                    `;
-                    
-                    // NFT image placeholder
-                    const nftImg = document.createElement('img');
-                    nftImg.src = stamp.img; // Default image
-                    nftImg.style.cssText = `
-                        width: 60px;
-                        height: 60px;
-                        border-radius: 8px;
-                        object-fit: cover;
-                        border: 2px solid var(--gold);
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-                    `;
-                    
-                    // User avatar
-                    const avatarImg = document.createElement('img');
-                    avatarImg.src = currentUser?.pfp_url || 'https://via.placeholder.com/60';
-                    avatarImg.style.cssText = `
-                        width: 60px;
-                        height: 60px;
-                        border-radius: 50%;
-                        object-fit: cover;
-                        border: 2px solid var(--gold);
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-                    `;
-                    
-                    warpletContainer.appendChild(nftImg);
-                    warpletContainer.appendChild(avatarImg);
-                    imageContainer.appendChild(warpletContainer);
-                    
-                    // Fetch user's actual Warplet NFT asynchronously
-                    if (currentUser?.fid) {
-                        fetch(`/api/warplet?fid=${currentUser.fid}`)
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.hasWarplet && data.imageUrl) {
-                                    nftImg.src = data.imageUrl;
-                                    console.log('✅ Loaded Warplet NFT:', data.name);
-                                }
-                            })
-                            .catch(err => console.error('Failed to load Warplet NFT:', err));
-                    }
-                } else {
-                    // Standard stamp image
-                    const img = document.createElement('img');
-                    img.src = stamp.img;
-                    img.style.cssText = `
-                        max-width: 100%;
-                        max-height: 100%;
-                        object-fit: contain;
-                        opacity: ${isOwned ? '1' : '0.7'};
-                        filter: ${isOwned ? 'none' : 'grayscale(20%)'};
-                    `;
-                    imageContainer.appendChild(img);
-                }
-                
+                const img = document.createElement('img');
+                img.src = stamp.img;
+                img.style.cssText = `
+                    max-width: 100%;
+                    max-height: 100%;
+                    object-fit: contain;
+                    opacity: ${isOwned ? '1' : '0.7'};
+                    filter: ${isOwned ? 'none' : 'grayscale(20%)'};
+                `;
+                imageContainer.appendChild(img);
                 card.appendChild(imageContainer);
                 
                 // Info section
@@ -6252,7 +6195,7 @@ Write only the reply text, nothing else:`;
         
         // Generate letter content (back side) with stamp
         function generateAddressSide(greeting, senderName, recipientNames, stampImg) {
-            return new Promise(async (resolve) => {
+            return new Promise((resolve) => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 
@@ -6263,93 +6206,11 @@ Write only the reply text, nothing else:`;
                 // Load Christmas background image
                 const bgImage = new Image();
                 bgImage.crossOrigin = 'anonymous';
-                bgImage.onload = async () => {
+                bgImage.onload = () => {
                     // Draw background
                     ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
                     
-                    // If Warplet stamp selected, draw NFT + Avatar in stamp area
-                    if (selectedStamp === 'warplet' && window.currentUser?.fid) {
-                        try {
-                            const warpletRes = await fetch(`/api/warplet?fid=${window.currentUser.fid}`);
-                            if (warpletRes.ok) {
-                                const warpletData = await warpletRes.json();
-                                
-                                if (warpletData.hasWarplet && warpletData.imageUrl) {
-                                    // Load NFT image
-                                    const nftImg = new Image();
-                                    nftImg.crossOrigin = 'anonymous';
-                                    await new Promise((nftResolve) => {
-                                        nftImg.onload = () => nftResolve();
-                                        nftImg.onerror = () => nftResolve(); // Continue even if fails
-                                        nftImg.src = warpletData.imageUrl;
-                                    });
-                                    
-                                    // Load user avatar
-                                    const avatarImg = new Image();
-                                    avatarImg.crossOrigin = 'anonymous';
-                                    await new Promise((avatarResolve) => {
-                                        avatarImg.onload = () => avatarResolve();
-                                        avatarImg.onerror = () => avatarResolve();
-                                        avatarImg.src = window.currentUser.pfp_url || 'https://via.placeholder.com/150';
-                                    });
-                                    
-                                    // Draw NFT and Avatar in stamp area (top right corner)
-                                    const stampX = canvas.width - 320;
-                                    const stampY = 80;
-                                    const size = 120;
-                                    const gap = 20;
-                                    
-                                    // Draw golden border background
-                                    ctx.fillStyle = 'rgba(212, 175, 55, 0.2)';
-                                    ctx.fillRect(stampX - 10, stampY - 10, size * 2 + gap + 20, size + 20);
-                                    
-                                    // Draw NFT (left)
-                                    if (nftImg.complete && nftImg.naturalWidth > 0) {
-                                        ctx.save();
-                                        ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                                        ctx.shadowBlur = 10;
-                                        ctx.shadowOffsetX = 2;
-                                        ctx.shadowOffsetY = 2;
-                                        ctx.drawImage(nftImg, stampX, stampY, size, size);
-                                        ctx.strokeStyle = '#d4af37';
-                                        ctx.lineWidth = 3;
-                                        ctx.strokeRect(stampX, stampY, size, size);
-                                        ctx.restore();
-                                    }
-                                    
-                                    // Draw Avatar (right, circular)
-                                    if (avatarImg.complete && avatarImg.naturalWidth > 0) {
-                                        ctx.save();
-                                        ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                                        ctx.shadowBlur = 10;
-                                        ctx.shadowOffsetX = 2;
-                                        ctx.shadowOffsetY = 2;
-                                        
-                                        // Circular clip
-                                        ctx.beginPath();
-                                        ctx.arc(stampX + size + gap + size/2, stampY + size/2, size/2, 0, Math.PI * 2);
-                                        ctx.closePath();
-                                        ctx.clip();
-                                        ctx.drawImage(avatarImg, stampX + size + gap, stampY, size, size);
-                                        ctx.restore();
-                                        
-                                        // Golden circular border
-                                        ctx.beginPath();
-                                        ctx.arc(stampX + size + gap + size/2, stampY + size/2, size/2, 0, Math.PI * 2);
-                                        ctx.strokeStyle = '#d4af37';
-                                        ctx.lineWidth = 3;
-                                        ctx.stroke();
-                                    }
-                                    
-                                    console.log('✅ Drew Warplet NFT + Avatar on postcard');
-                                }
-                            }
-                        } catch (error) {
-                            console.error('Failed to load Warplet NFT for postcard:', error);
-                        }
-                    }
-                    
-                    // Stamp is already in the background image for non-Warplet stamps
+                    // Stamp is already in the background image, no need to draw it separately
                     // "To:" removed - background already has postal elements
                     
                     // Letter content starts safely within border (avoid stamp area)
