@@ -3154,9 +3154,6 @@
         let searchTimeout = null;
         const MAX_RECIPIENTS = 5;
         
-        // ===== TEST MODE =====
-        const TEST_MODE = false; // Set to false for production
-        
         // ===== STAMP SYSTEM =====
         let userStamps = {}; // Store user's owned stamps
         let stampEligibility = {}; // Store eligibility check results
@@ -3228,52 +3225,23 @@
             statusIndicator.textContent = 'Checking...';
             
             try {
-                const userFid = window.currentUser?.fid || 3;
+                const userFid = window.currentUser?.fid;
                 
-                // TEST MODE: Skip all API calls
-                if (TEST_MODE) {
-                    console.log('🧪 TEST MODE: Auto-granting stamps...');
-                    
-                    // Simulate loading animation
-                    loadingText.textContent = 'Scanning Neynar Score...';
-                    await new Promise(r => setTimeout(r, 500));
-                    
-                    loadingText.textContent = 'Checking Power Badge...';
-                    await new Promise(r => setTimeout(r, 500));
-                    
-                    loadingText.textContent = 'Verifying Warplet NFT...';
-                    await new Promise(r => setTimeout(r, 800));
-                    
-                    // Set eligibility
-                    stampEligibility = {
-                        neynar: { eligible: false, score: 0.45, reason: 'TEST: Neynar Score: 0.45 (<0.6 不符合)' },
-                        farcaster: { eligible: true, reason: 'TEST: Farcaster Power Badge holder' },
-                        warplet: { eligible: true, reason: 'TEST: Warplet NFT holder' }
-                    };
-                    eligibility = stampEligibility;
-                    
-                    // Auto-grant test stamps with quantities
-                    userStamps = {
-                        neynar: { owned: false }, // 不符合资格，未拥有 → 显示购买按钮
-                        farcaster: { owned: true, quantity: 10, acquired_method: 'test', first_free_claimed: true },
-                        warplet: { owned: true, quantity: 5, acquired_method: 'test', first_free_claimed: true },
-                        based: { owned: false } // Not minted yet - can test mint flow
-                    };
-                    saveUserStamps(userFid);
-                    
-                    console.log('🧪 TEST MODE: Stamps granted!', userStamps);
-                } else {
-                    // PRODUCTION MODE: Real API call with loading animation
-                    loadingText.textContent = 'Scanning Neynar Score...';
-                    await new Promise(r => setTimeout(r, 500));
-                    
-                    loadingText.textContent = 'Checking Power Badge...';
-                    await new Promise(r => setTimeout(r, 500));
-                    
-                    loadingText.textContent = 'Verifying Warplet NFT...';
-                    await new Promise(r => setTimeout(r, 500));
-                    // PRODUCTION MODE: Real API call
-                    const response = await fetch(`/api/neynar?action=check_stamps&fid=${userFid}`);
+                if (!userFid) {
+                    throw new Error('请先登录Farcaster账号');
+                }
+                
+                // Real API call with loading animation
+                loadingText.textContent = 'Scanning Neynar Score...';
+                await new Promise(r => setTimeout(r, 500));
+                
+                loadingText.textContent = 'Checking Power Badge...';
+                await new Promise(r => setTimeout(r, 500));
+                
+                loadingText.textContent = 'Verifying Warplet NFT...';
+                await new Promise(r => setTimeout(r, 500));
+                
+                const response = await fetch(`/api/neynar?action=check_stamps&fid=${userFid}`);
                     
                     if (!response.ok) {
                         throw new Error(`API returned ${response.status}: ${response.statusText}`);
@@ -3285,10 +3253,9 @@
                         throw new Error(data.message || 'Invalid API response');
                     }
                     
-                    stampEligibility = data.stamps;
-                    eligibility = data.stamps; // Store for progress bar
-                    loadUserStamps(userFid);
-                }
+                stampEligibility = data.stamps;
+                eligibility = data.stamps; // Store for progress bar
+                loadUserStamps(userFid);
                 
                 await new Promise(r => setTimeout(r, 400));
                 
@@ -3314,12 +3281,7 @@
                 console.error('Error checking stamps:', error);
                 loadingDiv.style.display = 'none';
                 statusIndicator.innerHTML = '<span style="color: #ff6b6b;">Error loading</span>';
-                
-                if (TEST_MODE) {
-                    alert(`TEST MODE Error: ${error.message}\n\nThis shouldn't happen in test mode. Check console for details.`);
-                } else {
-                    alert('Failed to check stamps. Please try again.');
-                }
+                alert(`检查邮票失败: ${error.message}\n\n请确认已登录Farcaster账号。`);
             }
         }
         
@@ -3904,11 +3866,18 @@
             
             if (!confirmed) return;
             
-            if (TEST_MODE) {
-                // TEST MODE: Instant purchase
-                const userFid = window.currentUser?.fid || 3;
-                
-                if (!userStamps[stampId]) {
+            const userFid = window.currentUser?.fid;
+            if (!userFid) {
+                alert('请先登录Farcaster账号');
+                return;
+            }
+            
+            // TODO: Implement real payment
+            alert('购买功能开发中...');
+            return;
+            
+            /*
+            if (!userStamps[stampId]) {
                     userStamps[stampId] = {
                         owned: true,
                         quantity: totalStamps,
@@ -4489,8 +4458,12 @@
                 const loadingMsg = document.getElementById('selected-users');
                 loadingMsg.innerHTML = '<div style="color:rgba(255,255,255,0.5);font-size:0.8rem;text-align:center;padding:12px;">🔍 Finding your best friends...</div>';
                 
-                // Use current user's fid, or @xqc (275646) for TEST_MODE
-                const fid = currentUser?.fid || (TEST_MODE ? 275646 : 3);
+                // Use current user's fid
+                const fid = currentUser?.fid;
+                if (!fid) {
+                    loadingMsg.innerHTML = '<div style="color:rgba(255,107,107,0.8);font-size:0.8rem;text-align:center;padding:12px;">请先登录Farcaster账号</div>';
+                    return;
+                }
                 
                 // Call new best_friends API
                 const res = await fetch(`/api/neynar?action=best_friends&fid=${fid}`);
@@ -4513,7 +4486,7 @@
                     // Show success message with interaction stats
                     const mutualCount = data.users.filter(u => u.is_mutual).length;
                     const topInteraction = data.top_interaction_type;
-                    const userLabel = (TEST_MODE && !currentUser) ? "@xqc's" : "Your";
+                    const userLabel = "Your";
                     setTimeout(() => {
                         const hint = document.createElement('div');
                         hint.style.cssText = 'font-size:0.7rem;color:#4ade80;text-align:center;margin-top:8px;';
@@ -4910,29 +4883,12 @@
             btn.innerHTML = '⏳ Generating AI...';
             
             try {
-                // TEST MODE: Use @xqc's real avatar for testing
-                let senderAvatar, senderName;
-                if (TEST_MODE && !currentUser) {
-                    // Fetch @xqc's real profile from Neynar
-                    try {
-                        const xqcResponse = await fetch('/api/neynar?action=user_by_fid&fid=275646');
-                        const xqcData = await xqcResponse.json();
-                        if (xqcData.users && xqcData.users.length > 0) {
-                            senderAvatar = xqcData.users[0].pfp_url;
-                            senderName = xqcData.users[0].username;
-                            console.log('🧪 TEST MODE: Using @xqc avatar:', senderAvatar);
-                        } else {
-                            throw new Error('Failed to fetch xqc profile');
-                        }
-                    } catch (error) {
-                        console.error('Failed to fetch @xqc profile, using fallback:', error);
-                        senderAvatar = 'https://i.imgur.com/HeIi0wU.png';
-                        senderName = 'xqc';
-                    }
-                } else {
-                    senderAvatar = currentUser?.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
-                    senderName = currentUser?.username || 'You';
+                if (!currentUser?.fid) {
+                    throw new Error('请先登录Farcaster账号');
                 }
+                
+                const senderAvatar = currentUser.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
+                const senderName = currentUser.username || 'You';
                 
                 // Get first recipient for personalization
                 const firstRecipient = selectedRecipients.length > 0 ? selectedRecipients[0] : null;
@@ -5040,28 +4996,12 @@
             btn.innerHTML = '⏳ Regenerating...';
             
             try {
-                // TEST MODE: Use @xqc's real avatar for testing
-                let senderAvatar, senderName;
-                if (TEST_MODE && !currentUser) {
-                    try {
-                        const xqcResponse = await fetch('/api/neynar?action=user_by_fid&fid=275646');
-                        const xqcData = await xqcResponse.json();
-                        if (xqcData.users && xqcData.users.length > 0) {
-                            senderAvatar = xqcData.users[0].pfp_url;
-                            senderName = xqcData.users[0].username;
-                            console.log('🧪 TEST MODE: Using @xqc avatar for regeneration');
-                        } else {
-                            throw new Error('Failed to fetch xqc profile');
-                        }
-                    } catch (error) {
-                        console.error('Failed to fetch @xqc profile, using fallback:', error);
-                        senderAvatar = 'https://i.imgur.com/HeIi0wU.png';
-                        senderName = 'xqc';
-                    }
-                } else {
-                    senderAvatar = currentUser?.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
-                    senderName = currentUser?.username || 'You';
+                if (!currentUser?.fid) {
+                    throw new Error('请先登录Farcaster账号');
                 }
+                
+                const senderAvatar = currentUser.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
+                const senderName = currentUser.username || 'You';
                 
                 const response = await fetch('/api/gemini', {
                     method: 'POST',
@@ -5179,7 +5119,7 @@
             
             await new Promise((resolve) => {
                 stampImage.onload = async () => {
-                    const senderName = currentUser?.username || (TEST_MODE ? 'xqc' : 'Anonymous');
+                    const senderName = currentUser?.username || 'Anonymous';
                     
                     // Create a gift for each recipient with personalized address side
                     const links = [];
@@ -6436,7 +6376,7 @@ Write only the reply text, nothing else:`;
                 stamp.crossOrigin = 'anonymous'; // Enable CORS for external NFT images
                 stamp.onload = () => {
                     // Generate letter content (back) with stamp, greeting, and recipient names
-                    const senderName = window.currentUser?.username || (TEST_MODE ? 'xqc' : 'Anonymous');
+                    const senderName = window.currentUser?.username || 'Anonymous';
                     const recipientNames = selectedRecipients.map(r => r.username);
                     
                     console.log('[compositeStampOnImage] currentAIGreeting:', currentAIGreeting);
@@ -6461,7 +6401,7 @@ Write only the reply text, nothing else:`;
                     stamp.onerror = () => {
                         console.error('Failed to load stamp image');
                         // Fallback: show basic double-sided layout without stamp
-                        const senderName = window.currentUser?.username || (TEST_MODE ? 'xqc' : 'Anonymous');
+                        const senderName = window.currentUser?.username || 'Anonymous';
                         const recipientNames = selectedRecipients.map(r => r.username);
                         
                         // Generate address side without stamp
