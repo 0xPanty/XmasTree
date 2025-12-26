@@ -1512,6 +1512,25 @@
     <div id="gift-modal" class="custom-modal">
         <div class="modal-box" style="max-width: 400px;">
             <div class="modal-title">🎁 Send Christmas Gift</div>
+            
+            <!-- Plaza Gift Explanation -->
+            <div id="plaza-explanation" style="background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); border-radius: 8px; padding: 12px; margin-bottom: 16px; display: none;">
+                <div style="display: flex; align-items: start; gap: 10px;">
+                    <span style="font-size: 1.5rem; line-height: 1;">🎄</span>
+                    <div style="flex: 1;">
+                        <div style="color: var(--gold); font-weight: bold; font-size: 0.85rem; margin-bottom: 6px;">
+                            How Plaza Gifts Work
+                        </div>
+                        <div style="color: rgba(255,255,255,0.7); font-size: 0.75rem; line-height: 1.5;">
+                            • Your gift will appear as a <strong style="color: var(--gold);">glowing ornament</strong> on the Christmas tree<br>
+                            • Anyone in the Farcaster community can discover and claim it<br>
+                            • Gifts are distributed based on your chosen method (equal split or lucky draw)<br>
+                            • Spread joy and surprise to the community! 🎁✨
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="mode-toggle">
                 <button class="mode-btn active" onclick="selectGiftMode('direct')">🎯 Direct Gift</button>
                 <button class="mode-btn" onclick="selectGiftMode('redpacket')">🧧 Red Packet</button>
@@ -5997,10 +6016,15 @@
             const passwordGroup = document.getElementById('password-group');
             const modeToggle = document.querySelector('.mode-toggle');
             const modeHint = document.getElementById('mode-hint');
+            const plazaExplanation = document.getElementById('plaza-explanation');
+            
             if (recipientGroup) recipientGroup.style.display = 'none';
             if (passwordGroup) passwordGroup.style.display = 'none';
             if (modeToggle) modeToggle.style.display = 'none';
-            if (modeHint) modeHint.textContent = 'Gift will appear in the plaza for anyone to claim';
+            if (modeHint) modeHint.style.display = 'none';
+            
+            // Show Plaza explanation
+            if (plazaExplanation) plazaExplanation.style.display = 'block';
 
             // Show shares and distribution
             document.getElementById('shares-group').style.display = 'block';
