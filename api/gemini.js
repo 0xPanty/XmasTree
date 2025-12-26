@@ -39,10 +39,19 @@ module.exports = async function handler(req, res) {
         if (action === 'generateCard') {
             // Christmas scenes for variety
             // Fetch sender avatar and convert to base64
+            console.log('📸 Fetching sender avatar:', senderAvatar);
             const senderImg = await imageUrlToBase64(senderAvatar);
+            console.log('✅ Sender avatar converted:', senderImg ? 'Success' : 'Failed');
             
             // Fetch Warplet NFT if provided
+            if (warpletImageUrl) {
+                console.log('🎨 Fetching Warplet NFT:', warpletImageUrl);
+                console.log('🏷️ Warplet name:', warpletName);
+            }
             const warpletImg = warpletImageUrl ? await imageUrlToBase64(warpletImageUrl) : null;
+            if (warpletImageUrl) {
+                console.log('✅ Warplet NFT converted:', warpletImg ? 'Success' : 'Failed');
+            }
 
             let imageData = null;
             let imageError = null;
@@ -294,17 +303,41 @@ IMPORTANT: Natural watercolor fade effect - NO hard edges, NO defined oval/arch 
                         data: warpletImg.base64
                     }
                 });
-                console.log('✅ Added Warplet NFT as reference image (second)');
+                console.log('✅ Added Warplet NFT as reference image (second):', warpletName);
+                console.log('🎯 Will generate scene with BOTH person and Warplet companion');
+            } else if (warpletImageUrl) {
+                console.log('⚠️ Warplet URL provided but conversion failed');
             }
             
             // Build prompt based on whether Warplet is included
             let characterDescription = '';
             if (senderImg && warpletImg) {
-                characterDescription = `Create a vintage New Year or Christmas greeting card featuring TWO characters:
-1. The person in the first photo (preserve their facial features and likeness)
-2. The character/creature from the second image (${warpletName || 'Warplet'}) - include this character as a companion in the scene
+                characterDescription = `Create a vintage New Year or Christmas greeting card illustration featuring TWO main characters together in the scene:
 
-IMPORTANT: Both characters should be in the scene together - the person and their ${warpletName || 'Warplet'} companion interacting naturally in the holiday setting.`;
+CHARACTER 1 (from first reference image): 
+- The person in the first photo - preserve their facial features, hairstyle, and general appearance
+- Dress them in festive winter clothing appropriate for the scene
+- They should be the main human character
+
+CHARACTER 2 (from second reference image - ${warpletName || 'Warplet NFT'}):
+- The character/creature from the second image
+- Include them as a cherished companion/friend in the scene
+- They should appear natural and integrated into the holiday setting
+- If it's a cartoon/stylized character, maintain that style while blending with the vintage postcard aesthetic
+
+SCENE INTERACTION - CRITICAL:
+- Both characters MUST appear together in the same scene
+- Show them interacting warmly - perhaps the person is holding/hugging the companion, or they're side by side
+- The ${warpletName || 'Warplet'} should feel like a beloved part of the holiday celebration
+- Natural positioning - not just placed next to each other, but truly sharing the moment
+- Examples of good interactions:
+  * Person holding the companion while decorating a tree
+  * Walking together through snow
+  * Sitting together by a fireplace
+  * The companion perched on the person's shoulder
+  * Both looking at something together (tree, gift, snow, etc.)
+
+The overall composition should feel like a treasured memory of celebrating the holidays with a special companion.`;
             } else if (senderImg) {
                 characterDescription = `Create a vintage New Year or Christmas greeting card featuring this person in the photo.`;
             }
@@ -389,11 +422,13 @@ IMPORTANT: Natural watercolor fade effect - NO hard edges, NO defined oval/arch 
             }
 
             // Generate personalized greeting based on scene analysis
+            const companionNote = warpletImageUrl ? `\n\nIMPORTANT CONTEXT: The illustration features ${senderName} together with their special companion (${warpletName || 'Warplet'}) celebrating the holidays. You should naturally mention or reference this companion in the greeting to match what's shown in the image. Keep it warm and natural - the companion is part of the holiday celebration.` : '';
+            
             const greetingPrompt = `You are writing a heartfelt Christmas greeting card from ${senderName} to ${displayRecipient}.
 
 MANDATORY LENGTH RULE: Your response MUST be 120-150 words maximum. This is a concise, warm postcard message that must fit perfectly on the card without overflow.
 
-The card illustration shows: "${randomScene}"
+The card illustration shows: "${randomScene}"${companionNote}
 
 IMPORTANT - WRITING STYLE:
 - Use elegant, warm letter-writing style (like a handwritten letter with pen and ink)
