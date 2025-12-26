@@ -4938,7 +4938,27 @@
                 const firstRecipient = selectedRecipients.length > 0 ? selectedRecipients[0] : null;
                 const recipientName = firstRecipient ? `@${firstRecipient.username}` : 'dear friend';
                 
-                console.log('Generating AI postcard with:', { senderAvatar, senderName, recipientName });
+                // If Warplet stamp selected, fetch user's Warplet NFT to include in scene
+                let warpletImageUrl = null;
+                let warpletName = null;
+                if (selectedStamp === 'warplet' && currentUser?.fid) {
+                    console.log('🎨 Fetching Warplet NFT for scene generation...');
+                    try {
+                        const warpletRes = await fetch(`/api/warplet?fid=${currentUser.fid}`);
+                        if (warpletRes.ok) {
+                            const warpletData = await warpletRes.json();
+                            if (warpletData.hasWarplet && warpletData.imageUrl) {
+                                warpletImageUrl = warpletData.imageUrl;
+                                warpletName = warpletData.name || 'Warplet';
+                                console.log('✅ Found Warplet NFT for scene:', warpletName, warpletImageUrl);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Failed to fetch Warplet NFT:', error);
+                    }
+                }
+                
+                console.log('Generating AI postcard with:', { senderAvatar, senderName, recipientName, warpletImageUrl, warpletName });
                 
                 const response = await fetch('/api/gemini', {
                     method: 'POST',
@@ -4948,6 +4968,8 @@
                         senderAvatar,
                         senderName,
                         recipientName,
+                        warpletImageUrl,
+                        warpletName,
                         message: '' // No user message, AI generates everything
                     })
                 });

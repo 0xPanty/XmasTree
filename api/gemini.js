@@ -18,7 +18,7 @@ module.exports = async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { action, senderName, senderAvatar, recipientName, recipientAvatar, message } = req.body;
+    const { action, senderName, senderAvatar, recipientName, recipientAvatar, message, warpletImageUrl, warpletName } = req.body;
     const displayRecipient = recipientName || 'dear friend';
 
     // Helper: fetch image and convert to base64
@@ -40,6 +40,9 @@ module.exports = async function handler(req, res) {
             // Christmas scenes for variety
             // Fetch sender avatar and convert to base64
             const senderImg = await imageUrlToBase64(senderAvatar);
+            
+            // Fetch Warplet NFT if provided
+            const warpletImg = warpletImageUrl ? await imageUrlToBase64(warpletImageUrl) : null;
 
             let imageData = null;
             let imageError = null;
@@ -283,9 +286,32 @@ IMPORTANT: Natural watercolor fade effect - NO hard edges, NO defined oval/arch 
                 console.log('✅ Added user avatar as reference image (first)');
             }
             
-            // Then add text prompt that refers to "this person"
+            // Add Warplet NFT as second reference image if provided
+            if (warpletImg) {
+                imageParts.push({
+                    inlineData: {
+                        mimeType: warpletImg.mimeType,
+                        data: warpletImg.base64
+                    }
+                });
+                console.log('✅ Added Warplet NFT as reference image (second)');
+            }
+            
+            // Build prompt based on whether Warplet is included
+            let characterDescription = '';
+            if (senderImg && warpletImg) {
+                characterDescription = `Create a vintage New Year or Christmas greeting card featuring TWO characters:
+1. The person in the first photo (preserve their facial features and likeness)
+2. The character/creature from the second image (${warpletName || 'Warplet'}) - include this character as a companion in the scene
+
+IMPORTANT: Both characters should be in the scene together - the person and their ${warpletName || 'Warplet'} companion interacting naturally in the holiday setting.`;
+            } else if (senderImg) {
+                characterDescription = `Create a vintage New Year or Christmas greeting card featuring this person in the photo.`;
+            }
+            
+            // Then add text prompt that refers to the images
             const finalPrompt = senderImg 
-                ? `Create a vintage New Year or Christmas greeting card featuring this person in the photo.
+                ? `${characterDescription}
 
 Inspired by classic illustrated New Year and Christmas postcards by Jenny Nyström, Anton Pieck, or Ellen Clapsaddle.
 
