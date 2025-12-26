@@ -2816,8 +2816,9 @@
         let plazaGifts = JSON.parse(localStorage.getItem('plaza_gifts') || '[]');
         let isPlazaMode = false;
         
-        // 🧪 TEMP: Add test gifts for screenshot
-        if (plazaGifts.length === 0) {
+        // 🧪 TEMP: Add test gifts for screenshot - FORCE OVERRIDE
+        if (true) { // Always override for testing
+            console.log('🧪 FORCING TEST GIFTS');
             plazaGifts = [
                 {
                     id: 'test1',
