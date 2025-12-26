@@ -3180,14 +3180,10 @@
         async function openDirectGiftModal() {
             console.log('🎁 Button clicked');
             
-            // Set demo user if no Farcaster user
+            // Check if user is loaded from SDK
             if (!window.currentUser?.fid) {
-                window.currentUser = {
-                    fid: 3,
-                    username: 'dwr',
-                    displayName: 'Dan Romero',
-                    pfpUrl: 'https://i.imgur.com/xqc.jpg'
-                };
+                alert('⚠️ Please wait for the app to load...\n\nIf this persists, please refresh the page.');
+                return;
             }
             
             // Open modal first
