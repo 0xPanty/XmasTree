@@ -5841,6 +5841,7 @@
             
             // Use DocumentFragment for better performance
             const fragment = document.createDocumentFragment();
+            console.log('🎁 Rendering', activeGifts.length, 'plaza gifts');
             activeGifts.forEach((gift, index) => {
                 const pos = positions[index];
                 const div = document.createElement('div');
@@ -5851,8 +5852,13 @@
                 
                 const img = document.createElement('img');
                 img.src = gift.sender.pfp || 'https://i.imgur.com/HeIi0wU.png';
-                img.onerror = () => img.src = 'https://i.imgur.com/HeIi0wU.png';
+                img.onerror = () => {
+                    console.warn('❌ Failed to load avatar:', img.src);
+                    img.src = 'https://i.imgur.com/HeIi0wU.png';
+                };
+                img.onload = () => console.log('✅ Loaded avatar for', gift.sender.username, img.src);
                 img.alt = gift.sender.username;
+                console.log(`🎁 Creating gift #${index}:`, gift.sender.username, gift.sender.pfp);
                 
                 const santa = document.createElement('div');
                 santa.className = 'santa-emoji';
@@ -5865,6 +5871,7 @@
             
             plaza.innerHTML = '';
             plaza.appendChild(fragment);
+            console.log('✅ Plaza rendered with', plaza.children.length, 'gifts');
         }
 
         // Open claim modal for specific gift
