@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warplet NFT 检测测试</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #0a1a0a;
+            color: #fff;
+        }
+        .container {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 12px;
+            padding: 30px;
+        }
+        h1 {
+            color: #d4af37;
+            margin-bottom: 30px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #d4af37;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 6px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #d4af37, #ffd700);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            display: none;
+        }
+        .result.success {
+            background: rgba(74, 222, 128, 0.1);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            display: block;
+        }
+        .result.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            display: block;
+        }
+        .result h3 {
+            margin-top: 0;
+            color: #d4af37;
+        }
+        .nft-preview {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .nft-preview img {
+            max-width: 200px;
+            border-radius: 8px;
+            border: 2px solid #d4af37;
+        }
+        pre {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .info {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .status.yes {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+        }
+        .status.no {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 Warplet NFT 检测测试</h1>
+        
+        <div class="info">
+            <strong>ℹ️ 说明：</strong><br>
+            输入Farcaster用户名或FID，检查是否持有Warplet NFT，以及NFT图片能否正确获取。
+        </div>
+
+        <div class="input-group">
+            <label for="username">Farcaster 用户名（不需要@）</label>
+            <input type="text" id="username" placeholder="例如: xqc" value="xqc">
+        </div>
+
+        <div class="input-group">
+            <label for="fid">或者直接输入 FID</label>
+            <input type="text" id="fid" placeholder="例如: 275646">
+        </div>
+
+        <button onclick="testWarplet()">🔍 检测 Warplet NFT</button>
+
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        async function testWarplet() {
+            const resultDiv = document.getElementById('result');
+            const button = document.querySelector('button');
+            
+            button.disabled = true;
+            button.textContent = '⏳ 检测中...';
+            resultDiv.innerHTML = '';
+            resultDiv.className = 'result';
+            resultDiv.style.display = 'none';
+
+            try {
+                const username = document.getElementById('username').value.trim().replace('@', '');
+                let fid = document.getElementById('fid').value.trim();
+
+                // Step 1: Get FID if username provided
+                if (username && !fid) {
+                    resultDiv.innerHTML = '<p>📡 正在查询用户信息...</p>';
+                    resultDiv.style.display = 'block';
+                    
+                    const userRes = await fetch(`/api/neynar?action=search&q=${encodeURIComponent(username)}&limit=1`);
+                    const userData = await userRes.json();
+                    
+                    if (!userData.result?.users?.[0]) {
+                        throw new Error('未找到该用户');
+                    }
+                    
+                    const user = userData.result.users[0];
+                    fid = user.fid;
+                    
+                    resultDiv.innerHTML += `<p>✅ 找到用户: @${user.username} (FID: ${fid})</p>`;
+                }
+
+                if (!fid) {
+                    throw new Error('请输入用户名或FID');
+                }
+
+                // Step 2: Check Warplet NFT
+                resultDiv.innerHTML += '<p>🎨 正在检测 Warplet NFT...</p>';
+                
+                const warpletRes = await fetch(`/api/warplet?fid=${fid}`);
+                const warpletData = await warpletRes.json();
+
+                console.log('Warplet API 响应:', warpletData);
+
+                // Display result
+                let html = '<h3>检测结果</h3>';
+                
+                if (warpletData.hasWarplet) {
+                    html += '<div class="status yes">✅ 持有 Warplet NFT</div>';
+                    html += `<p><strong>NFT 名称：</strong> ${warpletData.name || 'Warplet'}</p>`;
+                    html += `<p><strong>Token ID：</strong> ${warpletData.tokenId || 'N/A'}</p>`;
+                    html += `<p><strong>合约地址：</strong> ${warpletData.contractAddress || 'N/A'}</p>`;
+                    html += `<p><strong>持有地址：</strong> ${warpletData.address || 'N/A'}</p>`;
+                    
+                    if (warpletData.imageUrl) {
+                        html += `<div class="nft-preview">
+                            <p><strong>NFT 图片：</strong></p>
+                            <img src="${warpletData.imageUrl}" alt="Warplet NFT" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect width=%22200%22 height=%22200%22 fill=%22%23333%22/><text x=%2250%25%22 y=%2250%25%22 fill=%22white%22 text-anchor=%22middle%22 dy=%22.3em%22>加载失败</text></svg>'">
+                            <p style="font-size: 12px; color: rgba(255,255,255,0.6); word-break: break-all;">${warpletData.imageUrl}</p>
+                        </div>`;
+                    } else {
+                        html += '<p>⚠️ 未获取到NFT图片URL</p>';
+                    }
+                    
+                    html += '<hr style="margin: 20px 0; border: 1px solid rgba(212,175,55,0.2);">';
+                    html += '<h4>🎨 AI生成预期效果</h4>';
+                    html += '<p>✅ 这个NFT图片会被传递给Gemini AI</p>';
+                    html += '<p>✅ AI会将用户和Warplet角色一起绘制在圣诞场景中</p>';
+                    html += '<p>✅ 两者会有自然互动（拥抱、并排、一起活动等）</p>';
+                    
+                    resultDiv.className = 'result success';
+                } else {
+                    html += '<div class="status no">❌ 未持有 Warplet NFT</div>';
+                    html += `<p><strong>原因：</strong> ${warpletData.message || '未找到NFT'}</p>`;
+                    
+                    if (warpletData.debug) {
+                        html += '<details><summary>🔍 调试信息</summary>';
+                        html += `<pre>${JSON.stringify(warpletData.debug, null, 2)}</pre>`;
+                        html += '</details>';
+                    }
+                    
+                    html += '<hr style="margin: 20px 0; border: 1px solid rgba(212,175,55,0.2);">';
+                    html += '<h4>💡 解决方案</h4>';
+                    html += '<ol style="text-align: left;">';
+                    html += '<li>在Base链上购买Warplet NFT<br><a href="https://opensea.io/collection/the-warplets-farcaster" target="_blank" style="color: #d4af37;">→ OpenSea购买链接</a></li>';
+                    html += '<li>确保NFT地址已在Warpcast中验证</li>';
+                    html += '<li>等待几分钟让区块链数据同步</li>';
+                    html += '</ol>';
+                    
+                    resultDiv.className = 'result error';
+                }
+
+                // Show raw response
+                html += '<details style="margin-top: 20px;"><summary>📋 完整API响应</summary>';
+                html += `<pre>${JSON.stringify(warpletData, null, 2)}</pre>`;
+                html += '</details>';
+
+                resultDiv.innerHTML = html;
+
+            } catch (error) {
+                console.error('检测失败:', error);
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <h3>❌ 检测失败</h3>
+                    <p><strong>错误：</strong> ${error.message}</p>
+                    <p>请检查：</p>
+                    <ul style="text-align: left;">
+                        <li>网络连接是否正常</li>
+                        <li>输入的用户名或FID是否正确</li>
+                        <li>API服务是否正常运行</li>
+                    </ul>
+                `;
+            } finally {
+                button.disabled = false;
+                button.textContent = '🔍 检测 Warplet NFT';
+                resultDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
