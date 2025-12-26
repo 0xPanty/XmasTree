@@ -6392,12 +6392,16 @@ Write only the reply text, nothing else:`;
                                 console.log('[compositeStampOnImage] ✅ Using user Warplet NFT:', warpletData.name, warpletData.imageUrl);
                                 stampImageSrc = warpletData.imageUrl;
                             } else {
-                                console.log('[compositeStampOnImage] ❌ No Warplet NFT found');
+                                console.log('[compositeStampOnImage] ❌ No Warplet NFT found for user');
                                 console.log('[compositeStampOnImage] Debug info:', warpletData.debug);
+                                console.log('[compositeStampOnImage] Checked addresses:', warpletData.debug?.addresses);
+                                console.log('[compositeStampOnImage] Contract:', warpletData.debug?.checkedContract);
+                                console.log('[compositeStampOnImage] Using default Warplet stamp instead');
                             }
                         } else {
                             const errorText = await warpletRes.text();
                             console.error('[compositeStampOnImage] ❌ Warplet API error:', warpletRes.status, errorText);
+                            console.log('[compositeStampOnImage] Using default Warplet stamp as fallback');
                         }
                     } catch (error) {
                         console.error('[compositeStampOnImage] ❌ Failed to fetch Warplet NFT:', error);

@@ -52,12 +52,22 @@ module.exports = async function handler(req, res) {
         // Combine all addresses (verified + custody)
         const allAddresses = [...new Set([...ethAddresses, custodyAddress])];
 
-        console.log(`[warplet] User addresses:`, allAddresses);
+        console.log(`[warplet] User @${user.username} addresses:`, allAddresses);
+        console.log(`[warplet] User profile:`, {
+            fid: user.fid,
+            username: user.username,
+            ethAddresses: ethAddresses,
+            custodyAddress: custodyAddress
+        });
 
         if (allAddresses.length === 0) {
             return res.status(404).json({ 
                 error: 'No Ethereum addresses found',
-                hasWarplet: false 
+                hasWarplet: false,
+                debug: {
+                    fid: fid,
+                    username: user.username
+                }
             });
         }
 
