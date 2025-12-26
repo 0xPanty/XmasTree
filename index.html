@@ -4902,12 +4902,12 @@
             btn.innerHTML = '⏳ Generating AI...';
             
             try {
-                if (!currentUser?.fid) {
+                if (!window.currentUser?.fid) {
                     throw new Error('请先登录Farcaster账号');
                 }
                 
-                const senderAvatar = currentUser.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
-                const senderName = currentUser.username || 'You';
+                const senderAvatar = window.currentUser.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
+                const senderName = window.currentUser.username || 'You';
                 
                 // Get first recipient for personalization
                 const firstRecipient = selectedRecipients.length > 0 ? selectedRecipients[0] : null;
@@ -4916,10 +4916,10 @@
                 // If Warplet stamp selected, fetch user's Warplet NFT to include in scene
                 let warpletImageUrl = null;
                 let warpletName = null;
-                if (selectedStamp === 'warplet' && currentUser?.fid) {
+                if (selectedStamp === 'warplet' && window.currentUser?.fid) {
                     console.log('🎨 Fetching Warplet NFT for scene generation...');
                     try {
-                        const warpletRes = await fetch(`/api/warplet?fid=${currentUser.fid}`);
+                        const warpletRes = await fetch(`/api/warplet?fid=${window.currentUser.fid}`);
                         if (warpletRes.ok) {
                             const warpletData = await warpletRes.json();
                             if (warpletData.hasWarplet && warpletData.imageUrl) {
