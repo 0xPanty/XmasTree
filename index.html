@@ -3317,6 +3317,28 @@
                 eligibility = data.stamps; // Store for progress bar
                 loadUserStamps(userFid);
                 
+                // Auto-claim eligible stamps (if not already owned)
+                let autoClaimedAny = false;
+                const quantities = { neynar: 3, farcaster: 10, warplet: 5 };
+                ['neynar', 'farcaster', 'warplet'].forEach(stampId => {
+                    const isEligible = stampEligibility[stampId]?.eligible;
+                    const notOwned = !userStamps[stampId]?.owned;
+                    if (isEligible && notOwned) {
+                        userStamps[stampId] = {
+                            owned: true,
+                            quantity: quantities[stampId] || 1,
+                            acquired_method: 'free',
+                            acquired_at: new Date().toISOString(),
+                            first_free_claimed: true
+                        };
+                        autoClaimedAny = true;
+                        console.log(`✅ Auto-claimed ${stampId}: ${quantities[stampId]} stamps`);
+                    }
+                });
+                if (autoClaimedAny) {
+                    saveUserStamps(userFid);
+                }
+                
                 await new Promise(r => setTimeout(r, 400));
                 
                 // Hide loading, show stamps
