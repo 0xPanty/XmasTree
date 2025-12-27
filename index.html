@@ -3675,7 +3675,10 @@
                         actionBtn.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
                         actionBtn.style.color = '#2c2c2c';
                         actionBtn.textContent = '🎁 Free Mint';
-                        actionBtn.onclick = () => openBasedMintModal();
+                        actionBtn.onclick = () => {
+                            // Open thirdweb claim page directly
+                            window.open('https://thirdweb.com/base/0xEdeAEe23EC053865ed685282bD31c165647d3799/claim', '_blank');
+                        };
                     } else {
                         actionBtn.style.background = 'rgba(100,100,100,0.3)';
                         actionBtn.style.color = 'rgba(255,255,255,0.4)';
