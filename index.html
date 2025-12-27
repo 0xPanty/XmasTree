@@ -3399,6 +3399,9 @@
         
         // Render stamp grid inline - FINAL REDESIGN
         function renderStampGrid() {
+            console.log('🎨 renderStampGrid called, selectedStamp =', selectedStamp);
+            console.log('📦 userStamps:', JSON.stringify(userStamps));
+            
             const stampGrid = document.getElementById('stamp-grid');
             stampGrid.innerHTML = '';
             
@@ -3518,6 +3521,7 @@
                 
                 // Selected badge
                 if (selectedStamp === stamp.id) {
+                    console.log(`✓ Adding Selected badge to ${stamp.id}`);
                     const selectedBadge = document.createElement('div');
                     selectedBadge.setAttribute('data-badge', 'selected');
                     selectedBadge.style.cssText = `
