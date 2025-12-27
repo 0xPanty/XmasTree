@@ -1,4 +1,9 @@
 {
+  "accountAssociation": {
+    "header": "eyJmaWQiOjI3NTQyLCJ0eXBlIjoiY3VzdG9keSIsImtleSI6IjB4Mzk0M2Y1ZjBmOGFlYjU0OGRiMjQ3YTU4MTZlZDIwNDNjMWI3ZjZhZSJ9",
+    "payload": "eyJkb21haW4iOiJ4bWFzLXRyZWUtb3BhbC52ZXJjZWwuYXBwIn0",
+    "signature": "MHgyYzJmZTg0ODZiOWU3YzVmYjA2NGZmYWFkYmI0NzlhZWYzNzI5YzgxNGU4ZTU4ODRjMjNjODk0MTA1MzI3YTVlNTVjZWEwOWM2MzE2ZTc5ZjFhODhkOTgyZjczY2M5ZDFhMWRhYjliNzc2NTVjYzgxZmI2MjE1ZTRlYzI3ZjBlMWM"
+  },
   "miniapp": {
     "version": "1",
     "name": "Jingle Gift",
