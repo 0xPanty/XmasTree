@@ -3391,10 +3391,6 @@
             const loadingDiv = document.getElementById('stamp-loading-inline');
             const stampGrid = document.getElementById('stamp-grid');
             const statusIndicator = document.getElementById('stamp-status-indicator');
-            
-            // Check if user owns Based NFT on-chain
-            const userFid = window.currentUser?.fid || 3;
-            await checkBasedNFTOwnership(userFid);
             const loadingText = document.getElementById('stamp-loading-inline-text');
             const noStampWarning = document.getElementById('no-stamp-warning');
             
@@ -3414,7 +3410,7 @@
                 const userFid = window.currentUser?.fid;
                 
                 if (!userFid) {
-                    throw new Error('请先登录Farcaster账号');
+                    throw new Error('Please sign in with Farcaster');
                 }
                 
                 // Real API call with loading animation
@@ -3425,6 +3421,10 @@
                 await new Promise(r => setTimeout(r, 500));
                 
                 loadingText.textContent = 'Verifying Warplet NFT...';
+                await new Promise(r => setTimeout(r, 500));
+                
+                loadingText.textContent = 'Checking Based NFT...';
+                await checkBasedNFTOwnership(userFid);
                 await new Promise(r => setTimeout(r, 500));
                 
                 const response = await fetch(`/api/neynar?action=check_stamps&fid=${userFid}`);
