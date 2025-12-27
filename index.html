@@ -4356,6 +4356,13 @@
         // Mint Based NFT (FREE - Gas Only)
         async function mintBasedNFT() {
             try {
+                // Get Farcaster SDK
+                const sdk = window.farcasterSDK;
+                if (!sdk) {
+                    alert('❌ Farcaster SDK not loaded\n\nPlease refresh the page.');
+                    return;
+                }
+                
                 // Get Ethereum provider from Farcaster SDK
                 const provider = await sdk.wallet.getEthereumProvider();
                 
@@ -5108,6 +5115,12 @@
             btn.innerHTML = '💰 Calling wallet...';
             
             try {
+                // Get Farcaster SDK
+                const sdk = window.farcasterSDK;
+                if (!sdk) {
+                    throw new Error('Farcaster SDK not loaded. Please refresh the page.');
+                }
+                
                 // Call Farcaster wallet to send USDC payment
                 const result = await sdk.actions.sendToken({
                     token: 'eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // Base USDC
