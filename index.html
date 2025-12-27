@@ -3719,17 +3719,8 @@
                     if (canMintBased) {
                         actionBtn.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
                         actionBtn.style.color = '#2c2c2c';
-                        actionBtn.textContent = '🎁 Claim on thirdweb';
-                        actionBtn.onclick = (e) => {
-                            e.stopPropagation();
-                            // Open thirdweb claim page
-                            window.open('https://thirdweb.com/base/0x6D3634AA13F3b719A6d1209036da056F6788cdd6/claim', '_blank');
-                            
-                            // Show instructions
-                            setTimeout(() => {
-                                alert('📝 Instructions:\n\n1. Claim your Based NFT on thirdweb (opens in new tab)\n2. Return here after claiming\n3. The stamp will automatically unlock!\n\n✨ Refresh the page after claiming to see your stamp.');
-                            }, 500);
-                        };
+                        actionBtn.textContent = '🎁 Free Mint';
+                        actionBtn.onclick = () => mintBasedNFTSimple();
                     } else {
                         actionBtn.style.background = 'rgba(100,100,100,0.3)';
                         actionBtn.style.color = 'rgba(255,255,255,0.4)';
@@ -4433,7 +4424,117 @@
             };
         }
         
-        // Mint Based NFT (FREE - Gas Only)
+        // Simple mint function using raw transaction
+        async function mintBasedNFTSimple() {
+            const loadingToast = showLoadingToast('Initializing...');
+            
+            try {
+                console.log('🎯 Starting simple Based NFT claim...');
+                
+                // Get Farcaster SDK
+                const sdk = window.farcasterSDK;
+                if (!sdk) {
+                    if (document.body.contains(loadingToast)) {
+                        document.body.removeChild(loadingToast);
+                    }
+                    alert('❌ Farcaster SDK not loaded\n\nPlease refresh the page.');
+                    return;
+                }
+                
+                loadingToast.textContent = 'Getting wallet...';
+                const provider = await sdk.wallet.getEthereumProvider();
+                
+                if (!provider) {
+                    if (document.body.contains(loadingToast)) {
+                        document.body.removeChild(loadingToast);
+                    }
+                    alert('❌ Wallet not available\n\nPlease try again.');
+                    return;
+                }
+                
+                loadingToast.textContent = 'Connecting...';
+                const ethersProvider = new ethers.BrowserProvider(provider);
+                const signer = await ethersProvider.getSigner();
+                const userAddress = await signer.getAddress();
+                
+                console.log('🔐 Wallet:', userAddress);
+                
+                const CONTRACT_ADDRESS = '0x6D3634AA13F3b719A6d1209036da056F6788cdd6';
+                
+                // Encode claim function call manually
+                // claim(address receiver, uint256 tokenId, uint256 quantity, address currency, uint256 pricePerToken, allowlistProof, data)
+                const iface = new ethers.Interface([
+                    'function claim(address _receiver, uint256 _tokenId, uint256 _quantity, address _currency, uint256 _pricePerToken, tuple(bytes32[] proof, uint256 quantityLimitPerWallet, uint256 pricePerToken, address currency) _allowlistProof, bytes _data)'
+                ]);
+                
+                const claimData = iface.encodeFunctionData('claim', [
+                    userAddress,  // receiver
+                    0,  // tokenId
+                    1,  // quantity
+                    '0x0000000000000000000000000000000000000000',  // currency
+                    0,  // pricePerToken
+                    [[], 0, 0, '0x0000000000000000000000000000000000000000'],  // allowlistProof
+                    '0x'  // data
+                ]);
+                
+                console.log('📝 Encoded data:', claimData);
+                
+                loadingToast.textContent = 'Calling wallet...';
+                
+                // Send transaction
+                const tx = await signer.sendTransaction({
+                    to: CONTRACT_ADDRESS,
+                    data: claimData,
+                    value: 0
+                });
+                
+                console.log('📝 Transaction sent:', tx.hash);
+                loadingToast.textContent = 'Confirming...';
+                
+                const receipt = await tx.wait();
+                console.log('✅ Confirmed:', receipt);
+                
+                if (document.body.contains(loadingToast)) {
+                    document.body.removeChild(loadingToast);
+                }
+                
+                // Update stamps
+                const userFid = window.currentUser?.fid || 3;
+                userStamps.based = {
+                    owned: true,
+                    quantity: Infinity,
+                    permanent: true,
+                    acquired_method: 'minted',
+                    acquired_at: new Date().toISOString(),
+                    tx_hash: tx.hash,
+                    contract: CONTRACT_ADDRESS
+                };
+                
+                saveUserStamps(userFid);
+                renderStampGrid();
+                showBasedMintSuccessToast();
+                
+            } catch (error) {
+                console.error('❌ Claim failed:', error);
+                
+                const toasts = document.querySelectorAll('body > div');
+                toasts.forEach(toast => {
+                    if (toast.textContent && toast.textContent.includes('...')) {
+                        if (document.body.contains(toast)) {
+                            document.body.removeChild(toast);
+                        }
+                    }
+                });
+                
+                if (error.code === 'ACTION_REJECTED' || error.code === 4001) {
+                    alert('❌ Transaction Cancelled\n\nYou rejected the transaction.');
+                } else {
+                    alert(`❌ Claim Failed\n\n${error.message || 'Unknown error'}\n\nTry refreshing and claiming again.`);
+                }
+            }
+        }
+        
+        // Old complex mint function (backup)
         async function mintBasedNFT() {
             const loadingToast = showLoadingToast('Initializing...');
             
