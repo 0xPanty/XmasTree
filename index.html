@@ -3206,6 +3206,9 @@
         async function openDirectGiftModal() {
             console.log('🎁 Button clicked');
             
+            // Reset selected stamp on modal open to ensure clean state
+            selectedStamp = null;
+            
             // Wait a bit for SDK to load, then use fallback if needed
             if (!window.currentUser?.fid) {
                 // Wait 1 second for SDK
@@ -3781,11 +3784,6 @@
             
             // Show success message with celebration
             alert(`🎉 领取成功！Claimed Successfully!\n\n✅ ${stampName}: +${claimQuantity} stamps\n\n🎁 Free reward unlocked!`);
-            
-            // Auto-select if first stamp
-            if (!selectedStamp) {
-                selectedStamp = stampId;
-            }
             
             // Re-render
             renderStampGrid();
