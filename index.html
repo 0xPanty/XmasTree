@@ -3675,10 +3675,7 @@
                         actionBtn.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
                         actionBtn.style.color = '#2c2c2c';
                         actionBtn.textContent = '🎁 Free Mint';
-                        actionBtn.onclick = () => {
-                            // Open thirdweb claim page directly
-                            window.open('https://thirdweb.com/base/0xEdeAEe23EC053865ed685282bD31c165647d3799/claim', '_blank');
-                        };
+                        actionBtn.onclick = () => openBasedMintModal();
                     } else {
                         actionBtn.style.background = 'rgba(100,100,100,0.3)';
                         actionBtn.style.color = 'rgba(255,255,255,0.4)';
@@ -4428,7 +4425,7 @@
                 loadingToast.textContent = 'Wallet connected!';
                 
                 // Based NFT Contract Configuration (thirdweb Edition Drop)
-                const BASED_NFT_CONTRACT = '0xEdeAEe23EC053865ed685282bD31c165647d3799';
+                const BASED_NFT_CONTRACT = '0x6D3634AA13F3b719A6d1209036da056F6788cdd6';
                 const BASED_NFT_ABI = [
                     'function claim(address _receiver, uint256 _tokenId, uint256 _quantity, address _currency, uint256 _pricePerToken, tuple(bytes32[] proof, uint256 quantityLimitPerWallet, uint256 pricePerToken, address currency) _allowlistProof, bytes _data) public payable',
                     'function balanceOf(address owner, uint256 tokenId) public view returns (uint256)',
