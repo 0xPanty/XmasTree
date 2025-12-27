@@ -3336,7 +3336,7 @@
                 // First check if already unlocked via minting
                 if (userStamps.based?.owned && userStamps.based?.tx_hash) {
                     console.log('✅ Based stamp already unlocked via minting');
-                    renderStampGrid();
+                    // Don't call renderStampGrid here - will be called later
                     return true;
                 }
                 
@@ -3388,7 +3388,7 @@
                             nft_balance: balance.toString()
                         };
                         saveUserStamps(userFid);
-                        renderStampGrid();
+                        // Don't call renderStampGrid here - will be called later
                         return true;
                     }
                     return false;
@@ -3436,6 +3436,9 @@
                     throw new Error('Please sign in with Farcaster');
                 }
                 
+                // Load user stamps FIRST
+                loadUserStamps(userFid);
+                
                 // Real API call with loading animation
                 loadingText.textContent = 'Scanning Neynar Score...';
                 await new Promise(r => setTimeout(r, 500));
@@ -3464,7 +3467,6 @@
                     
                 stampEligibility = data.stamps;
                 eligibility = data.stamps; // Store for progress bar
-                loadUserStamps(userFid);
                 
                 // Auto-claim eligible stamps (if not already owned)
                 let autoClaimedAny = false;
