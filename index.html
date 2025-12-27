@@ -4504,30 +4504,13 @@
                 });
                 
                 console.log('📝 Transaction sent:', txHash);
-                loadingToast.textContent = 'Confirming...';
                 
-                // Wait for transaction confirmation
-                let receipt = null;
-                for (let i = 0; i < 60; i++) {
-                    try {
-                        receipt = await provider.request({
-                            method: 'eth_getTransactionReceipt',
-                            params: [txHash]
-                        });
-                        if (receipt) break;
-                    } catch (e) {
-                        console.log('Waiting for receipt...');
-                    }
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                }
-                
-                console.log('✅ Confirmed:', receipt);
-                
+                // Remove loading toast immediately - don't wait for confirmation
                 if (document.body.contains(loadingToast)) {
                     document.body.removeChild(loadingToast);
                 }
                 
-                // Update stamps
+                // Update stamps immediately
                 const userFid = window.currentUser?.fid || 3;
                 userStamps.based = {
                     owned: true,
@@ -4540,6 +4523,12 @@
                 };
                 
                 saveUserStamps(userFid);
+                
+                // Check NFT ownership (will auto-detect after a few seconds)
+                setTimeout(() => {
+                    checkBasedNFTOwnership();
+                }, 3000);
+                
                 renderStampGrid();
                 showBasedMintSuccessToast();
                 
