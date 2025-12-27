@@ -3333,6 +3333,12 @@
                         };
                         autoClaimedAny = true;
                         console.log(`✅ Auto-claimed ${stampId}: ${quantities[stampId]} stamps`);
+                        
+                        // Auto-select ONLY the first claimed stamp
+                        if (!selectedStamp) {
+                            selectedStamp = stampId;
+                            console.log(`🎯 Auto-selected first stamp: ${stampId}`);
+                        }
                     }
                 });
                 if (autoClaimedAny) {
