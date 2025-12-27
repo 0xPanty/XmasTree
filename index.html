@@ -3413,6 +3413,8 @@
             const stampGrid = document.getElementById('stamp-grid');
             stampGrid.innerHTML = '';
             
+            console.log('🎫 renderStampGrid - selectedStamp:', selectedStamp);
+            
             const stamps = [
                 { id: 'neynar', name: 'Neynar', img: '/stamp/neynar-preview.png', price: '0.1', quantity: 3 },
                 { id: 'farcaster', name: 'Farcaster', img: '/stamp/farcaster-preview.png', price: '0.37', quantity: 10 },
@@ -3529,6 +3531,7 @@
                 
                 // Selected badge
                 if (selectedStamp === stamp.id) {
+                    console.log(`✅ Adding Selected badge to ${stamp.id}`);
                     const selectedBadge = document.createElement('div');
                     selectedBadge.setAttribute('data-badge', 'selected');
                     selectedBadge.style.cssText = `
