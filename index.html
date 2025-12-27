@@ -3300,8 +3300,34 @@
             await checkStampEligibilityInline();
         }
         
+        // Clear fake Based stamp data from TEST_MODE (one-time cleanup)
+        function clearFakeBasedStamp() {
+            const userFid = window.currentUser?.fid || 3;
+            const stampsKey = `stamps_${userFid}`;
+            const stored = localStorage.getItem(stampsKey);
+            
+            if (stored) {
+                const stamps = JSON.parse(stored);
+                
+                // If Based stamp exists but has no tx_hash, it's fake data
+                if (stamps.based && !stamps.based.tx_hash) {
+                    console.log('🧹 Clearing fake Based stamp data from TEST_MODE');
+                    delete stamps.based;
+                    localStorage.setItem(stampsKey, JSON.stringify(stamps));
+                    
+                    // Update global state
+                    if (userStamps.based && !userStamps.based.tx_hash) {
+                        delete userStamps.based;
+                    }
+                }
+            }
+        }
+        
         // Check stamp eligibility inline (inside the modal)
         async function checkStampEligibilityInline() {
+            // Clear fake data first
+            clearFakeBasedStamp();
+            
             const loadingDiv = document.getElementById('stamp-loading-inline');
             const stampGrid = document.getElementById('stamp-grid');
             const statusIndicator = document.getElementById('stamp-status-indicator');
