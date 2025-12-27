@@ -1,0 +1,12 @@
+{
+  "miniapp": {
+    "version": "1",
+    "name": "Jingle Gift",
+    "iconUrl": "https://xmas-tree-opal.vercel.app/icon.png",
+    "homeUrl": "https://xmas-tree-opal.vercel.app",
+    "imageUrl": "https://xmas-tree-opal.vercel.app/stamp/farcaster-preview.png",
+    "buttonTitle": "Open",
+    "splashImageUrl": "https://xmas-tree-opal.vercel.app/icon.png",
+    "splashBackgroundColor": "#0a1a0a"
+  }
+}
