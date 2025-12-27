@@ -3342,43 +3342,66 @@
                 
                 // Get Farcaster SDK
                 const sdk = window.farcasterSDK;
-                if (!sdk) return false;
-                
-                const provider = await sdk.wallet.getEthereumProvider();
-                if (!provider) return false;
-                
-                const ethersProvider = new ethers.BrowserProvider(provider);
-                const signer = await ethersProvider.getSigner();
-                const userAddress = await signer.getAddress();
-                
-                console.log('🔍 Checking NFT ownership for:', userAddress);
-                
-                // Check if user owns Based NFT
-                const BASED_CONTRACT = '0x6D3634AA13F3b719A6d1209036da056F6788cdd6';
-                const BASED_ABI = ['function balanceOf(address owner, uint256 tokenId) public view returns (uint256)'];
-                const contract = new ethers.Contract(BASED_CONTRACT, BASED_ABI, ethersProvider);
-                
-                const balance = await contract.balanceOf(userAddress, 0); // Token ID 0
-                
-                console.log('NFT Balance:', balance.toString());
-                
-                if (balance > 0) {
-                    console.log('✅ User owns Based NFT! Unlocking stamp...');
-                    // Auto-unlock Based stamp
-                    userStamps.based = {
-                        owned: true,
-                        quantity: Infinity,
-                        permanent: true,
-                        acquired_method: 'claimed_onchain',
-                        acquired_at: new Date().toISOString(),
-                        nft_balance: balance.toString()
-                    };
-                    saveUserStamps(userFid);
-                    renderStampGrid();
-                    return true;
+                if (!sdk) {
+                    console.log('⚠️ SDK not available, skipping NFT check');
+                    return false;
                 }
+                
+                // Use timeout to prevent hanging
+                const timeoutPromise = new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Timeout')), 3000)
+                );
+                
+                const checkPromise = (async () => {
+                    const provider = await sdk.wallet.getEthereumProvider();
+                    if (!provider) return false;
+                    
+                    // Try to get accounts without triggering wallet popup
+                    const accounts = await provider.request({ method: 'eth_accounts' });
+                    if (!accounts || accounts.length === 0) {
+                        console.log('⚠️ No wallet connected, skipping NFT check');
+                        return false;
+                    }
+                    
+                    const userAddress = accounts[0];
+                    console.log('🔍 Checking NFT ownership for:', userAddress);
+                    
+                    // Check if user owns Based NFT
+                    const BASED_CONTRACT = '0x6D3634AA13F3b719A6d1209036da056F6788cdd6';
+                    const BASED_ABI = ['function balanceOf(address owner, uint256 tokenId) public view returns (uint256)'];
+                    const ethersProvider = new ethers.BrowserProvider(provider);
+                    const contract = new ethers.Contract(BASED_CONTRACT, BASED_ABI, ethersProvider);
+                    
+                    const balance = await contract.balanceOf(userAddress, 0); // Token ID 0
+                    
+                    console.log('NFT Balance:', balance.toString());
+                    
+                    if (balance > 0) {
+                        console.log('✅ User owns Based NFT! Unlocking stamp...');
+                        // Auto-unlock Based stamp
+                        userStamps.based = {
+                            owned: true,
+                            quantity: Infinity,
+                            permanent: true,
+                            acquired_method: 'claimed_onchain',
+                            acquired_at: new Date().toISOString(),
+                            nft_balance: balance.toString()
+                        };
+                        saveUserStamps(userFid);
+                        renderStampGrid();
+                        return true;
+                    }
+                    return false;
+                })();
+                
+                return await Promise.race([checkPromise, timeoutPromise]);
+                
             } catch (error) {
-                console.log('⚠️ Could not check Based NFT ownership:', error.message);
+                if (error.message === 'Timeout') {
+                    console.log('⚠️ NFT check timeout, skipping...');
+                } else {
+                    console.log('⚠️ Could not check Based NFT ownership:', error.message);
+                }
             }
             return false;
         }
