@@ -136,8 +136,8 @@ module.exports = async function handler(req, res) {
                 const neynarScore = user.experimental?.neynar_user_score || user.neynar_user_score || 0;
                 const hasNeynarScore = neynarScore > 0.6;
                 
-                // Check 2: Farcaster Power Badge (Pro member)
-                const hasPowerBadge = user.power_badge || false;
+                // Check 2: Farcaster Pro subscription (correct field is user.pro.status)
+                const hasPro = user.pro?.status === 'subscribed';
                 
                 // Check 3: Warplet NFT holder
                 const verifiedAddresses = user.verified_addresses?.eth_addresses || [];
@@ -172,8 +172,8 @@ module.exports = async function handler(req, res) {
                             reason: hasNeynarScore ? `Neynar Score: ${neynarScore.toFixed(2)} (>0.6)` : `Neynar Score: ${neynarScore.toFixed(2)} (<0.6)`
                         },
                         farcaster: {
-                            eligible: hasPowerBadge,
-                            reason: hasPowerBadge ? 'Farcaster Power Badge holder' : 'Requires Farcaster Power Badge'
+                            eligible: hasPro,
+                            reason: hasPro ? 'Farcaster Pro subscriber' : 'Requires Farcaster Pro subscription'
                         },
                         warplet: {
                             eligible: holdsWarplet,
@@ -183,7 +183,7 @@ module.exports = async function handler(req, res) {
                     user: {
                         username: user.username,
                         neynar_score: neynarScore,
-                        power_badge: hasPowerBadge,
+                        pro_status: user.pro?.status || 'none',
                         verified_addresses_count: verifiedAddresses.length
                     }
                 });
