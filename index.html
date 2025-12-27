@@ -4424,12 +4424,13 @@
                 console.log('🔐 Connected wallet:', userAddress);
                 loadingToast.textContent = 'Wallet connected!';
                 
-                // Based NFT Contract Configuration (ERC1155)
-                const BASED_NFT_CONTRACT = '0x3171800ca90a1b26f1fb53de83b8e71e24b44e46';
+                // Based NFT Contract Configuration (Simple mint)
+                const BASED_NFT_CONTRACT = '0x6D3634AA13F3b719A6d1209036da056F6788cdd6';
                 const BASED_NFT_ABI = [
-                    'function mint(address to, uint256 id, uint256 amount, bytes data) public payable',
-                    'function mintBatch(address to, uint256[] ids, uint256[] amounts, bytes data) public payable',
-                    'function balanceOf(address account, uint256 id) public view returns (uint256)'
+                    'function mint() public',
+                    'function balanceOf(address user) public view returns (uint256)',
+                    'function hasMinted(address user) public view returns (bool)',
+                    'function totalMinted() public view returns (uint256)'
                 ];
                 
                 loadingToast.textContent = 'Preparing transaction...';
@@ -4441,13 +4442,9 @@
                 
                 loadingToast.textContent = 'Calling your wallet...';
                 
-                // ERC1155 mint function - mint token ID 1, quantity 1
-                // mint(address to, uint256 id, uint256 amount, bytes data)
-                const tokenId = 1; // Token ID (adjust if needed)
-                const quantity = 1; // Mint 1 NFT
-                const data = '0x'; // Empty bytes
-                
-                const tx = await basedContract.mint(userAddress, tokenId, quantity, data, { value: 0 });
+                // Simple mint function - no parameters needed
+                console.log('🎯 Calling mint()...');
+                const tx = await basedContract.mint();
                 
                 console.log('📝 Transaction sent:', tx.hash);
                 loadingToast.textContent = 'Confirming transaction...';
@@ -4472,8 +4469,7 @@
                     mint_price: 'free',
                     nft_minted: true,
                     tx_hash: tx.hash, // ✅ Transaction proof
-                    contract: BASED_NFT_CONTRACT,
-                    token_id: tokenId
+                    contract: BASED_NFT_CONTRACT
                 };
                 
                 saveUserStamps(userFid);
