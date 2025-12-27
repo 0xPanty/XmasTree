@@ -3646,10 +3646,15 @@
                     };
                 } else if (stamp.id === 'based') {
                     if (canMintBased) {
-                        actionBtn.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
-                        actionBtn.style.color = '#2c2c2c';
-                        actionBtn.textContent = '🎁 Free Mint';
-                        actionBtn.onclick = () => openBasedMintModal();
+                        actionBtn.style.background = 'rgba(100,100,100,0.3)';
+                        actionBtn.style.color = 'rgba(255,255,255,0.4)';
+                        actionBtn.style.cursor = 'not-allowed';
+                        actionBtn.textContent = '🚧 Coming Soon';
+                        actionBtn.disabled = true;
+                        actionBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            alert('⏳ Based Mint Coming Soon!\n\nNFT contract deployment in progress.');
+                        };
                     } else {
                         actionBtn.style.background = 'rgba(100,100,100,0.3)';
                         actionBtn.style.color = 'rgba(255,255,255,0.4)';
