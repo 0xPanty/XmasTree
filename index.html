@@ -3413,6 +3413,8 @@
             ];
             
             stamps.forEach(stamp => {
+                console.log(`🔍 Processing stamp: ${stamp.id}, selectedStamp === stamp.id? ${selectedStamp === stamp.id}`);
+                
                 const isOwned = userStamps[stamp.id]?.owned;
                 const ownedQuantity = userStamps[stamp.id]?.quantity || 0;
                 const eligibility = stampEligibility[stamp.id];
