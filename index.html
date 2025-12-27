@@ -3323,6 +3323,47 @@
             }
         }
         
+        // Check if user owns Based NFT on-chain
+        async function checkBasedNFTOwnership(userFid) {
+            try {
+                // Get Farcaster SDK
+                const sdk = window.farcasterSDK;
+                if (!sdk) return false;
+                
+                const provider = await sdk.wallet.getEthereumProvider();
+                if (!provider) return false;
+                
+                const ethersProvider = new ethers.BrowserProvider(provider);
+                const signer = await ethersProvider.getSigner();
+                const userAddress = await signer.getAddress();
+                
+                // Check if user owns Based NFT
+                const BASED_CONTRACT = '0x6D3634AA13F3b719A6d1209036da056F6788cdd6';
+                const BASED_ABI = ['function balanceOf(address owner, uint256 tokenId) public view returns (uint256)'];
+                const contract = new ethers.Contract(BASED_CONTRACT, BASED_ABI, ethersProvider);
+                
+                const balance = await contract.balanceOf(userAddress, 0); // Token ID 0
+                
+                if (balance > 0) {
+                    console.log('✅ User owns Based NFT!', balance.toString());
+                    // Auto-unlock Based stamp
+                    userStamps.based = {
+                        owned: true,
+                        quantity: Infinity,
+                        permanent: true,
+                        acquired_method: 'claimed_onchain',
+                        acquired_at: new Date().toISOString(),
+                        nft_balance: balance.toString()
+                    };
+                    saveUserStamps(userFid);
+                    return true;
+                }
+            } catch (error) {
+                console.log('⚠️ Could not check Based NFT ownership:', error.message);
+            }
+            return false;
+        }
+        
         // Check stamp eligibility inline (inside the modal)
         async function checkStampEligibilityInline() {
             // Clear fake data first
@@ -3331,6 +3372,10 @@
             const loadingDiv = document.getElementById('stamp-loading-inline');
             const stampGrid = document.getElementById('stamp-grid');
             const statusIndicator = document.getElementById('stamp-status-indicator');
+            
+            // Check if user owns Based NFT on-chain
+            const userFid = window.currentUser?.fid || 3;
+            await checkBasedNFTOwnership(userFid);
             const loadingText = document.getElementById('stamp-loading-inline-text');
             const noStampWarning = document.getElementById('no-stamp-warning');
             
@@ -3674,8 +3719,17 @@
                     if (canMintBased) {
                         actionBtn.style.background = 'linear-gradient(135deg, #ffd700, #ffed4e)';
                         actionBtn.style.color = '#2c2c2c';
-                        actionBtn.textContent = '🎁 Free Mint';
-                        actionBtn.onclick = () => openBasedMintModal();
+                        actionBtn.textContent = '🎁 Claim on thirdweb';
+                        actionBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            // Open thirdweb claim page
+                            window.open('https://thirdweb.com/base/0x6D3634AA13F3b719A6d1209036da056F6788cdd6/claim', '_blank');
+                            
+                            // Show instructions
+                            setTimeout(() => {
+                                alert('📝 Instructions:\n\n1. Claim your Based NFT on thirdweb (opens in new tab)\n2. Return here after claiming\n3. The stamp will automatically unlock!\n\n✨ Refresh the page after claiming to see your stamp.');
+                            }, 500);
+                        };
                     } else {
                         actionBtn.style.background = 'rgba(100,100,100,0.3)';
                         actionBtn.style.color = 'rgba(255,255,255,0.4)';
