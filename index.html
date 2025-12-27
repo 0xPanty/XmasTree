@@ -3328,6 +3328,18 @@
         // Check if user owns Based NFT on-chain
         async function checkBasedNFTOwnership(userFid) {
             try {
+                // Get user FID
+                if (!userFid) {
+                    userFid = window.currentUser?.fid || 3;
+                }
+                
+                // First check if already unlocked via minting
+                if (userStamps.based?.owned && userStamps.based?.tx_hash) {
+                    console.log('✅ Based stamp already unlocked via minting');
+                    renderStampGrid();
+                    return true;
+                }
+                
                 // Get Farcaster SDK
                 const sdk = window.farcasterSDK;
                 if (!sdk) return false;
@@ -3339,6 +3351,8 @@
                 const signer = await ethersProvider.getSigner();
                 const userAddress = await signer.getAddress();
                 
+                console.log('🔍 Checking NFT ownership for:', userAddress);
+                
                 // Check if user owns Based NFT
                 const BASED_CONTRACT = '0x6D3634AA13F3b719A6d1209036da056F6788cdd6';
                 const BASED_ABI = ['function balanceOf(address owner, uint256 tokenId) public view returns (uint256)'];
@@ -3346,8 +3360,10 @@
                 
                 const balance = await contract.balanceOf(userAddress, 0); // Token ID 0
                 
+                console.log('NFT Balance:', balance.toString());
+                
                 if (balance > 0) {
-                    console.log('✅ User owns Based NFT!', balance.toString());
+                    console.log('✅ User owns Based NFT! Unlocking stamp...');
                     // Auto-unlock Based stamp
                     userStamps.based = {
                         owned: true,
@@ -3358,6 +3374,7 @@
                         nft_balance: balance.toString()
                     };
                     saveUserStamps(userFid);
+                    renderStampGrid();
                     return true;
                 }
             } catch (error) {
