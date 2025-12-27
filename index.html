@@ -4426,12 +4426,12 @@
             };
         }
         
-        // Ultra simple - just call contract directly without encoding
+        // Use EIP-1193 provider.request() - the Farcaster way
         async function mintBasedNFTSimple() {
             const loadingToast = showLoadingToast('Initializing...');
             
             try {
-                console.log('🎯 Starting Based NFT claim...');
+                console.log('🎯 Starting Based NFT claim with EIP-1193...');
                 
                 // Get Farcaster SDK
                 const sdk = window.farcasterSDK;
@@ -4454,61 +4454,73 @@
                     return;
                 }
                 
-                loadingToast.textContent = 'Connecting...';
-                const ethersProvider = new ethers.BrowserProvider(provider);
-                const signer = await ethersProvider.getSigner();
-                const userAddress = await signer.getAddress();
+                console.log('✅ Provider:', provider);
+                
+                loadingToast.textContent = 'Getting address...';
+                
+                // Get user address using EIP-1193
+                const accounts = await provider.request({ 
+                    method: 'eth_requestAccounts' 
+                });
+                const userAddress = accounts[0];
                 
                 console.log('🔐 Wallet:', userAddress);
                 
                 const CONTRACT_ADDRESS = '0x6D3634AA13F3b719A6d1209036da056F6788cdd6';
                 
-                // Simple ABI - just the claim function
-                const ABI = [{
-                    "name": "claim",
-                    "type": "function",
-                    "stateMutability": "payable",
-                    "inputs": [
-                        {"name": "_receiver", "type": "address"},
-                        {"name": "_tokenId", "type": "uint256"},
-                        {"name": "_quantity", "type": "uint256"},
-                        {"name": "_currency", "type": "address"},
-                        {"name": "_pricePerToken", "type": "uint256"},
-                        {"name": "_allowlistProof", "type": "tuple", "components": [
-                            {"name": "proof", "type": "bytes32[]"},
-                            {"name": "quantityLimitPerWallet", "type": "uint256"},
-                            {"name": "pricePerToken", "type": "uint256"},
-                            {"name": "currency", "type": "address"}
-                        ]},
-                        {"name": "_data", "type": "bytes"}
-                    ],
-                    "outputs": []
-                }];
+                // Encode claim function data
+                const iface = new ethers.Interface([
+                    'function claim(address _receiver, uint256 _tokenId, uint256 _quantity, address _currency, uint256 _pricePerToken, tuple(bytes32[] proof, uint256 quantityLimitPerWallet, uint256 pricePerToken, address currency) _allowlistProof, bytes _data)'
+                ]);
                 
-                const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
-                
-                loadingToast.textContent = 'Claiming...';
-                
-                // Call claim directly
-                const tx = await contract.claim(
-                    userAddress,  // receiver
-                    0,  // tokenId
-                    1,  // quantity
-                    '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',  // currency
-                    0,  // pricePerToken
-                    {  // allowlistProof
+                const claimData = iface.encodeFunctionData('claim', [
+                    userAddress,
+                    0,
+                    1,
+                    '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',
+                    0,
+                    {
                         proof: [],
                         quantityLimitPerWallet: 0,
                         pricePerToken: 0,
                         currency: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
                     },
-                    '0x'  // data
-                );
+                    '0x'
+                ]);
                 
-                console.log('📝 Transaction sent:', tx.hash);
+                console.log('📝 Encoded data:', claimData);
+                
+                loadingToast.textContent = 'Sending transaction...';
+                
+                // Send transaction using EIP-1193 provider.request()
+                const txHash = await provider.request({
+                    method: 'eth_sendTransaction',
+                    params: [{
+                        from: userAddress,
+                        to: CONTRACT_ADDRESS,
+                        data: claimData,
+                        value: '0x0'
+                    }]
+                });
+                
+                console.log('📝 Transaction sent:', txHash);
                 loadingToast.textContent = 'Confirming...';
                 
-                const receipt = await tx.wait();
+                // Wait for transaction confirmation
+                let receipt = null;
+                for (let i = 0; i < 60; i++) {
+                    try {
+                        receipt = await provider.request({
+                            method: 'eth_getTransactionReceipt',
+                            params: [txHash]
+                        });
+                        if (receipt) break;
+                    } catch (e) {
+                        console.log('Waiting for receipt...');
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                }
+                
                 console.log('✅ Confirmed:', receipt);
                 
                 if (document.body.contains(loadingToast)) {
@@ -4523,7 +4535,7 @@
                     permanent: true,
                     acquired_method: 'minted',
                     acquired_at: new Date().toISOString(),
-                    tx_hash: tx.hash,
+                    tx_hash: txHash,
                     contract: CONTRACT_ADDRESS
                 };
                 
@@ -4547,7 +4559,7 @@
                 if (error.code === 'ACTION_REJECTED' || error.code === 4001) {
                     alert('❌ Transaction Cancelled\n\nYou rejected the transaction.');
                 } else {
-                    alert(`❌ Claim Failed\n\n${error.reason || error.message || 'Unknown error'}\n\nPlease check console for details.`);
+                    alert(`❌ Claim Failed\n\n${error.message || 'Unknown error'}\n\nPlease check console for details.`);
                 }
             }
         }
