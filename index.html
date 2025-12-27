@@ -4424,10 +4424,10 @@
                 console.log('🔐 Connected wallet:', userAddress);
                 loadingToast.textContent = 'Wallet connected!';
                 
-                // Based NFT Contract Configuration (thirdweb)
+                // Based NFT Contract Configuration (thirdweb Edition Drop)
                 const BASED_NFT_CONTRACT = '0xEdeAEe23EC053865ed685282bD31c165647d3799';
                 const BASED_NFT_ABI = [
-                    'function claim(address receiver, uint256 quantity) public payable',
+                    'function claim(address _receiver, uint256 _tokenId, uint256 _quantity, address _currency, uint256 _pricePerToken, tuple(bytes32[] proof, uint256 quantityLimitPerWallet, uint256 pricePerToken, address currency) _allowlistProof, bytes _data) public payable',
                     'function balanceOf(address owner, uint256 tokenId) public view returns (uint256)',
                     'function totalSupply(uint256 tokenId) public view returns (uint256)'
                 ];
@@ -4456,25 +4456,68 @@
                     throw new Error('Contract not found on this network. Are you on Base mainnet?');
                 }
                 
-                // thirdweb claim function - receiver and quantity
-                console.log('🎯 Calling claim() for thirdweb contract...');
+                // thirdweb claim function with full parameters
+                console.log('🎯 Calling claim() for thirdweb Edition Drop...');
                 console.log('Contract:', BASED_NFT_CONTRACT);
                 console.log('User:', userAddress);
                 
+                // Parameters for free claim
+                const receiver = userAddress;
+                const tokenId = 0; // Token ID (usually 0 for Edition Drop)
                 const quantity = 1; // Claim 1 NFT
-                const tokenId = 0; // Token ID (thirdweb Edition usually uses 0)
+                const currency = '0x0000000000000000000000000000000000000000'; // ETH (but price is 0)
+                const pricePerToken = 0; // Free mint
+                const allowlistProof = {
+                    proof: [],
+                    quantityLimitPerWallet: 0,
+                    pricePerToken: 0,
+                    currency: '0x0000000000000000000000000000000000000000'
+                };
+                const data = '0x'; // Empty data
+                
+                console.log('📝 Claim parameters:', {
+                    receiver,
+                    tokenId,
+                    quantity,
+                    currency,
+                    pricePerToken,
+                    allowlistProof,
+                    data
+                });
                 
                 // Try to estimate gas first
                 try {
-                    const gasEstimate = await basedContract.claim.estimateGas(userAddress, quantity);
+                    const gasEstimate = await basedContract.claim.estimateGas(
+                        receiver,
+                        tokenId,
+                        quantity,
+                        currency,
+                        pricePerToken,
+                        allowlistProof,
+                        data
+                    );
                     console.log('⛽ Gas estimate:', gasEstimate.toString());
                 } catch (gasError) {
                     console.error('❌ Gas estimation failed:', gasError);
+                    console.error('Gas error details:', {
+                        message: gasError.message,
+                        reason: gasError.reason,
+                        code: gasError.code
+                    });
                     throw new Error(`Gas estimation failed: ${gasError.reason || gasError.message}`);
                 }
                 
-                // Call claim function
-                const tx = await basedContract.claim(userAddress, quantity);
+                // Call claim function with all parameters
+                const tx = await basedContract.claim(
+                    receiver,
+                    tokenId,
+                    quantity,
+                    currency,
+                    pricePerToken,
+                    allowlistProof,
+                    data,
+                    { value: 0 } // No ETH payment
+                );
                 
                 console.log('📝 Transaction sent:', tx.hash);
                 loadingToast.textContent = 'Confirming transaction...';
