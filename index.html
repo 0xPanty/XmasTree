@@ -4467,13 +4467,22 @@
                     'function claim(address _receiver, uint256 _tokenId, uint256 _quantity, address _currency, uint256 _pricePerToken, tuple(bytes32[] proof, uint256 quantityLimitPerWallet, uint256 pricePerToken, address currency) _allowlistProof, bytes _data)'
                 ]);
                 
+                // Use correct thirdweb claim function signature
+                // Based on thirdweb docs: receiver, tokenId, quantity, currency, pricePerToken, allowlistProof, data
+                const allowlistProof = {
+                    proof: [],
+                    quantityLimitPerWallet: 0,
+                    pricePerToken: 0,
+                    currency: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'  // Native token
+                };
+                
                 const claimData = iface.encodeFunctionData('claim', [
                     userAddress,  // receiver
                     0,  // tokenId
                     1,  // quantity
-                    '0x0000000000000000000000000000000000000000',  // currency
-                    0,  // pricePerToken
-                    [[], 0, 0, '0x0000000000000000000000000000000000000000'],  // allowlistProof
+                    '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',  // currency (native)
+                    0,  // pricePerToken (free)
+                    allowlistProof,  // allowlistProof
                     '0x'  // data
                 ]);
                 
