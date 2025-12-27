@@ -4412,7 +4412,7 @@
                     document.body.removeChild(loadingToast);
                 }
                 
-                // Update user stamps
+                // Update user stamps with transaction proof
                 const userFid = window.currentUser?.fid || 3;
                 userStamps.based = {
                     owned: true,
@@ -4422,12 +4422,16 @@
                     acquired_at: new Date().toISOString(),
                     mint_price: 'free',
                     nft_minted: true,
-                    tx_hash: tx.hash
+                    tx_hash: tx.hash, // ✅ Transaction proof
+                    contract: BASED_NFT_CONTRACT,
+                    token_id: tokenId
                 };
                 
                 saveUserStamps(userFid);
                 renderStampGrid();
                 showBasedMintSuccessToast();
+                
+                console.log('✅ Based stamp minted successfully:', tx.hash);
                 
             } catch (error) {
                 console.error('❌ Mint failed:', error);
