@@ -3041,13 +3041,21 @@
             }, 1500);
         }
         
-        // Gift Record feature - show gifts sent and claimed (only on-chain transactions)
+        // Gift Record feature - show gifts sent and claimed
         function openRecordModal() {
             const myUsername = currentUser?.username || 'anonymous';
             const myFid = currentUser?.fid;
             const myAddress = window.connectedAddress?.toLowerCase();
             
-            // Only show gifts with blockchain transactions (have txHash or contractGiftId)
+            // Created cards (not yet on-chain, have aiImageFront)
+            const createdCards = plazaGifts.filter(g => 
+                g.aiImageFront && 
+                !g.txHash && 
+                !g.contractGiftId &&
+                (g.sender?.username === myUsername || g.sender?.fid === myFid)
+            );
+            
+            // On-chain gifts
             const onChainGifts = plazaGifts.filter(g => g.txHash || g.contractGiftId);
             
             // Gifts I sent (on-chain only)
@@ -3069,11 +3077,36 @@
             let html = '';
             
             // If no records at all
-            if (sentGifts.length === 0 && claimedGifts.length === 0) {
-                html = '<div style="text-align:center; color:rgba(255,255,255,0.5); padding:24px; font-size:0.9rem;">No transaction records yet<br><span style="font-size:0.75rem; margin-top:8px; display:block;">Send or claim a gift to see records here</span></div>';
+            if (createdCards.length === 0 && sentGifts.length === 0 && claimedGifts.length === 0) {
+                html = '<div style="text-align:center; color:rgba(255,255,255,0.5); padding:24px; font-size:0.9rem;">No records yet<br><span style="font-size:0.75rem; margin-top:8px; display:block;">Create or send a gift to see records here</span></div>';
                 recordList.innerHTML = html;
                 document.getElementById('record-modal').classList.add('visible');
                 return;
+            }
+            
+            // Created cards section (NEW)
+            if (createdCards.length > 0) {
+                html += '<div style="color:var(--gold); font-weight:bold; margin-bottom:8px;">🎨 My Created Cards</div>';
+                html += createdCards.map(gift => {
+                    const recipientName = gift.recipient?.username || 'Friend';
+                    const shareUrl = location.origin + location.pathname + '?gift=' + gift.id;
+                    return `
+                        <div style="background:rgba(0,0,0,0.3); padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid rgba(212,175,55,0.3);">
+                            <div style="display:flex; gap:12px; align-items:start;">
+                                <img src="${gift.aiImageFront}" style="width:60px; height:80px; object-fit:cover; border-radius:6px; border:1px solid var(--gold);" 
+                                     onerror="this.src='https://i.imgur.com/HeIi0wU.png'">
+                                <div style="flex:1;">
+                                    <div style="color:var(--gold); font-weight:bold; margin-bottom:4px;">${gift.title || 'Christmas Card'}</div>
+                                    <div style="font-size:0.8rem; color:rgba(255,255,255,0.7); margin-bottom:4px;">To: @${recipientName}</div>
+                                    ${gift.amount ? `<div style="font-size:0.85rem; color:var(--gold);">🎁 ${gift.amount} ${gift.token}</div>` : ''}
+                                    <button onclick="window.open('${shareUrl}', '_blank')" style="margin-top:8px; padding:4px 12px; background:linear-gradient(135deg, var(--gold), #ffd700); border:none; border-radius:6px; color:#2c2c2c; font-size:0.75rem; font-weight:bold; cursor:pointer;">
+                                        View Card
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
             }
             
             // Sent gifts section
