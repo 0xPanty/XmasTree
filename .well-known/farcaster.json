@@ -7,9 +7,9 @@
   "miniapp": {
     "version": "1",
     "name": "Jingle Gift",
-    "iconUrl": "https://xmas-tree-opal.vercel.app/icon.svg",
+    "iconUrl": "https://xmas-tree-opal.vercel.app/icon.png",
     "homeUrl": "https://xmas-tree-opal.vercel.app",
-    "splashImageUrl": "https://xmas-tree-opal.vercel.app/icon.svg",
+    "splashImageUrl": "https://xmas-tree-opal.vercel.app/icon.png",
     "splashBackgroundColor": "#0a1a0a"
   }
 }
