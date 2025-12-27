@@ -2810,7 +2810,7 @@
     <script>
         let giftType = 'equal';
         let currentUser = null; // Will be set by Farcaster SDK
-        const TEST_MODE = false; // Production mode
+        const TEST_MODE = true; // Enable free minting for MVP testing
         // Neynar API calls go through /api/neynar to protect API key
         const MAX_PLAZA_GIFTS = 10;
         let plazaGifts = JSON.parse(localStorage.getItem('plaza_gifts') || '[]');
