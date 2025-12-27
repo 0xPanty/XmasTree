@@ -3457,48 +3457,16 @@
                     card.onclick = () => {
                         // Only update if different stamp selected
                         if (selectedStamp !== stamp.id) {
-                            // Remove selection from previous card
-                            const prevSelected = document.querySelector('#stamp-grid > div > div[data-selected="true"]');
-                            if (prevSelected) {
-                                prevSelected.style.borderColor = 'rgba(212,175,55,0.3)';
-                                prevSelected.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-                                prevSelected.setAttribute('data-selected', 'false');
-                                // Remove "Selected" badge
-                                const prevBadge = prevSelected.querySelector('[data-badge="selected"]');
-                                if (prevBadge) prevBadge.remove();
-                            }
-                            
-                            // Apply selection to current card
+                            // Update selected stamp variable
                             selectedStamp = stamp.id;
-                            card.style.borderColor = 'var(--gold)';
-                            card.style.boxShadow = '0 0 20px rgba(212,175,55,0.5)';
-                            card.setAttribute('data-selected', 'true');
+                            console.log('🎯 Stamp selected:', selectedStamp);
                             
-                            // Add "Selected" badge
-                            const selectedBadge = document.createElement('div');
-                            selectedBadge.setAttribute('data-badge', 'selected');
-                            selectedBadge.style.cssText = `
-                                position: absolute;
-                                top: 8px;
-                                left: 8px;
-                                background: var(--gold);
-                                color: #2c2c2c;
-                                padding: 4px 10px;
-                                border-radius: 16px;
-                                font-size: 0.65rem;
-                                font-weight: bold;
-                                box-shadow: 0 2px 8px rgba(212,175,55,0.5);
-                                z-index: 10;
-                            `;
-                            selectedBadge.textContent = '✓ Selected';
-                            card.appendChild(selectedBadge);
-                            
+                            // Re-render entire grid to update visual states
+                            renderStampGrid();
                             updateGenerateButtonState();
                         }
                     };
                     
-                    // Mark if this card is selected
-                    card.setAttribute('data-selected', selectedStamp === stamp.id ? 'true' : 'false');
                 }
                 
                 // Top-right badge (quantity or unlimited)
@@ -3519,28 +3487,6 @@
                     `;
                     badge.textContent = isUnlimited ? '♾️' : `🎫 ${ownedQuantity}`;
                     card.appendChild(badge);
-                }
-                
-                // Selected badge
-                if (selectedStamp === stamp.id) {
-                    console.log(`✓ Adding Selected badge to ${stamp.id}`);
-                    const selectedBadge = document.createElement('div');
-                    selectedBadge.setAttribute('data-badge', 'selected');
-                    selectedBadge.style.cssText = `
-                        position: absolute;
-                        top: 8px;
-                        left: 8px;
-                        background: var(--gold);
-                        color: #2c2c2c;
-                        padding: 4px 10px;
-                        border-radius: 16px;
-                        font-size: 0.65rem;
-                        font-weight: bold;
-                        box-shadow: 0 2px 8px rgba(212,175,55,0.5);
-                        z-index: 10;
-                    `;
-                    selectedBadge.textContent = '✓ Selected';
-                    card.appendChild(selectedBadge);
                 }
                 
                 // Image container (fixed height for alignment)
