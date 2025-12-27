@@ -4442,8 +4442,47 @@
                 
                 loadingToast.textContent = 'Calling your wallet...';
                 
+                // Debug: Check network
+                const network = await ethersProvider.getNetwork();
+                console.log('📡 Network:', {
+                    name: network.name,
+                    chainId: Number(network.chainId)
+                });
+                
+                // Debug: Check if contract exists
+                const code = await ethersProvider.getCode(BASED_NFT_CONTRACT);
+                console.log('📄 Contract code exists:', code !== '0x');
+                
+                if (code === '0x') {
+                    throw new Error('Contract not found on this network. Are you on Base mainnet?');
+                }
+                
+                // Debug: Check if user already minted
+                try {
+                    const alreadyMinted = await basedContract.hasMinted(userAddress);
+                    console.log('✅ Already minted?', alreadyMinted);
+                    
+                    if (alreadyMinted) {
+                        throw new Error('You have already minted this NFT!');
+                    }
+                } catch (e) {
+                    console.log('⚠️ Could not check mint status:', e.message);
+                }
+                
                 // Simple mint function - no parameters needed
                 console.log('🎯 Calling mint()...');
+                console.log('Contract:', BASED_NFT_CONTRACT);
+                console.log('User:', userAddress);
+                
+                // Try to estimate gas first
+                try {
+                    const gasEstimate = await basedContract.mint.estimateGas();
+                    console.log('⛽ Gas estimate:', gasEstimate.toString());
+                } catch (gasError) {
+                    console.error('❌ Gas estimation failed:', gasError);
+                    throw new Error(`Gas estimation failed: ${gasError.reason || gasError.message}`);
+                }
+                
                 const tx = await basedContract.mint();
                 
                 console.log('📝 Transaction sent:', tx.hash);
