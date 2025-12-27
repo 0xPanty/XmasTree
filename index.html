@@ -2073,7 +2073,7 @@
                         </div>
                         
                         <button type="button" id="regenerate-ai-btn" onclick="regenerateAIPostcard()" style="width:100%; padding:12px; background:linear-gradient(135deg, #f093fb, #f5576c); border:none; color:#fff; border-radius:8px; cursor:pointer; font-weight:bold;">
-                            🔄 重新生成 (0.1 USDC)
+                            🔄 REGENERATE (0.1 USDC)
                         </button>
                     </div>
                 </div>
@@ -5099,13 +5099,13 @@
         
         async function regenerateAIPostcard() {
             // Payment confirmation
-            if (!confirm(`重新生成需要 ${REGENERATE_COST} USDC\nRegeneration costs ${REGENERATE_COST} USDC\n\n✅ 将调用你的钱包支付\n✅ Will call your wallet for payment\n\n继续？Continue?`)) {
+            if (!confirm(`Regeneration costs ${REGENERATE_COST} USDC\n\n✅ Will call your wallet for payment\n\nContinue?`)) {
                 return;
             }
             
             const btn = document.getElementById('regenerate-ai-btn');
             btn.disabled = true;
-            btn.innerHTML = '💰 调用钱包中... Calling wallet...';
+            btn.innerHTML = '💰 Calling wallet...';
             
             try {
                 // Call Farcaster wallet to send USDC payment
@@ -5120,12 +5120,12 @@
                 }
                 
                 console.log('✅ Payment successful:', result.send.transaction);
-                btn.innerHTML = '⏳ 重新生成中... Regenerating...';
+                btn.innerHTML = '⏳ Regenerating...';
             } catch (error) {
                 console.error('❌ Payment failed:', error);
-                alert(`❌ 支付失败 Payment Failed\n\n${error.message || 'User cancelled or payment error'}`);
+                alert(`❌ Payment Failed\n\n${error.message || 'User cancelled or payment error'}`);
                 btn.disabled = false;
-                btn.innerHTML = '🔄 重新生成 (0.1 USDC)';
+                btn.innerHTML = '🔄 REGENERATE (0.1 USDC)';
                 return;
             }
             
@@ -5169,15 +5169,15 @@
                     console.log('💾 Saved regenerated postcard to cache');
                     
                     btn.disabled = false;
-                    btn.innerHTML = '🔄 重新生成 (0.1 USDC)';
+                    btn.innerHTML = '🔄 REGENERATE (0.1 USDC)';
                 } else {
                     throw new Error(data.error || 'Regeneration failed');
                 }
             } catch (error) {
                 console.error('AI regeneration error:', error);
-                alert('❌ 重新生成失败 Regeneration failed\n\n请重试 Please try again');
+                alert('❌ Regeneration failed\n\nPlease try again');
                 btn.disabled = false;
-                btn.innerHTML = '🔄 重新生成 (0.1 USDC)';
+                btn.innerHTML = '🔄 REGENERATE (0.1 USDC)';
             }
         }
         
