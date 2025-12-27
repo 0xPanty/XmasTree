@@ -2073,7 +2073,7 @@
                         </div>
                         
                         <button type="button" id="regenerate-ai-btn" onclick="regenerateAIPostcard()" style="width:100%; padding:12px; background:linear-gradient(135deg, #f093fb, #f5576c); border:none; color:#fff; border-radius:8px; cursor:pointer; font-weight:bold;">
-                            🔄 Regenerate (0.1 USDC)
+                            🔄 重新生成 (0.1 USDC)
                         </button>
                     </div>
                 </div>
@@ -5099,22 +5099,35 @@
         
         async function regenerateAIPostcard() {
             // Payment confirmation
-            if (!confirm(`Regeneration costs ${REGENERATE_COST} USDC\n\nTransfer to: ${PAYMENT_ADDRESS}\n\nContinue?`)) {
+            if (!confirm(`重新生成需要 ${REGENERATE_COST} USDC\nRegeneration costs ${REGENERATE_COST} USDC\n\n✅ 将调用你的钱包支付\n✅ Will call your wallet for payment\n\n继续？Continue?`)) {
                 return;
             }
             
             const btn = document.getElementById('regenerate-ai-btn');
             btn.disabled = true;
-            btn.innerHTML = '💰 Complete payment...';
+            btn.innerHTML = '💰 调用钱包中... Calling wallet...';
             
-            // TODO: Implement actual payment verification
-            // For now, simulate payment
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            // Show payment reminder
-            alert(`Please transfer ${REGENERATE_COST} USDC to:\n${PAYMENT_ADDRESS}\n\nClick OK after transfer to continue`);
-            
-            btn.innerHTML = '⏳ Regenerating...';
+            try {
+                // Call Farcaster wallet to send USDC payment
+                const result = await sdk.actions.sendToken({
+                    token: 'eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // Base USDC
+                    amount: (REGENERATE_COST * 1000000).toString(), // 0.1 USDC = 100000 units (6 decimals)
+                    recipientAddress: PAYMENT_ADDRESS
+                });
+                
+                if (!result.success) {
+                    throw new Error(result.error?.message || 'Payment cancelled');
+                }
+                
+                console.log('✅ Payment successful:', result.send.transaction);
+                btn.innerHTML = '⏳ 重新生成中... Regenerating...';
+            } catch (error) {
+                console.error('❌ Payment failed:', error);
+                alert(`❌ 支付失败 Payment Failed\n\n${error.message || 'User cancelled or payment error'}`);
+                btn.disabled = false;
+                btn.innerHTML = '🔄 重新生成 (0.1 USDC)';
+                return;
+            }
             
             try {
                 if (!currentUser?.fid) {
@@ -5156,15 +5169,15 @@
                     console.log('💾 Saved regenerated postcard to cache');
                     
                     btn.disabled = false;
-                    btn.innerHTML = '🔄 Regenerate (0.1 USDC)';
+                    btn.innerHTML = '🔄 重新生成 (0.1 USDC)';
                 } else {
                     throw new Error(data.error || 'Regeneration failed');
                 }
             } catch (error) {
                 console.error('AI regeneration error:', error);
-                alert('Regeneration failed, please try again (no duplicate charge)');
+                alert('❌ 重新生成失败 Regeneration failed\n\n请重试 Please try again');
                 btn.disabled = false;
-                btn.innerHTML = '🔄 Regenerate (0.1 USDC)';
+                btn.innerHTML = '🔄 重新生成 (0.1 USDC)';
             }
         }
         
