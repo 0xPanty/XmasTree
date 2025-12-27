@@ -4381,21 +4381,40 @@
         
         // Mint Based NFT (FREE - Gas Only)
         async function mintBasedNFT() {
+            const loadingToast = showLoadingToast('Initializing...');
+            
             try {
+                console.log('🎯 Starting Based NFT mint...');
+                
                 // Get Farcaster SDK
                 const sdk = window.farcasterSDK;
+                console.log('SDK available?', !!sdk);
+                
                 if (!sdk) {
+                    if (document.body.contains(loadingToast)) {
+                        document.body.removeChild(loadingToast);
+                    }
                     alert('❌ Farcaster SDK not loaded\n\nPlease refresh the page.');
                     return;
                 }
                 
+                loadingToast.textContent = 'Getting wallet provider...';
+                console.log('🔍 Getting Ethereum provider...');
+                
                 // Get Ethereum provider from Farcaster SDK
                 const provider = await sdk.wallet.getEthereumProvider();
+                console.log('Provider received:', !!provider);
                 
                 if (!provider) {
+                    if (document.body.contains(loadingToast)) {
+                        document.body.removeChild(loadingToast);
+                    }
                     alert('❌ Wallet not available\n\nPlease try again.');
                     return;
                 }
+                
+                loadingToast.textContent = 'Connecting to wallet...';
+                console.log('🔗 Creating ethers provider...');
                 
                 // Create ethers provider and signer
                 const ethersProvider = new ethers.BrowserProvider(provider);
@@ -4403,6 +4422,7 @@
                 const userAddress = await signer.getAddress();
                 
                 console.log('🔐 Connected wallet:', userAddress);
+                loadingToast.textContent = 'Wallet connected!';
                 
                 // Based NFT Contract Configuration (ERC1155)
                 const BASED_NFT_CONTRACT = '0x3171800ca90a1b26f1fb53de83b8e71e24b44e46';
@@ -4412,11 +4432,14 @@
                     'function balanceOf(address account, uint256 id) public view returns (uint256)'
                 ];
                 
+                loadingToast.textContent = 'Preparing transaction...';
+                console.log('📝 Contract:', BASED_NFT_CONTRACT);
+                
                 // Connect to contract
                 const basedContract = new ethers.Contract(BASED_NFT_CONTRACT, BASED_NFT_ABI, signer);
+                console.log('✅ Contract instance created');
                 
-                // Show loading
-                const loadingToast = showLoadingToast('Minting Based NFT...');
+                loadingToast.textContent = 'Calling your wallet...';
                 
                 // ERC1155 mint function - mint token ID 1, quantity 1
                 // mint(address to, uint256 id, uint256 amount, bytes data)
@@ -4461,12 +4484,29 @@
                 
             } catch (error) {
                 console.error('❌ Mint failed:', error);
+                console.error('Error details:', {
+                    message: error.message,
+                    code: error.code,
+                    data: error.data
+                });
+                
+                // Remove loading toast
+                const loadingToasts = document.querySelectorAll('body > div');
+                loadingToasts.forEach(toast => {
+                    if (toast.textContent && toast.textContent.includes('...')) {
+                        if (document.body.contains(toast)) {
+                            document.body.removeChild(toast);
+                        }
+                    }
+                });
                 
                 // User rejected transaction
                 if (error.code === 'ACTION_REJECTED' || error.code === 4001) {
                     alert('❌ Transaction Cancelled\n\nYou rejected the transaction.');
+                } else if (error.message && error.message.includes('user rejected')) {
+                    alert('❌ Transaction Cancelled\n\nYou rejected the transaction.');
                 } else {
-                    alert(`❌ Mint Failed\n\n${error.message || 'Unknown error'}`);
+                    alert(`❌ Mint Failed\n\n${error.message || 'Unknown error'}\n\nCheck console for details.`);
                 }
             }
         }
