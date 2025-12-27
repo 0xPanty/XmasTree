@@ -2810,7 +2810,7 @@
     <script>
         let giftType = 'equal';
         let currentUser = null; // Will be set by Farcaster SDK
-        const TEST_MODE = true; // Enable free minting for MVP testing
+        const TEST_MODE = false; // Production mode - use real wallet
         // Neynar API calls go through /api/neynar to protect API key
         const MAX_PLAZA_GIFTS = 10;
         let plazaGifts = JSON.parse(localStorage.getItem('plaza_gifts') || '[]');
@@ -4322,13 +4322,53 @@
         
         // Mint Based NFT (FREE - Gas Only)
         async function mintBasedNFT() {
-            
-            // TODO: Implement actual minting + payment
-            
-            if (TEST_MODE) {
-                // TEST MODE: Instant mint
-                const userFid = window.currentUser?.fid || 3;
+            try {
+                // Get Ethereum provider from Farcaster SDK
+                const provider = await sdk.wallet.getEthereumProvider();
                 
+                if (!provider) {
+                    alert('❌ Wallet not available\n\nPlease try again.');
+                    return;
+                }
+                
+                // Create ethers provider and signer
+                const ethersProvider = new ethers.BrowserProvider(provider);
+                const signer = await ethersProvider.getSigner();
+                const userAddress = await signer.getAddress();
+                
+                console.log('🔐 Connected wallet:', userAddress);
+                
+                // Based NFT Contract Configuration
+                // TODO: Replace with actual Based NFT contract details
+                const BASED_NFT_CONTRACT = '0xYourBasedNFTContractAddress';
+                const BASED_NFT_ABI = [
+                    'function mint() public payable',
+                    'function safeMint(address to) public'
+                ];
+                
+                // Connect to contract
+                const basedContract = new ethers.Contract(BASED_NFT_CONTRACT, BASED_NFT_ABI, signer);
+                
+                // Show loading
+                const loadingToast = showLoadingToast('Minting Based NFT...');
+                
+                // Call mint function (adjust based on actual contract)
+                const tx = await basedContract.mint({ value: 0 }); // Free mint, only gas
+                
+                console.log('📝 Transaction sent:', tx.hash);
+                loadingToast.textContent = 'Confirming transaction...';
+                
+                // Wait for confirmation
+                const receipt = await tx.wait();
+                console.log('✅ Transaction confirmed:', receipt);
+                
+                // Remove loading
+                if (document.body.contains(loadingToast)) {
+                    document.body.removeChild(loadingToast);
+                }
+                
+                // Update user stamps
+                const userFid = window.currentUser?.fid || 3;
                 userStamps.based = {
                     owned: true,
                     quantity: Infinity,
@@ -4336,16 +4376,46 @@
                     acquired_method: 'minted',
                     acquired_at: new Date().toISOString(),
                     mint_price: 'free',
-                    nft_minted: true
+                    nft_minted: true,
+                    tx_hash: tx.hash
                 };
                 
                 saveUserStamps(userFid);
                 renderStampGrid();
                 showBasedMintSuccessToast();
-            } else {
-                // PRODUCTION MODE: Real payment + mint
-                alert('🚧 Payment integration coming soon!\n\nMinting will be available after payment setup.');
+                
+            } catch (error) {
+                console.error('❌ Mint failed:', error);
+                
+                // User rejected transaction
+                if (error.code === 'ACTION_REJECTED' || error.code === 4001) {
+                    alert('❌ Transaction Cancelled\n\nYou rejected the transaction.');
+                } else {
+                    alert(`❌ Mint Failed\n\n${error.message || 'Unknown error'}`);
+                }
             }
+        }
+        
+        // Show loading toast
+        function showLoadingToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0,0,0,0.9);
+                color: white;
+                padding: 20px 30px;
+                border-radius: 12px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+                z-index: 10000;
+                text-align: center;
+                font-size: 1rem;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            return toast;
         }
         
         // Show Based mint success toast
