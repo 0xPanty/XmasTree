@@ -1414,6 +1414,8 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <!-- Ethers.js for Web3 -->
     <script src="https://cdn.jsdelivr.net/npm/ethers@6.9.0/dist/ethers.umd.min.js"></script>
+    <!-- thirdweb SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/thirdweb@5/dist/thirdweb.umd.js"></script>
     <script>
         // Contract Configuration
         const CONTRACT_ADDRESS = '0x5307bFc2F5bB5efC858622aDcAeE60619C51b884';
@@ -4424,12 +4426,12 @@
             };
         }
         
-        // Simple mint function using raw transaction
+        // Ultra simple - just call contract directly without encoding
         async function mintBasedNFTSimple() {
             const loadingToast = showLoadingToast('Initializing...');
             
             try {
-                console.log('🎯 Starting simple Based NFT claim...');
+                console.log('🎯 Starting Based NFT claim...');
                 
                 // Get Farcaster SDK
                 const sdk = window.farcasterSDK;
@@ -4461,41 +4463,47 @@
                 
                 const CONTRACT_ADDRESS = '0x6D3634AA13F3b719A6d1209036da056F6788cdd6';
                 
-                // Encode claim function call manually
-                // claim(address receiver, uint256 tokenId, uint256 quantity, address currency, uint256 pricePerToken, allowlistProof, data)
-                const iface = new ethers.Interface([
-                    'function claim(address _receiver, uint256 _tokenId, uint256 _quantity, address _currency, uint256 _pricePerToken, tuple(bytes32[] proof, uint256 quantityLimitPerWallet, uint256 pricePerToken, address currency) _allowlistProof, bytes _data)'
-                ]);
+                // Simple ABI - just the claim function
+                const ABI = [{
+                    "name": "claim",
+                    "type": "function",
+                    "stateMutability": "payable",
+                    "inputs": [
+                        {"name": "_receiver", "type": "address"},
+                        {"name": "_tokenId", "type": "uint256"},
+                        {"name": "_quantity", "type": "uint256"},
+                        {"name": "_currency", "type": "address"},
+                        {"name": "_pricePerToken", "type": "uint256"},
+                        {"name": "_allowlistProof", "type": "tuple", "components": [
+                            {"name": "proof", "type": "bytes32[]"},
+                            {"name": "quantityLimitPerWallet", "type": "uint256"},
+                            {"name": "pricePerToken", "type": "uint256"},
+                            {"name": "currency", "type": "address"}
+                        ]},
+                        {"name": "_data", "type": "bytes"}
+                    ],
+                    "outputs": []
+                }];
                 
-                // Use correct thirdweb claim function signature
-                // Based on thirdweb docs: receiver, tokenId, quantity, currency, pricePerToken, allowlistProof, data
-                const allowlistProof = {
-                    proof: [],
-                    quantityLimitPerWallet: 0,
-                    pricePerToken: 0,
-                    currency: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'  // Native token
-                };
+                const contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
                 
-                const claimData = iface.encodeFunctionData('claim', [
+                loadingToast.textContent = 'Claiming...';
+                
+                // Call claim directly
+                const tx = await contract.claim(
                     userAddress,  // receiver
                     0,  // tokenId
                     1,  // quantity
-                    '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',  // currency (native)
-                    0,  // pricePerToken (free)
-                    allowlistProof,  // allowlistProof
+                    '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE',  // currency
+                    0,  // pricePerToken
+                    {  // allowlistProof
+                        proof: [],
+                        quantityLimitPerWallet: 0,
+                        pricePerToken: 0,
+                        currency: '0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE'
+                    },
                     '0x'  // data
-                ]);
-                
-                console.log('📝 Encoded data:', claimData);
-                
-                loadingToast.textContent = 'Calling wallet...';
-                
-                // Send transaction
-                const tx = await signer.sendTransaction({
-                    to: CONTRACT_ADDRESS,
-                    data: claimData,
-                    value: 0
-                });
+                );
                 
                 console.log('📝 Transaction sent:', tx.hash);
                 loadingToast.textContent = 'Confirming...';
@@ -4525,6 +4533,7 @@
                 
             } catch (error) {
                 console.error('❌ Claim failed:', error);
+                console.error('Full error:', JSON.stringify(error, null, 2));
                 
                 const toasts = document.querySelectorAll('body > div');
                 toasts.forEach(toast => {
@@ -4538,7 +4547,7 @@
                 if (error.code === 'ACTION_REJECTED' || error.code === 4001) {
                     alert('❌ Transaction Cancelled\n\nYou rejected the transaction.');
                 } else {
-                    alert(`❌ Claim Failed\n\n${error.message || 'Unknown error'}\n\nTry refreshing and claiming again.`);
+                    alert(`❌ Claim Failed\n\n${error.reason || error.message || 'Unknown error'}\n\nPlease check console for details.`);
                 }
             }
         }
