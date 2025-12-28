@@ -5767,6 +5767,10 @@
                     btn.disabled = false;
                     btn.innerHTML = '🔄 REGENERATE (0.1 USDC)';
                     
+                    // Update Send Gift button state
+                    updateSendGiftButtonState();
+                    console.log('🎁 Send Gift button enabled');
+                    
                     console.log('✅ Regeneration complete! Both sides updated.');
                 } else {
                     console.error('❌ API returned error:', data.error);
