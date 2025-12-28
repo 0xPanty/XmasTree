@@ -1447,28 +1447,49 @@
         let giftContract = null;
         let connectedAddress = null;
 
-        // Connect Wallet
+        // Connect Wallet (using Farcaster SDK)
         async function connectWallet() {
             try {
-                if (!window.ethereum) {
-                    alert('Please install MetaMask or use a Web3 browser!');
+                // Get Farcaster SDK
+                const sdk = window.farcasterSDK;
+                if (!sdk) {
+                    alert('🔐 Farcaster SDK not available\n\nPlease open this app in the Farcaster mobile app.');
                     return false;
                 }
                 
-                web3Provider = new ethers.BrowserProvider(window.ethereum);
-                await web3Provider.send("eth_requestAccounts", []);
+                console.log('🔗 Getting Ethereum provider from Farcaster SDK...');
+                
+                // Get Ethereum provider from Farcaster
+                const provider = await sdk.wallet.getEthereumProvider();
+                if (!provider) {
+                    alert('❌ Wallet not available\n\nPlease try again or check your Farcaster app settings.');
+                    return false;
+                }
+                
+                // Create ethers provider
+                web3Provider = new ethers.BrowserProvider(provider);
+                
+                // Request accounts
+                const accounts = await provider.request({ method: 'eth_requestAccounts' });
+                if (!accounts || accounts.length === 0) {
+                    alert('❌ No accounts found\n\nPlease make sure your wallet is connected in Farcaster.');
+                    return false;
+                }
+                
+                console.log('✅ Wallet connected:', accounts[0]);
                 
                 // Check network
                 const network = await web3Provider.getNetwork();
                 if (Number(network.chainId) !== BASE_CHAIN_ID) {
                     try {
-                        await window.ethereum.request({
+                        await provider.request({
                             method: 'wallet_switchEthereumChain',
                             params: [{ chainId: '0x' + BASE_CHAIN_ID.toString(16) }],
                         });
                     } catch (switchError) {
                         if (switchError.code === 4902) {
-                            await window.ethereum.request({
+                            // Chain not added, try to add it
+                            await provider.request({
                                 method: 'wallet_addEthereumChain',
                                 params: [{
                                     chainId: '0x' + BASE_CHAIN_ID.toString(16),
@@ -1478,9 +1499,12 @@
                                     blockExplorerUrls: ['https://basescan.org']
                                 }]
                             });
+                        } else {
+                            throw switchError;
                         }
                     }
-                    web3Provider = new ethers.BrowserProvider(window.ethereum);
+                    // Recreate provider after network switch
+                    web3Provider = new ethers.BrowserProvider(provider);
                 }
                 
                 web3Signer = await web3Provider.getSigner();
@@ -1494,10 +1518,10 @@
                     walletBtn.classList.add('connected');
                 }
                 
-                console.log('Wallet connected:', connectedAddress);
+                console.log('✅ Wallet setup complete:', connectedAddress);
                 return true;
             } catch (error) {
-                console.error('Wallet connection failed:', error);
+                console.error('❌ Wallet connection failed:', error);
                 alert('Failed to connect wallet: ' + error.message);
                 return false;
             }
@@ -2779,33 +2803,97 @@
         const root = createRoot(document.getElementById('canvas-container'));
         root.render(<App />);
         
-        // Farcaster Mini App SDK - signal ready after render
-        setTimeout(async () => {
+        // Farcaster Mini App SDK - Initialize properly according to docs
+        (async function initializeFarcasterSDK() {
             try {
+                console.log('🚀 Initializing Farcaster Mini App SDK...');
                 const { sdk } = await import('https://esm.sh/@farcaster/miniapp-sdk');
                 window.farcasterSDK = sdk;
+                
+                // Signal ready to Farcaster client
                 sdk.actions.ready();
-                console.log('Farcaster Mini App ready');
+                console.log('✅ SDK ready signal sent');
                 
-                // Get user from SDK context (may need to await)
+                // Get user context from SDK
                 const context = await sdk.context;
-                console.log('SDK context:', context);
+                console.log('📱 SDK context received:', context);
                 
-                if (context && context.user && context.user.fid) {
+                if (context?.user?.fid) {
                     window.currentUser = {
                         fid: Number(context.user.fid),
                         username: context.user.username || 'unknown',
                         displayName: context.user.displayName || 'Unknown User',
-                        pfp_url: context.user.pfpUrl || ''
+                        pfp_url: context.user.pfpUrl || 'https://i.imgur.com/HeIi0wU.png'
                     };
-                    console.log('✅ User set from SDK:', window.currentUser);
+                    console.log('✅ User authenticated:', window.currentUser);
+                    
+                    // Update UI to show user info
+                    updateUserUI();
                 } else {
-                    console.warn('⚠️ No valid user in SDK context:', context);
+                    console.warn('⚠️ Not running in Farcaster context or user not available');
+                    window.currentUser = null;
+                    updateUserUI();
                 }
             } catch (err) {
-                console.error('SDK error:', err);
+                console.error('❌ SDK initialization failed:', err);
+                window.currentUser = null;
+                updateUserUI();
             }
-        }, 100);
+        })();
+        
+        // Update UI based on user login state
+        function updateUserUI() {
+            const header = document.getElementById('main-header');
+            if (!header) return;
+            
+            // Remove old user info if exists
+            const oldInfo = document.getElementById('user-info');
+            if (oldInfo) oldInfo.remove();
+            
+            if (window.currentUser) {
+                // User is logged in - show user info
+                const userInfo = document.createElement('div');
+                userInfo.id = 'user-info';
+                userInfo.style.cssText = `
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-top: 12px;
+                    padding: 8px 16px;
+                    background: rgba(212, 175, 55, 0.1);
+                    border: 1px solid var(--gold);
+                    border-radius: 20px;
+                    backdrop-filter: blur(10px);
+                    font-size: 0.85rem;
+                    color: var(--gold);
+                    justify-content: center;
+                `;
+                userInfo.innerHTML = `
+                    <img src="${window.currentUser.pfp_url}" 
+                         style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--gold);"
+                         onerror="this.src='https://i.imgur.com/HeIi0wU.png'">
+                    <span>@${window.currentUser.username}</span>
+                `;
+                header.appendChild(userInfo);
+            } else {
+                // User not logged in - show message
+                const loginMsg = document.createElement('div');
+                loginMsg.id = 'user-info';
+                loginMsg.style.cssText = `
+                    margin-top: 12px;
+                    padding: 8px 16px;
+                    background: rgba(255, 107, 107, 0.1);
+                    border: 1px solid rgba(255, 107, 107, 0.5);
+                    border-radius: 20px;
+                    backdrop-filter: blur(10px);
+                    font-size: 0.75rem;
+                    color: rgba(255, 255, 255, 0.8);
+                    text-align: center;
+                `;
+                loginMsg.textContent = 'Please open in Farcaster app';
+                header.appendChild(loginMsg);
+            }
+        }
     </script>
 
     <!-- Gift Plaza System -->
@@ -2813,6 +2901,23 @@
         let giftType = 'equal';
         let currentUser = null; // Will be set by Farcaster SDK
         const TEST_MODE = false; // Production mode - use real wallet
+        
+        // Utility: Check if user is authenticated
+        function requireAuth(actionName = 'this action') {
+            if (!window.currentUser?.fid) {
+                alert(`🔐 Authentication Required\n\nPlease open this app in the Farcaster mobile app to ${actionName}.\n\nYou need to be signed in with your Farcaster account.`);
+                return false;
+            }
+            return true;
+        }
+        
+        // Utility: Get current user FID (throws if not authenticated)
+        function getUserFid() {
+            if (!window.currentUser?.fid) {
+                throw new Error('User not authenticated');
+            }
+            return window.currentUser.fid;
+        }
         // Neynar API calls go through /api/neynar to protect API key
         const MAX_PLAZA_GIFTS = 10;
         let plazaGifts = JSON.parse(localStorage.getItem('plaza_gifts') || '[]');
@@ -3239,27 +3344,22 @@
         
         // Open direct gift modal and load stamps inline
         async function openDirectGiftModal() {
-            console.log('🎁 Button clicked');
+            console.log('🎁 Send Postcard button clicked');
+            
+            // Check if user is authenticated
+            if (!window.currentUser?.fid) {
+                // Wait briefly for SDK to initialize (if still loading)
+                await new Promise(r => setTimeout(r, 500));
+                
+                // If still no user, show authentication required message
+                if (!window.currentUser?.fid) {
+                    alert('🔐 Authentication Required\n\nPlease open this app in the Farcaster mobile app to send postcards.\n\nThis feature requires a signed-in Farcaster account.');
+                    return;
+                }
+            }
             
             // Reset selected stamp on modal open to ensure clean state
             selectedStamp = null;
-            
-            // Wait a bit for SDK to load, then use fallback if needed
-            if (!window.currentUser?.fid) {
-                // Wait 1 second for SDK
-                await new Promise(r => setTimeout(r, 1000));
-                
-                // If still no user, use demo user to let app work
-                if (!window.currentUser?.fid) {
-                    console.warn('⚠️ SDK did not load user, using demo fallback');
-                    window.currentUser = {
-                        fid: 3,
-                        username: 'dwr',
-                        displayName: 'Dan Romero (Demo)',
-                        pfp_url: 'https://i.imgur.com/HeIi0wU.png'
-                    };
-                }
-            }
             
             // Open modal first
             openOriginalDirectGiftModal();
@@ -3304,7 +3404,8 @@
         
         // Clear fake Based stamp data from TEST_MODE (one-time cleanup)
         function clearFakeBasedStamp() {
-            const userFid = window.currentUser?.fid || 3;
+            if (!window.currentUser?.fid) return;
+            const userFid = getUserFid();
             const stampsKey = `stamps_${userFid}`;
             const stored = localStorage.getItem(stampsKey);
             
@@ -3330,7 +3431,8 @@
             try {
                 // Get user FID
                 if (!userFid) {
-                    userFid = window.currentUser?.fid || 3;
+                    if (!window.currentUser?.fid) return false;
+                    userFid = getUserFid();
                 }
                 
                 // First check if already unlocked via minting
@@ -3430,11 +3532,10 @@
             statusIndicator.textContent = 'Checking...';
             
             try {
-                const userFid = window.currentUser?.fid;
-                
-                if (!userFid) {
+                if (!window.currentUser?.fid) {
                     throw new Error('Please sign in with Farcaster');
                 }
+                const userFid = getUserFid();
                 
                 // Load user stamps FIRST
                 loadUserStamps(userFid);
@@ -3862,7 +3963,8 @@
         
         // Claim stamp inline
         function claimStampInline(stampId, stampName, quantity) {
-            const userFid = window.currentUser?.fid || 3;
+            if (!requireAuth('claim stamps')) return;
+            const userFid = getUserFid();
             
             // Stamp quantities from config
             const quantities = {
@@ -4058,11 +4160,8 @@
             
             if (!confirmed) return;
             
-            const userFid = window.currentUser?.fid;
-            if (!userFid) {
-                alert('请先登录Farcaster账号');
-                return;
-            }
+            if (!requireAuth('purchase stamps')) return;
+            const userFid = getUserFid();
             
             // TODO: Implement real payment
             alert('购买功能开发中...');
@@ -4365,7 +4464,8 @@
                     
                     if (TEST_MODE) {
                         // TEST MODE: Instant purchase
-                        const userFid = window.currentUser?.fid || 3;
+                        if (!requireAuth('purchase stamps')) return;
+                        const userFid = getUserFid();
                         userStamps[stampId].quantity += totalStamps;
                         saveUserStamps(userFid);
                         
@@ -4553,7 +4653,7 @@
                 }
                 
                 // Update stamps immediately
-                const userFid = window.currentUser?.fid || 3;
+                const userFid = getUserFid();
                 userStamps.based = {
                     owned: true,
                     quantity: Infinity,
@@ -4748,7 +4848,7 @@
                 }
                 
                 // Update user stamps with transaction proof
-                const userFid = window.currentUser?.fid || 3;
+                const userFid = getUserFid();
                 userStamps.based = {
                     owned: true,
                     quantity: Infinity,
@@ -5311,8 +5411,11 @@
                 return;
             }
             
+            // Check authentication first
+            if (!requireAuth('generate AI postcards')) return;
+            
             // ===== CHECK INDEXEDDB CACHE FIRST =====
-            const userFid = window.currentUser?.fid || 3;
+            const userFid = getUserFid();
             const cache = await loadAIPostcardCache(userFid);
             
             if (cache && cache.image && !isAIGenerated) {
@@ -5346,7 +5449,7 @@
                     currentAIImage = null;
                     currentAIGreeting = '';
                     aiGenerationCount = 0;
-                    const userFid = window.currentUser?.fid || 3;
+                    const userFid = getUserFid();
                     clearAIPostcardCache(userFid);
                     // Continue with generation below
                 } else {
@@ -5371,8 +5474,10 @@
             btn.innerHTML = '⏳ Generating AI...';
             
             try {
-                if (!window.currentUser?.fid) {
-                    throw new Error('请先登录Farcaster账号');
+                if (!requireAuth('generate AI postcards')) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span style="font-size:1.2rem;">🎨</span><span>Generate AI Postcard</span>';
+                    return;
                 }
                 
                 const senderAvatar = window.currentUser.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
@@ -5503,12 +5608,14 @@
             }
             
             try {
-                if (!currentUser?.fid) {
-                    throw new Error('请先登录Farcaster账号');
+                if (!requireAuth('regenerate AI postcards')) {
+                    btn.disabled = false;
+                    btn.innerHTML = '🔄 REGENERATE (0.1 USDC)';
+                    return;
                 }
                 
-                const senderAvatar = currentUser.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
-                const senderName = currentUser.username || 'You';
+                const senderAvatar = window.currentUser.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
+                const senderName = window.currentUser.username || 'You';
                 
                 const response = await fetch('/api/gemini', {
                     method: 'POST',
@@ -5537,7 +5644,7 @@
                     document.getElementById('ai-preview-greeting').textContent = currentAIGreeting;
                     
                     // Save new generation to cache
-                    const userFid = window.currentUser?.fid || 3;
+                    const userFid = getUserFid();
                     saveAIPostcardCache(userFid);
                     console.log('💾 Saved regenerated postcard to cache');
                     
@@ -5613,7 +5720,7 @@
                 
                 // Consume stamps
                 stamp.quantity -= requiredStamps;
-                const userFid = window.currentUser?.fid || 3;
+                const userFid = getUserFid();
                 saveUserStamps(userFid);
             }
             
@@ -5689,7 +5796,7 @@
             } else { alert(shareText); }
             
             // Reset and clear cache (so user can generate new postcard next time)
-            const userFid = window.currentUser?.fid || 3;
+            const userFid = getUserFid();
             clearAIPostcardCache(userFid);
             console.log('🗑️ Cleared AI postcard cache after sending');
             
