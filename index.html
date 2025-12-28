@@ -3507,13 +3507,20 @@
             console.log('✅ All DOM elements found, starting animation...');
             
             // Show loading
+            console.log('📺 Before: loadingDiv.style.display =', loadingDiv.style.display);
+            console.log('📺 Before: stampGrid.style.display =', stampGrid.style.display);
+            
             loadingDiv.style.display = 'block';
             stampGrid.style.display = 'none';
             if (noStampWarning) noStampWarning.style.display = 'none';
             
+            console.log('📺 After: loadingDiv.style.display =', loadingDiv.style.display);
+            console.log('📺 After: stampGrid.style.display =', stampGrid.style.display);
+            
             console.log('📺 Setting statusIndicator to "Checking..."');
             statusIndicator.textContent = 'Checking...';
-            console.log('📺 Current statusIndicator:', statusIndicator.textContent);
+            console.log('📺 Current statusIndicator.textContent:', statusIndicator.textContent);
+            console.log('📺 Current loadingText.textContent:', loadingText.textContent);
             
             try {
                 if (!window.currentUser?.fid) {
