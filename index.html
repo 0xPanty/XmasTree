@@ -5651,6 +5651,9 @@
                 const senderAvatar = window.currentUser.pfp_url || 'https://i.imgur.com/HeIi0wU.png';
                 const senderName = window.currentUser.username || 'You';
                 
+                console.log('📞 Calling Gemini API to generate new image...');
+                console.log('👤 Sender:', senderName);
+                
                 const response = await fetch('/api/gemini', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -5662,9 +5665,18 @@
                     })
                 });
                 
+                console.log('📡 API response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+                }
+                
+                console.log('📡 Gemini API response received');
                 const data = await response.json();
+                console.log('📦 Response data:', data.success ? 'Success' : 'Failed');
                 
                 if (data.success && data.image) {
+                    console.log('✅ New image generated successfully!');
                     currentAIImage = data.image;
                     currentAIGreeting = data.greeting || 'Merry Christmas!';
                     currentAIScene = {
@@ -5672,10 +5684,19 @@
                         description: data.sceneDescription || 'holiday celebration'
                     };
                     aiGenerationCount++;
+                    console.log('🔢 Generation count:', aiGenerationCount);
                     
                     // Update preview
-                    document.getElementById('ai-preview-image').src = `data:image/png;base64,${currentAIImage}`;
-                    document.getElementById('ai-preview-greeting').textContent = currentAIGreeting;
+                    const previewImg = document.getElementById('ai-preview-image');
+                    const previewGreeting = document.getElementById('ai-preview-greeting');
+                    
+                    if (previewImg && previewGreeting) {
+                        previewImg.src = `data:image/png;base64,${currentAIImage}`;
+                        previewGreeting.textContent = currentAIGreeting;
+                        console.log('🖼️ Preview updated successfully!');
+                    } else {
+                        console.error('❌ Preview elements not found!');
+                    }
                     
                     // Save new generation to cache
                     const userFid = getUserFid();
@@ -5684,7 +5705,11 @@
                     
                     btn.disabled = false;
                     btn.innerHTML = '🔄 REGENERATE (0.1 USDC)';
+                    
+                    // Show success message
+                    alert('✅ New postcard generated!\n\nYour payment was successful.');
                 } else {
+                    console.error('❌ API returned error:', data.error);
                     throw new Error(data.error || 'Regeneration failed');
                 }
             } catch (error) {
