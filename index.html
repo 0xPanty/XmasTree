@@ -3306,39 +3306,60 @@
             openOriginalDirectGiftModal();
             
             // Try to restore cached postcard from IndexedDB
-            const userFid = window.currentUser.fid;
-            loadAIPostcardCache(userFid).then(cache => {
-                // Always restore cache if it exists (removed !isAIGenerated check)
+            try {
+                const userFid = getUserFid();
+                console.log('📦 Attempting to load cached postcard for FID:', userFid);
+                
+                const cache = await loadAIPostcardCache(userFid);
+                
+                // Always restore cache if it exists
                 if (cache && cache.image) {
-                    console.log('📦 Restoring cached postcard on modal open...');
+                    console.log('✅ Found cached postcard! Restoring...');
+                    console.log('📊 Cache data:', {
+                        hasImage: !!cache.image,
+                        imageLength: cache.image?.length,
+                        greeting: cache.greeting,
+                        generationCount: cache.generationCount
+                    });
+                    
                     currentAIImage = cache.image;
-                    currentAIGreeting = cache.greeting;
+                    currentAIGreeting = cache.greeting || 'Merry Christmas!';
                     currentAIScene = cache.scene;
                     isAIGenerated = true;
                     aiGenerationCount = cache.generationCount || 1;
                     
-                    // Update UI
-                    setTimeout(() => {
-                        document.getElementById('ai-preview-front').src = `data:image/png;base64,${currentAIImage}`;
-                        document.getElementById('ai-preview-greeting').textContent = currentAIGreeting;
-                        document.getElementById('ai-generate-section').style.display = 'none';
-                        document.getElementById('ai-preview-section').style.display = 'block';
-                        
-                        // Enable Send Gift button
-                        updateSendGiftButtonState();
-                    }, 100);
+                    // Update UI elements
+                    const previewImg = document.getElementById('ai-preview-front');
+                    const previewGreeting = document.getElementById('ai-preview-greeting');
+                    const generateSection = document.getElementById('ai-generate-section');
+                    const previewSection = document.getElementById('ai-preview-section');
+                    
+                    if (previewImg) {
+                        previewImg.src = `data:image/png;base64,${currentAIImage}`;
+                        console.log('🖼️ Preview image updated');
+                    } else {
+                        console.error('❌ Preview image element not found!');
+                    }
+                    
+                    if (previewGreeting) {
+                        previewGreeting.textContent = currentAIGreeting;
+                        console.log('💬 Preview greeting updated');
+                    }
+                    
+                    if (generateSection) generateSection.style.display = 'none';
+                    if (previewSection) previewSection.style.display = 'block';
+                    
+                    console.log('✅ Cached postcard restored successfully!');
                 } else {
-                    // No cache or incomplete data - update button state
-                    setTimeout(() => {
-                        updateSendGiftButtonState();
-                    }, 100);
+                    console.log('📭 No cached postcard found or incomplete data');
                 }
-            }).catch(err => {
-                console.error('Failed to load cache on modal open:', err);
-                setTimeout(() => {
-                    updateSendGiftButtonState();
-                }, 100);
-            });
+                
+                // Update Send Gift button state
+                updateSendGiftButtonState();
+            } catch (err) {
+                console.error('❌ Failed to restore cached postcard:', err);
+                updateSendGiftButtonState();
+            }
             
             // Then load stamps inline
             await checkStampEligibilityInline();
