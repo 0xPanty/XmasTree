@@ -5621,13 +5621,15 @@
                 
                 console.log('✅ Transaction sent!');
                 console.log('📝 Transaction hash:', tx.hash);
-                btn.innerHTML = '⏳ Confirming transaction...';
                 
-                // Wait for transaction confirmation
-                console.log('⏳ Waiting for confirmation...');
-                const receipt = await tx.wait();
-                console.log('✅ Transaction confirmed!');
-                console.log('📋 Receipt:', receipt);
+                // Don't wait for confirmation - generate image immediately for better UX
+                // Confirmation happens in background
+                tx.wait().then(receipt => {
+                    console.log('✅ Transaction confirmed in background!');
+                    console.log('📋 Receipt:', receipt);
+                }).catch(err => {
+                    console.error('⚠️ Transaction confirmation failed:', err);
+                });
                 
                 btn.innerHTML = '🎨 Generating new image...';
             } catch (error) {
