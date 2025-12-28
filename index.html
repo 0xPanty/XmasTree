@@ -5941,6 +5941,8 @@
                         const personalizedBack = await generateAddressSide(currentAIGreeting, senderName, r.username, stampImage);
                         
                         const giftId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                        
+                        // Full gift data with images (for localStorage)
                         const giftData = {
                             id: giftId,
                             title: title,
@@ -5958,8 +5960,22 @@
                             createdAt: Date.now()
                         };
                         
+                        // Lightweight metadata for IPFS (without images to avoid 413 error)
+                        const ipfsMetadata = {
+                            id: giftId,
+                            title: title,
+                            message: currentAIGreeting,
+                            cover: selectedCover,
+                            sceneType: currentAIScene?.type || 'general',
+                            sceneDescription: currentAIScene?.description || 'holiday celebration',
+                            recipient: { fid: r.fid, username: r.username, pfp: r.pfp_url },
+                            sender: currentUser || { fid: 0, username: 'anonymous', pfp: '' },
+                            createdAt: Date.now(),
+                            note: 'Images stored separately to avoid size limits'
+                        };
+                        
                         // Upload to IPFS via Pinata (with detailed progress)
-                        const USE_IPFS = false; // Temporarily disabled - IPFS upload hangs (no timeout)
+                        const USE_IPFS = true; // Re-enabled - now uploading lightweight metadata only (no images)
                         
                         if (USE_IPFS) {
                             console.log(`📤 [${links.length + 1}/${selectedRecipients.length}] Uploading gift for @${r.username} to IPFS...`);
@@ -5979,7 +5995,7 @@
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({
                                         action: 'upload',
-                                        data: giftData
+                                        data: ipfsMetadata  // Use lightweight metadata without images
                                     })
                                 });
                                 
@@ -7048,6 +7064,12 @@
                         if (result.success && result.data) {
                             console.log('✅ Gift loaded from IPFS');
                             const gift = result.data;
+                            
+                            // Note: IPFS only contains metadata, not images (to avoid 413 error)
+                            if (!gift.aiImage || !gift.aiImageBack) {
+                                console.log('⚠️ Gift loaded from IPFS (metadata only, images not included)');
+                                gift._ipfsMetadataOnly = true;
+                            }
                             
                             if (gift.mode === 'direct') {
                                 showGreetingCard(gift);
