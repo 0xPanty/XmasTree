@@ -2826,74 +2826,15 @@
                         pfp_url: context.user.pfpUrl || 'https://i.imgur.com/HeIi0wU.png'
                     };
                     console.log('✅ User authenticated:', window.currentUser);
-                    
-                    // Update UI to show user info
-                    updateUserUI();
                 } else {
                     console.warn('⚠️ Not running in Farcaster context or user not available');
                     window.currentUser = null;
-                    updateUserUI();
                 }
             } catch (err) {
                 console.error('❌ SDK initialization failed:', err);
                 window.currentUser = null;
-                updateUserUI();
             }
         })();
-        
-        // Update UI based on user login state
-        function updateUserUI() {
-            const header = document.getElementById('main-header');
-            if (!header) return;
-            
-            // Remove old user info if exists
-            const oldInfo = document.getElementById('user-info');
-            if (oldInfo) oldInfo.remove();
-            
-            if (window.currentUser) {
-                // User is logged in - show user info
-                const userInfo = document.createElement('div');
-                userInfo.id = 'user-info';
-                userInfo.style.cssText = `
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    margin-top: 12px;
-                    padding: 8px 16px;
-                    background: rgba(212, 175, 55, 0.1);
-                    border: 1px solid var(--gold);
-                    border-radius: 20px;
-                    backdrop-filter: blur(10px);
-                    font-size: 0.85rem;
-                    color: var(--gold);
-                    justify-content: center;
-                `;
-                userInfo.innerHTML = `
-                    <img src="${window.currentUser.pfp_url}" 
-                         style="width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--gold);"
-                         onerror="this.src='https://i.imgur.com/HeIi0wU.png'">
-                    <span>@${window.currentUser.username}</span>
-                `;
-                header.appendChild(userInfo);
-            } else {
-                // User not logged in - show message
-                const loginMsg = document.createElement('div');
-                loginMsg.id = 'user-info';
-                loginMsg.style.cssText = `
-                    margin-top: 12px;
-                    padding: 8px 16px;
-                    background: rgba(255, 107, 107, 0.1);
-                    border: 1px solid rgba(255, 107, 107, 0.5);
-                    border-radius: 20px;
-                    backdrop-filter: blur(10px);
-                    font-size: 0.75rem;
-                    color: rgba(255, 255, 255, 0.8);
-                    text-align: center;
-                `;
-                loginMsg.textContent = 'Please open in Farcaster app';
-                header.appendChild(loginMsg);
-            }
-        }
     </script>
 
     <!-- Gift Plaza System -->
