@@ -16,6 +16,13 @@ export default async function handler(req, res) {
                 throw new Error('Pinata JWT not configured');
             }
 
+            // Log request details (without sensitive data)
+            console.log('🔍 Pinata upload attempt:', {
+                hasJWT: !!pinataJWT,
+                jwtLength: pinataJWT?.length,
+                dataSize: JSON.stringify(data).length
+            });
+
             // Upload JSON data to Pinata
             const response = await fetch('https://api.pinata.cloud/pinning/pinJSONToIPFS', {
                 method: 'POST',
@@ -35,10 +42,19 @@ export default async function handler(req, res) {
                 })
             });
 
+            console.log('📡 Pinata response:', {
+                status: response.status,
+                statusText: response.statusText,
+                ok: response.ok
+            });
+
             if (!response.ok) {
                 const error = await response.text();
-                console.error('Pinata upload failed:', error);
-                throw new Error('Failed to upload to IPFS');
+                console.error('❌ Pinata upload failed:', {
+                    status: response.status,
+                    error: error
+                });
+                throw new Error(`Failed to upload to IPFS: ${response.status} ${error}`);
             }
 
             const result = await response.json();

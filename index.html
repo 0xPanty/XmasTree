@@ -5937,7 +5937,7 @@
                         };
                         
                         // Upload to IPFS via Pinata (with detailed progress)
-                        const USE_IPFS = false; // TODO: Temporarily disabled - IPFS upload stuck
+                        const USE_IPFS = true; // Re-enabled with better error logging
                         
                         if (USE_IPFS) {
                             console.log(`📤 [${links.length + 1}/${selectedRecipients.length}] Uploading gift for @${r.username} to IPFS...`);
