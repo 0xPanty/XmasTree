@@ -3506,21 +3506,27 @@
             
             console.log('✅ All DOM elements found, starting animation...');
             
-            // Show loading
+            // Force show loading animation
             console.log('📺 Before: loadingDiv.style.display =', loadingDiv.style.display);
             console.log('📺 Before: stampGrid.style.display =', stampGrid.style.display);
             
-            loadingDiv.style.display = 'block';
+            // Force display with !important override
+            loadingDiv.style.cssText = 'display: block !important; padding: 16px;';
             stampGrid.style.display = 'none';
             if (noStampWarning) noStampWarning.style.display = 'none';
             
             console.log('📺 After: loadingDiv.style.display =', loadingDiv.style.display);
             console.log('📺 After: stampGrid.style.display =', stampGrid.style.display);
+            console.log('📺 loadingDiv computed display:', window.getComputedStyle(loadingDiv).display);
             
             console.log('📺 Setting statusIndicator to "Checking..."');
             statusIndicator.textContent = 'Checking...';
             console.log('📺 Current statusIndicator.textContent:', statusIndicator.textContent);
             console.log('📺 Current loadingText.textContent:', loadingText.textContent);
+            
+            // Force update loadingText to be visible
+            loadingText.textContent = 'Starting check...';
+            loadingText.style.cssText = 'margin-top: 8px; font-size: 0.75rem; color: var(--gold); text-align: center; display: block !important;';
             
             try {
                 if (!window.currentUser?.fid) {
