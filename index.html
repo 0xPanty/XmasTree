@@ -5561,11 +5561,11 @@
                 }
                 
                 // Create ethers provider
-                const ethersProvider = new ethers.BrowserProvider(provider);
-                const signer = await ethersProvider.getSigner();
+                let ethersProvider = new ethers.BrowserProvider(provider);
+                let signer = await ethersProvider.getSigner();
                 
                 // Check network (must be Base = 8453)
-                const network = await ethersProvider.getNetwork();
+                let network = await ethersProvider.getNetwork();
                 console.log('🌐 Current network:', network.chainId.toString());
                 
                 if (network.chainId !== 8453n) {
@@ -5577,7 +5577,14 @@
                             params: [{ chainId: '0x2105' }], // Base = 8453 = 0x2105
                         });
                         console.log('✅ Switched to Base');
+                        
+                        // IMPORTANT: Recreate provider and signer after network switch
+                        ethersProvider = new ethers.BrowserProvider(provider);
+                        signer = await ethersProvider.getSigner();
+                        network = await ethersProvider.getNetwork();
+                        console.log('✅ Verified network:', network.chainId.toString());
                     } catch (switchError) {
+                        console.error('Network switch failed:', switchError);
                         throw new Error('Please switch to Base network in your wallet');
                     }
                 }
