@@ -5564,6 +5564,24 @@
                 const ethersProvider = new ethers.BrowserProvider(provider);
                 const signer = await ethersProvider.getSigner();
                 
+                // Check network (must be Base = 8453)
+                const network = await ethersProvider.getNetwork();
+                console.log('🌐 Current network:', network.chainId.toString());
+                
+                if (network.chainId !== 8453n) {
+                    // Try to switch to Base
+                    console.log('⚠️ Wrong network, switching to Base...');
+                    try {
+                        await provider.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x2105' }], // Base = 8453 = 0x2105
+                        });
+                        console.log('✅ Switched to Base');
+                    } catch (switchError) {
+                        throw new Error('Please switch to Base network in your wallet');
+                    }
+                }
+                
                 // USDC contract on Base
                 const usdcAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
                 const usdcAbi = [
@@ -5574,6 +5592,9 @@
                 
                 // Check user USDC balance first
                 const userAddress = await signer.getAddress();
+                console.log('👤 User address:', userAddress);
+                console.log('💳 Payment to:', PAYMENT_ADDRESS);
+                
                 const balance = await usdcContract.balanceOf(userAddress);
                 const requiredAmount = (REGENERATE_COST * 1000000).toString(); // 0.1 USDC
                 
@@ -5584,10 +5605,12 @@
                     throw new Error(`Insufficient USDC balance!\n\nYou need ${REGENERATE_COST} USDC\nYour balance: ${ethers.formatUnits(balance, 6)} USDC`);
                 }
                 
-                // Send USDC transaction
+                // Send USDC transaction with manual gas limit
+                console.log('📤 Sending USDC transfer...');
                 const tx = await usdcContract.transfer(
                     PAYMENT_ADDRESS,
-                    requiredAmount
+                    requiredAmount,
+                    { gasLimit: 100000 } // Manual gas limit to avoid estimation
                 );
                 
                 console.log('✅ Transaction sent:', tx.hash);
