@@ -5840,7 +5840,8 @@
             console.log('📝 Step 2: Validating recipients...');
             if (selectedRecipients.length === 0) { 
                 console.error('❌ No recipients!');
-                alert('⚠️ Please add at least one recipient\n\nTap the search icon to add friends!'); 
+                showLoading('⚠️ Please add at least one recipient!\n\nTap the search icon to add friends!');
+                setTimeout(hideLoading, 3000);
                 return; 
             }
             console.log('✅ Recipients OK:', selectedRecipients.length);
@@ -5848,7 +5849,8 @@
             console.log('📝 Step 3: Validating AI generation...');
             if (!isAIGenerated) { 
                 console.error('❌ No AI postcard!');
-                alert('Please generate AI postcard first!'); 
+                showLoading('⚠️ Please generate AI postcard first!');
+                setTimeout(hideLoading, 3000);
                 return; 
             }
             console.log('✅ AI postcard OK');
@@ -5858,7 +5860,8 @@
             // Check if user has selected a stamp and has enough quantity
             if (!selectedStamp) {
                 console.error('❌ No stamp selected!');
-                alert('⚠️ Please select a stamp first!\n\nStamps are required to send postcards.');
+                showLoading('⚠️ Please select a stamp first!\n\nStamps are required to send postcards.');
+                setTimeout(hideLoading, 3000);
                 return;
             }
             console.log('✅ Stamp selected:', selectedStamp);
@@ -5870,7 +5873,8 @@
             // Check if user owns this stamp
             if (!stamp || !stamp.owned) {
                 console.error('❌ User doesn\'t own this stamp!');
-                alert('⚠️ You don\'t own this stamp!\n\nPlease claim or purchase stamps first.');
+                showLoading('⚠️ You don\'t own this stamp!\n\nPlease claim or purchase stamps first.');
+                setTimeout(hideLoading, 3000);
                 return;
             }
             console.log('✅ User owns stamp');
@@ -5888,37 +5892,27 @@
                 
                 if (availableStamps < requiredStamps) {
                     console.error('❌ Not enough stamps!', { required: requiredStamps, available: availableStamps });
-                    alert(
+                    showLoading(
                         `⚠️ Not enough stamps!\n\n` +
                         `Sending to ${requiredStamps} friend${requiredStamps > 1 ? 's' : ''} requires ${requiredStamps} stamp${requiredStamps > 1 ? 's' : ''} 🎫\n` +
                         `You have: ${availableStamps} stamp${availableStamps !== 1 ? 's' : ''}\n\n` +
                         `Please purchase more stamps or reduce recipients.`
                     );
+                    setTimeout(hideLoading, 3000);
                     return;
                 }
                 console.log('✅ Stamp quantity OK');
                 
-                console.log('📝 Step 7: Showing confirmation dialog...');
-                // Confirm consumption
-                const confirmed = confirm(
-                    `📮 Confirm Send\n\n` +
-                    `Recipients: ${requiredStamps} friend${requiredStamps > 1 ? 's' : ''}\n` +
-                    `Cost: ${requiredStamps} stamp${requiredStamps > 1 ? 's' : ''} 🎫\n` +
-                    `Remaining after send: ${availableStamps - requiredStamps} stamp${availableStamps - requiredStamps !== 1 ? 's' : ''}\n\n` +
-                    `Continue?`
-                );
-                
-                console.log('User confirmed?', confirmed);
-                if (!confirmed) {
-                    console.log('❌ User cancelled');
-                    return;
-                }
-                console.log('✅ User confirmed, consuming stamps...');
+                console.log('📝 Step 7: Consuming stamps (auto-confirm, no modal)...');
+                // Auto-confirm - Farcaster Mini App doesn't support confirm()
+                // User already selected stamp and recipients, just proceed
+                console.log('✅ Auto-confirmed, consuming stamps...');
                 
                 // Consume stamps
                 stamp.quantity -= requiredStamps;
                 const userFid = getUserFid();
                 saveUserStamps(userFid);
+                console.log('✅ Stamps consumed:', requiredStamps, 'Remaining:', stamp.quantity);
             }
             
             // Payment logic removed - now just sends beautiful postcards!
