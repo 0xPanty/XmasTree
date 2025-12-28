@@ -5722,17 +5722,42 @@
                     aiGenerationCount++;
                     console.log('🔢 Generation count:', aiGenerationCount);
                     
-                    // Update preview
-                    const previewImg = document.getElementById('ai-preview-image');
+                    // Update preview - use correct element IDs
+                    const previewFront = document.getElementById('ai-preview-front');
                     const previewGreeting = document.getElementById('ai-preview-greeting');
                     
-                    if (previewImg && previewGreeting) {
-                        previewImg.src = `data:image/png;base64,${currentAIImage}`;
-                        previewGreeting.textContent = currentAIGreeting;
-                        console.log('🖼️ Preview updated successfully!');
+                    if (previewFront) {
+                        previewFront.src = `data:image/png;base64,${currentAIImage}`;
+                        console.log('🖼️ Front image updated!');
                     } else {
-                        console.error('❌ Preview elements not found!');
+                        console.error('❌ ai-preview-front element not found!');
                     }
+                    
+                    if (previewGreeting) {
+                        previewGreeting.textContent = currentAIGreeting;
+                        console.log('💬 Greeting text updated!');
+                    } else {
+                        console.error('❌ ai-preview-greeting element not found!');
+                    }
+                    
+                    // Generate back side with new greeting
+                    const senderName = window.currentUser?.username || 'You';
+                    console.log('📝 Generating back side...');
+                    
+                    generateAddressSide(
+                        currentAIGreeting,
+                        senderName,
+                        [],
+                        null
+                    ).then(backImage => {
+                        const backElement = document.getElementById('ai-preview-back');
+                        if (backElement) {
+                            backElement.src = backImage;
+                            console.log('💌 Back side updated!');
+                        }
+                    }).catch(err => {
+                        console.error('⚠️ Failed to generate back side:', err);
+                    });
                     
                     // Save new generation to cache
                     const userFid = getUserFid();
@@ -5742,8 +5767,7 @@
                     btn.disabled = false;
                     btn.innerHTML = '🔄 REGENERATE (0.1 USDC)';
                     
-                    // Show success message
-                    alert('✅ New postcard generated!\n\nYour payment was successful.');
+                    console.log('✅ Regeneration complete! Both sides updated.');
                 } else {
                     console.error('❌ API returned error:', data.error);
                     throw new Error(data.error || 'Regeneration failed');
