@@ -5621,7 +5621,15 @@
                 
                 console.log('✅ Transaction sent!');
                 console.log('📝 Transaction hash:', tx.hash);
-                btn.innerHTML = '⏳ Confirming...';
+                btn.innerHTML = '⏳ Confirming transaction...';
+                
+                // Wait for transaction confirmation
+                console.log('⏳ Waiting for confirmation...');
+                const receipt = await tx.wait();
+                console.log('✅ Transaction confirmed!');
+                console.log('📋 Receipt:', receipt);
+                
+                btn.innerHTML = '🎨 Generating new image...';
             } catch (error) {
                 console.error('❌ Payment failed:', error);
                 alert(`❌ Payment Failed\n\n${error.message || 'User cancelled or payment error'}`);
@@ -5630,6 +5638,7 @@
                 return;
             }
             
+            // Payment confirmed, now generate new image
             try {
                 if (!requireAuth('regenerate AI postcards')) {
                     btn.disabled = false;
