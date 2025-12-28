@@ -3308,13 +3308,14 @@
             // Try to restore cached postcard from IndexedDB
             const userFid = window.currentUser.fid;
             loadAIPostcardCache(userFid).then(cache => {
-                if (cache && cache.image && !isAIGenerated) {
+                // Always restore cache if it exists (removed !isAIGenerated check)
+                if (cache && cache.image) {
                     console.log('📦 Restoring cached postcard on modal open...');
                     currentAIImage = cache.image;
                     currentAIGreeting = cache.greeting;
                     currentAIScene = cache.scene;
                     isAIGenerated = true;
-                    aiGenerationCount = 1;
+                    aiGenerationCount = cache.generationCount || 1;
                     
                     // Update UI
                     setTimeout(() => {
@@ -5250,7 +5251,8 @@
                     greeting: currentAIGreeting,
                     scene: currentAIScene,
                     generatedAt: Date.now(),
-                    stampUsed: selectedStamp
+                    stampUsed: selectedStamp,
+                    generationCount: aiGenerationCount  // Save generation count
                 };
                 
                 store.put(cache);
@@ -5736,18 +5738,16 @@
                 alert(`Personalized postcard(s) created for ${links.length} friend(s)!\nEach will see their own name!\nLink(s) copied to clipboard!`);
             } else { alert(shareText); }
             
-            // Reset and clear cache (so user can generate new postcard next time)
-            const userFid = getUserFid();
-            clearAIPostcardCache(userFid);
-            console.log('🗑️ Cleared AI postcard cache after sending');
+            // Reset UI state but KEEP the cached postcard (user might want to send to others)
+            // DON'T clear IndexedDB cache - let user reuse the generated image
+            console.log('✅ Postcard sent! Image saved for reuse.');
             
             selectedRecipients = [];
             renderSelectedUsers();
-            isAIGenerated = false;
-            currentAIImage = null;
-            currentAIGreeting = null;
-            currentAIScene = null;
-            aiGenerationCount = 0;
+            // Keep: isAIGenerated = true (so it shows on next open)
+            // Keep: currentAIImage, currentAIGreeting, currentAIScene
+            // Keep: aiGenerationCount
+            // User can still regenerate if they want a new image
             document.getElementById('ai-generate-section').style.display = 'block';
             document.getElementById('ai-preview-section').style.display = 'none';
             document.getElementById('generate-ai-btn').disabled = false;
