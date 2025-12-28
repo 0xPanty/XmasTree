@@ -5566,13 +5566,28 @@
                 
                 // USDC contract on Base
                 const usdcAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
-                const usdcAbi = ['function transfer(address to, uint256 amount) returns (bool)'];
+                const usdcAbi = [
+                    'function transfer(address to, uint256 amount) returns (bool)',
+                    'function balanceOf(address owner) view returns (uint256)'
+                ];
                 const usdcContract = new ethers.Contract(usdcAddress, usdcAbi, signer);
                 
-                // Send USDC transaction (0.1 USDC = 100000 with 6 decimals)
+                // Check user USDC balance first
+                const userAddress = await signer.getAddress();
+                const balance = await usdcContract.balanceOf(userAddress);
+                const requiredAmount = (REGENERATE_COST * 1000000).toString(); // 0.1 USDC
+                
+                console.log('💰 USDC Balance:', ethers.formatUnits(balance, 6));
+                console.log('💰 Required:', REGENERATE_COST, 'USDC');
+                
+                if (balance < requiredAmount) {
+                    throw new Error(`Insufficient USDC balance!\n\nYou need ${REGENERATE_COST} USDC\nYour balance: ${ethers.formatUnits(balance, 6)} USDC`);
+                }
+                
+                // Send USDC transaction
                 const tx = await usdcContract.transfer(
                     PAYMENT_ADDRESS,
-                    (REGENERATE_COST * 1000000).toString()
+                    requiredAmount
                 );
                 
                 console.log('✅ Transaction sent:', tx.hash);
