@@ -3489,11 +3489,10 @@
                 return;
             }
             
-            // Show loading
+            // Show loading with animation
             loadingDiv.style.display = 'block';
             stampGrid.style.display = 'none';
             if (noStampWarning) noStampWarning.style.display = 'none';
-            statusIndicator.textContent = 'Checking...';
             
             try {
                 if (!window.currentUser?.fid) {
@@ -3504,19 +3503,35 @@
                 // Load user stamps FIRST
                 loadUserStamps(userFid);
                 
-                // Real API call with loading animation
-                loadingText.textContent = 'Scanning Neynar Score...';
-                await new Promise(r => setTimeout(r, 500));
+                // Real API call with loading animation (更明显的动画)
+                console.log('🎬 Starting stamp check animation...');
+                console.log('📺 LoadingDiv display:', loadingDiv.style.display);
+                console.log('📺 LoadingText element:', loadingText);
                 
-                loadingText.textContent = 'Checking Power Badge...';
-                await new Promise(r => setTimeout(r, 500));
+                // Step 1: Neynar Score
+                statusIndicator.innerHTML = '<span style="color: #ffa500;">⏳ Checking...</span>';
+                loadingText.textContent = '🔍 Scanning Neynar Score...';
+                console.log('Step 1:', loadingText.textContent);
+                await new Promise(r => setTimeout(r, 1000));
                 
-                loadingText.textContent = 'Verifying Warplet NFT...';
-                await new Promise(r => setTimeout(r, 500));
+                // Step 2: Power Badge
+                statusIndicator.innerHTML = '<span style="color: #ffa500;">⏳ Checking...</span>';
+                loadingText.textContent = '✅ Checking Power Badge...';
+                console.log('Step 2:', loadingText.textContent);
+                await new Promise(r => setTimeout(r, 1000));
                 
-                loadingText.textContent = 'Checking Based NFT...';
+                // Step 3: Warplet NFT
+                statusIndicator.innerHTML = '<span style="color: #ffa500;">⏳ Checking...</span>';
+                loadingText.textContent = '🎨 Verifying Warplet NFT...';
+                console.log('Step 3:', loadingText.textContent);
+                await new Promise(r => setTimeout(r, 1000));
+                
+                // Step 4: Based NFT
+                statusIndicator.innerHTML = '<span style="color: #ffa500;">⏳ Checking...</span>';
+                loadingText.textContent = '🎯 Checking Based NFT...';
+                console.log('Step 4:', loadingText.textContent);
                 await checkBasedNFTOwnership(userFid);
-                await new Promise(r => setTimeout(r, 500));
+                await new Promise(r => setTimeout(r, 1000));
                 
                 // Add timeout protection (10 seconds)
                 const timeoutPromise = new Promise((_, reject) => 
