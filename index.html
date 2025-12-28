@@ -5546,23 +5546,28 @@
             console.log('💰 About to call wallet...');
             
             try {
-                // Use Base Pay for in-app payment (no wallet popup)
-                console.log('💳 Initiating Base Pay...');
+                // Use Farcaster built-in wallet (NOT Base Account)
+                console.log('💳 Calling Farcaster wallet...');
                 
-                // Import Base Pay dynamically
-                const { pay } = await import('https://esm.sh/@base-org/account');
-                
-                const payment = await pay({
-                    amount: REGENERATE_COST.toString(), // '0.1' USD
-                    to: PAYMENT_ADDRESS,
-                    testnet: false // Production mode
-                });
-                
-                if (!payment || !payment.id) {
-                    throw new Error('Payment cancelled or failed');
+                const sdk = window.farcasterSDK;
+                if (!sdk) {
+                    throw new Error('Farcaster SDK not loaded. Please refresh the page.');
                 }
                 
-                console.log('✅ Payment successful:', payment.id);
+                // Call Farcaster's built-in wallet to send USDC (sendToken method)
+                const result = await sdk.actions.sendToken({
+                    token: 'eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // USDC on Base
+                    amount: (REGENERATE_COST * 1000000).toString(), // 0.1 USDC = 100000 (6 decimals)
+                    recipientAddress: PAYMENT_ADDRESS
+                });
+                
+                console.log('✅ Farcaster wallet result:', result);
+                
+                if (!result.transactionId) {
+                    throw new Error('Transaction failed or was cancelled');
+                }
+                
+                console.log('✅ Payment successful:', result.transactionId);
                 btn.innerHTML = '⏳ Regenerating...';
             } catch (error) {
                 console.error('❌ Payment failed:', error);
