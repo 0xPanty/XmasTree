@@ -5871,6 +5871,100 @@
                 saveUserStamps(userFid);
             }
             
+            // ===== PAYMENT LOGIC (if includeGift is true) =====
+            if (includeGift && amount && parseFloat(amount) > 0) {
+                const totalAmount = parseFloat(amount) * selectedRecipients.length;
+                
+                const paymentConfirmed = confirm(
+                    `💰 Payment Required\n\n` +
+                    `Recipients: ${selectedRecipients.length}\n` +
+                    `Amount per person: ${amount} ${token}\n` +
+                    `Total: ${totalAmount} ${token}\n\n` +
+                    `Proceed with payment?`
+                );
+                
+                if (!paymentConfirmed) {
+                    // Restore stamps if payment cancelled
+                    if (selectedStamp !== 'based') {
+                        stamp.quantity += requiredStamps;
+                        saveUserStamps(userFid);
+                    }
+                    return;
+                }
+                
+                try {
+                    // Call Farcaster wallet for payment
+                    console.log(`💳 Requesting payment: ${totalAmount} ${token}`);
+                    
+                    const sdk = window.farcasterSDK;
+                    if (!sdk) {
+                        throw new Error('Farcaster SDK not loaded');
+                    }
+                    
+                    // Get wallet provider
+                    const provider = await sdk.wallet.getEthereumProvider();
+                    if (!provider) {
+                        throw new Error('Wallet not available');
+                    }
+                    
+                    // Create ethers provider
+                    let ethersProvider = new ethers.BrowserProvider(provider);
+                    let signer = await ethersProvider.getSigner();
+                    
+                    // Check network (must be Base = 8453)
+                    let network = await ethersProvider.getNetwork();
+                    const currentChainId = Number(network.chainId);
+                    console.log('🌐 Current network:', currentChainId);
+                    
+                    if (currentChainId !== 8453) {
+                        console.log('⚠️ Switching to Base network...');
+                        await provider.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0x2105' }]
+                        });
+                        
+                        // Recreate provider after switch
+                        ethersProvider = new ethers.BrowserProvider(provider);
+                        signer = await ethersProvider.getSigner();
+                    }
+                    
+                    // USDC contract on Base
+                    const usdcAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+                    const usdcAbi = ['function transfer(address to, uint256 amount) returns (bool)'];
+                    const usdcContract = new ethers.Contract(usdcAddress, usdcAbi, signer);
+                    
+                    // Send USDC payment
+                    const usdcAmount = BigInt(totalAmount * 1000000); // 6 decimals
+                    console.log(`📤 Sending ${totalAmount} USDC...`);
+                    
+                    const tx = await usdcContract.transfer(
+                        PAYMENT_ADDRESS,
+                        usdcAmount,
+                        { gasLimit: 100000 }
+                    );
+                    
+                    console.log('✅ Payment transaction sent:', tx.hash);
+                    
+                    // Don't wait for confirmation, proceed immediately
+                    tx.wait().then(receipt => {
+                        console.log('✅ Payment confirmed on chain:', receipt.transactionHash);
+                    }).catch(err => {
+                        console.error('⚠️ Payment confirmation error:', err);
+                    });
+                    
+                } catch (error) {
+                    console.error('❌ Payment failed:', error);
+                    alert(`❌ Payment Failed\n\n${error.message || 'Please try again'}`);
+                    
+                    // Restore stamps
+                    if (selectedStamp !== 'based') {
+                        stamp.quantity += requiredStamps;
+                        saveUserStamps(userFid);
+                    }
+                    return;
+                }
+            }
+            
             closeDirectGiftModal();
             showLoading('Creating personalized postcards...');
             
