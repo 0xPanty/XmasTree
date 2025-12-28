@@ -3349,6 +3349,25 @@
                     if (generateSection) generateSection.style.display = 'none';
                     if (previewSection) previewSection.style.display = 'block';
                     
+                    // Generate a temporary back side with cached greeting
+                    const senderName = window.currentUser?.username || 'You';
+                    console.log('📝 Generating back side with cached greeting...');
+                    
+                    generateAddressSide(
+                        currentAIGreeting,
+                        senderName,
+                        [], // No recipients yet
+                        null // No stamp overlay (will be added when sending)
+                    ).then(backImage => {
+                        const backElement = document.getElementById('ai-preview-back');
+                        if (backElement) {
+                            backElement.src = backImage;
+                            console.log('💌 Back side generated with cached greeting');
+                        }
+                    }).catch(err => {
+                        console.error('⚠️ Failed to generate back side:', err);
+                    });
+                    
                     console.log('✅ Cached postcard restored successfully!');
                 } else {
                     console.log('📭 No cached postcard found or incomplete data');
