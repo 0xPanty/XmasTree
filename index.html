@@ -5513,12 +5513,22 @@
         }
         
         async function regenerateAIPostcard() {
-            // Payment confirmation
-            if (!confirm(`Regeneration costs ${REGENERATE_COST} USDC\n\n✅ Will call your wallet for payment\n\nContinue?`)) {
+            console.log('🔄 Regenerate button clicked');
+            
+            // Check if button element exists
+            const btn = document.getElementById('regenerate-ai-btn');
+            if (!btn) {
+                console.error('❌ Regenerate button not found in DOM');
+                alert('Error: Regenerate button not found. Please refresh the page.');
                 return;
             }
             
-            const btn = document.getElementById('regenerate-ai-btn');
+            // Payment confirmation
+            if (!confirm(`Regeneration costs ${REGENERATE_COST} USDC\n\n✅ Will call your wallet for payment\n\nContinue?`)) {
+                console.log('⚠️ User cancelled payment confirmation');
+                return;
+            }
+            
             btn.disabled = true;
             btn.innerHTML = '💰 Calling wallet...';
             
@@ -5747,13 +5757,10 @@
             // Keep: isAIGenerated = true (so it shows on next open)
             // Keep: currentAIImage, currentAIGreeting, currentAIScene
             // Keep: aiGenerationCount
-            // User can still regenerate if they want a new image
-            document.getElementById('ai-generate-section').style.display = 'block';
-            document.getElementById('ai-preview-section').style.display = 'none';
-            document.getElementById('generate-ai-btn').disabled = false;
-            document.getElementById('generate-ai-btn').innerHTML = '🎨 Generate AI Postcard';
+            // Keep preview section visible so user can regenerate or send to others
+            // DON'T switch back to generate section - keep showing the generated postcard
             
-            // Disable Send Gift button
+            // Disable Send Gift button (no recipients selected)
             updateSendGiftButtonState();
         }
         
