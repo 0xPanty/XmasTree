@@ -5546,7 +5546,7 @@
             console.log('💰 About to call wallet...');
             
             try {
-                // Use Farcaster built-in wallet (NOT Base Account)
+                // Use Farcaster wallet via wallet.getEthereumProvider()
                 console.log('💳 Calling Farcaster wallet...');
                 
                 const sdk = window.farcasterSDK;
@@ -5554,21 +5554,29 @@
                     throw new Error('Farcaster SDK not loaded. Please refresh the page.');
                 }
                 
-                // Call Farcaster's built-in wallet to send USDC (sendToken method)
-                const result = await sdk.actions.sendToken({
-                    token: 'eip155:8453/erc20:0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // USDC on Base
-                    amount: (REGENERATE_COST * 1000000).toString(), // 0.1 USDC = 100000 (6 decimals)
-                    recipientAddress: PAYMENT_ADDRESS
-                });
-                
-                console.log('✅ Farcaster wallet result:', result);
-                
-                if (!result.transactionId) {
-                    throw new Error('Transaction failed or was cancelled');
+                // Get Ethereum provider from Farcaster
+                const provider = await sdk.wallet.getEthereumProvider();
+                if (!provider) {
+                    throw new Error('Wallet not available');
                 }
                 
-                console.log('✅ Payment successful:', result.transactionId);
-                btn.innerHTML = '⏳ Regenerating...';
+                // Create ethers provider
+                const ethersProvider = new ethers.BrowserProvider(provider);
+                const signer = await ethersProvider.getSigner();
+                
+                // USDC contract on Base
+                const usdcAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+                const usdcAbi = ['function transfer(address to, uint256 amount) returns (bool)'];
+                const usdcContract = new ethers.Contract(usdcAddress, usdcAbi, signer);
+                
+                // Send USDC transaction (0.1 USDC = 100000 with 6 decimals)
+                const tx = await usdcContract.transfer(
+                    PAYMENT_ADDRESS,
+                    (REGENERATE_COST * 1000000).toString()
+                );
+                
+                console.log('✅ Transaction sent:', tx.hash);
+                btn.innerHTML = '⏳ Waiting for confirmation...';
             } catch (error) {
                 console.error('❌ Payment failed:', error);
                 alert(`❌ Payment Failed\n\n${error.message || 'User cancelled or payment error'}`);
