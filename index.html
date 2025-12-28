@@ -2098,7 +2098,7 @@
                             </div>
                         </div>
                         
-                        <button type="button" id="regenerate-ai-btn" onclick="regenerateAIPostcard()" style="width:100%; padding:12px; background:linear-gradient(135deg, #f093fb, #f5576c); border:none; color:#fff; border-radius:8px; cursor:pointer; font-weight:bold;">
+                        <button type="button" id="regenerate-ai-btn" onclick="regenerateAIPostcard()" style="width:100%; padding:12px; background:linear-gradient(135deg, #f093fb, #f5576c); border:none; color:#fff; border-radius:8px; cursor:pointer; font-weight:bold; pointer-events:auto !important; position:relative; z-index:999;">
                             🔄 REGENERATE (0.1 USDC)
                         </button>
                     </div>
@@ -5514,7 +5514,6 @@
         
         async function regenerateAIPostcard() {
             console.log('🔄 Regenerate button clicked');
-            alert('🔄 Regenerate button clicked! (Test)');  // 测试：按钮是否触发
             
             // Check if button element exists
             const btn = document.getElementById('regenerate-ai-btn');
