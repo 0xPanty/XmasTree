@@ -5514,6 +5514,7 @@
         
         async function regenerateAIPostcard() {
             console.log('🔄 Regenerate button clicked');
+            alert('🔄 Regenerate button clicked! (Test)');  // 测试：按钮是否触发
             
             // Check if button element exists
             const btn = document.getElementById('regenerate-ai-btn');
@@ -5523,14 +5524,27 @@
                 return;
             }
             
+            console.log('✅ Button element found');
+            
+            // Check authentication first
+            if (!requireAuth('regenerate postcards')) {
+                return;
+            }
+            
+            console.log('✅ User authenticated');
+            
             // Payment confirmation
-            if (!confirm(`Regeneration costs ${REGENERATE_COST} USDC\n\n✅ Will call your wallet for payment\n\nContinue?`)) {
+            const confirmResult = confirm(`Regeneration costs ${REGENERATE_COST} USDC\n\n✅ Will call your wallet for payment\n\nContinue?`);
+            console.log('💬 Confirm dialog result:', confirmResult);
+            
+            if (!confirmResult) {
                 console.log('⚠️ User cancelled payment confirmation');
                 return;
             }
             
             btn.disabled = true;
             btn.innerHTML = '💰 Calling wallet...';
+            console.log('💰 About to call wallet...');
             
             try {
                 // Get Farcaster SDK
