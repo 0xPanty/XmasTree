@@ -5533,95 +5533,95 @@
             console.log('✅ User authenticated');
             
             // Payment confirmation
-            const confirmResult = confirm(`Regeneration costs ${REGENERATE_COST} USDC\n\n✅ Will call your wallet for payment\n\nContinue?`);
-            console.log('💬 Confirm dialog result:', confirmResult);
-            
-            if (!confirmResult) {
-                console.log('⚠️ User cancelled payment confirmation');
-                return;
-            }
-            
             btn.disabled = true;
             btn.innerHTML = '💰 Calling wallet...';
-            console.log('💰 About to call wallet...');
+            console.log('💰 Starting payment flow...');
+            console.log('💰 Regeneration cost:', REGENERATE_COST, 'USDC');
+            console.log('💰 Payment address:', PAYMENT_ADDRESS);
             
             try {
-                // Use Farcaster wallet via wallet.getEthereumProvider()
-                console.log('💳 Calling Farcaster wallet...');
-                
                 const sdk = window.farcasterSDK;
                 if (!sdk) {
                     throw new Error('Farcaster SDK not loaded. Please refresh the page.');
                 }
                 
-                // Get Ethereum provider from Farcaster
+                console.log('🔌 Getting Farcaster wallet provider...');
                 const provider = await sdk.wallet.getEthereumProvider();
                 if (!provider) {
                     throw new Error('Wallet not available');
                 }
+                console.log('✅ Provider obtained');
                 
                 // Create ethers provider
+                console.log('🔗 Creating ethers provider...');
                 let ethersProvider = new ethers.BrowserProvider(provider);
                 let signer = await ethersProvider.getSigner();
                 
-                // Check network (must be Base = 8453)
+                // Check current network
                 let network = await ethersProvider.getNetwork();
-                console.log('🌐 Current network:', network.chainId.toString());
+                const currentChainId = Number(network.chainId);
+                console.log('🌐 Current network chainId:', currentChainId);
                 
-                if (network.chainId !== 8453n) {
-                    // Try to switch to Base
-                    console.log('⚠️ Wrong network, switching to Base...');
+                // Ensure we're on Base (chainId 8453)
+                if (currentChainId !== 8453) {
+                    console.log('⚠️ Wrong network! Need Base (8453), currently on:', currentChainId);
+                    console.log('🔄 Attempting to switch to Base...');
+                    
                     try {
                         await provider.request({
                             method: 'wallet_switchEthereumChain',
                             params: [{ chainId: '0x2105' }], // Base = 8453 = 0x2105
                         });
-                        console.log('✅ Switched to Base');
                         
-                        // IMPORTANT: Recreate provider and signer after network switch
+                        console.log('⏳ Waiting for network switch...');
+                        await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second
+                        
+                        // Recreate provider and signer after switch
+                        console.log('🔄 Recreating provider after network switch...');
                         ethersProvider = new ethers.BrowserProvider(provider);
                         signer = await ethersProvider.getSigner();
                         network = await ethersProvider.getNetwork();
-                        console.log('✅ Verified network:', network.chainId.toString());
+                        
+                        const newChainId = Number(network.chainId);
+                        console.log('✅ Network switched! New chainId:', newChainId);
+                        
+                        if (newChainId !== 8453) {
+                            throw new Error(`Network switch failed! Expected 8453, got ${newChainId}`);
+                        }
                     } catch (switchError) {
-                        console.error('Network switch failed:', switchError);
-                        throw new Error('Please switch to Base network in your wallet');
+                        console.error('❌ Network switch error:', switchError);
+                        throw new Error('Failed to switch to Base network. Please switch manually in your wallet.');
                     }
+                } else {
+                    console.log('✅ Already on Base network');
                 }
+                
+                // Get user address
+                const userAddress = await signer.getAddress();
+                console.log('👤 User address:', userAddress);
                 
                 // USDC contract on Base
                 const usdcAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
-                const usdcAbi = [
-                    'function transfer(address to, uint256 amount) returns (bool)',
-                    'function balanceOf(address owner) view returns (uint256)'
-                ];
+                const requiredAmount = BigInt(REGENERATE_COST * 1000000); // 0.1 USDC = 100000
+                
+                console.log('💳 USDC contract:', usdcAddress);
+                console.log('💵 Amount to transfer:', requiredAmount.toString(), '(', REGENERATE_COST, 'USDC)');
+                
+                // Send USDC transfer directly without balance check
+                console.log('📤 Preparing USDC transfer transaction...');
+                const usdcAbi = ['function transfer(address to, uint256 amount) returns (bool)'];
                 const usdcContract = new ethers.Contract(usdcAddress, usdcAbi, signer);
                 
-                // Check user USDC balance first
-                const userAddress = await signer.getAddress();
-                console.log('👤 User address:', userAddress);
-                console.log('💳 Payment to:', PAYMENT_ADDRESS);
-                
-                const balance = await usdcContract.balanceOf(userAddress);
-                const requiredAmount = (REGENERATE_COST * 1000000).toString(); // 0.1 USDC
-                
-                console.log('💰 USDC Balance:', ethers.formatUnits(balance, 6));
-                console.log('💰 Required:', REGENERATE_COST, 'USDC');
-                
-                if (balance < requiredAmount) {
-                    throw new Error(`Insufficient USDC balance!\n\nYou need ${REGENERATE_COST} USDC\nYour balance: ${ethers.formatUnits(balance, 6)} USDC`);
-                }
-                
-                // Send USDC transaction with manual gas limit
-                console.log('📤 Sending USDC transfer...');
+                console.log('🚀 Sending transaction...');
                 const tx = await usdcContract.transfer(
                     PAYMENT_ADDRESS,
                     requiredAmount,
-                    { gasLimit: 100000 } // Manual gas limit to avoid estimation
+                    { gasLimit: 100000 }
                 );
                 
-                console.log('✅ Transaction sent:', tx.hash);
-                btn.innerHTML = '⏳ Waiting for confirmation...';
+                console.log('✅ Transaction sent!');
+                console.log('📝 Transaction hash:', tx.hash);
+                btn.innerHTML = '⏳ Confirming...';
             } catch (error) {
                 console.error('❌ Payment failed:', error);
                 alert(`❌ Payment Failed\n\n${error.message || 'User cancelled or payment error'}`);
