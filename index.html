@@ -5785,13 +5785,37 @@
         }
         
         async function createDirectGift() {
+            console.log('🎁 Send Gift button clicked!');
+            const debugInfo = {
+                isAIGenerated: isAIGenerated,
+                hasImage: !!currentAIImage,
+                recipients: selectedRecipients.length,
+                selectedStamp: selectedStamp,
+                stampOwned: userStamps[selectedStamp]?.owned
+            };
+            console.log('Debug info:', debugInfo);
+            
+            // Show debug alert in test mode (remove after fixing)
+            if (false) { // Set to true to see debug info
+                alert(`🔍 Debug Info:\n\n` +
+                    `AI Generated: ${debugInfo.isAIGenerated}\n` +
+                    `Has Image: ${debugInfo.hasImage}\n` +
+                    `Recipients: ${debugInfo.recipients}\n` +
+                    `Selected Stamp: ${debugInfo.selectedStamp}\n` +
+                    `Stamp Owned: ${debugInfo.stampOwned}`
+                );
+            }
+            
             const title = generateGiftTitle(); // Auto-generate beautiful title
             const includeGift = document.getElementById('include-gift-money').checked;
             const token = includeGift ? document.getElementById('direct-gift-token').value : null;
             const amount = includeGift ? document.getElementById('direct-gift-amount').value : '0';
             
             if (includeGift && (!amount || parseFloat(amount) <= 0)) { alert('Enter valid amount'); return; }
-            if (selectedRecipients.length === 0) { alert('Select at least one recipient'); return; }
+            if (selectedRecipients.length === 0) { 
+                alert('⚠️ Please add at least one recipient\n\nTap the search icon to add friends!'); 
+                return; 
+            }
             if (!isAIGenerated) { 
                 alert('Please generate AI postcard first!'); 
                 return; 
