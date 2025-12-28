@@ -5860,7 +5860,13 @@
                     
                     // Create a gift for each recipient with personalized address side
                     const links = [];
-                    for (const r of selectedRecipients) {
+                    const totalRecipients = selectedRecipients.length;
+                    
+                    for (let i = 0; i < selectedRecipients.length; i++) {
+                        const r = selectedRecipients[i];
+                        
+                        // Update loading message with progress
+                        showLoading(`Uploading ${i + 1}/${totalRecipients} postcards to IPFS...`);
                         // Generate personalized address side (just for this recipient)
                         const personalizedBack = await generateAddressSide(currentAIGreeting, senderName, r.username, stampImage);
                         
@@ -5886,13 +5892,19 @@
                         };
                         
                         // Upload to IPFS via Pinata (with detailed progress)
-                        const USE_IPFS = false; // TODO: Set to true after testing
+                        const USE_IPFS = true; // Enabled for production
                         
                         if (USE_IPFS) {
                             console.log(`📤 [${links.length + 1}/${selectedRecipients.length}] Uploading gift for @${r.username} to IPFS...`);
                             try {
                                 const startTime = Date.now();
-                                const ipfsResponse = await fetch('/api/pinata', {
+                                
+                                // Add timeout protection (30 seconds)
+                                const timeoutPromise = new Promise((_, reject) => 
+                                    setTimeout(() => reject(new Error('Upload timeout (30s)')), 30000)
+                                );
+                                
+                                const uploadPromise = fetch('/api/pinata', {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({
@@ -5900,6 +5912,8 @@
                                         data: giftData
                                     })
                                 });
+                                
+                                const ipfsResponse = await Promise.race([uploadPromise, timeoutPromise]);
                                 
                                 console.log(`⏱️ API response time: ${Date.now() - startTime}ms`);
                                 const ipfsResult = await ipfsResponse.json();
@@ -5920,7 +5934,8 @@
                                     });
                                 }
                             } catch (err) {
-                                console.error('⚠️ IPFS upload error:', err);
+                                console.error('⚠️ IPFS upload error:', err.message || err);
+                                // Auto-fallback to localStorage if IPFS fails
                                 plazaGifts.push(giftData);
                                 links.push({ 
                                     username: r.username, 
