@@ -5885,42 +5885,51 @@
                             createdAt: Date.now()
                         };
                         
-                        // Upload to IPFS via Pinata
-                        console.log('📤 Uploading gift to IPFS...');
-                        try {
-                            const ipfsResponse = await fetch('/api/pinata', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    action: 'upload',
-                                    data: giftData
-                                })
-                            });
-                            
-                            const ipfsResult = await ipfsResponse.json();
-                            
-                            if (ipfsResult.success) {
-                                console.log('✅ Uploaded to IPFS:', ipfsResult.ipfsHash);
-                                // Use IPFS link
-                                links.push({ 
-                                    username: r.username, 
-                                    url: `${location.origin}${location.pathname}?ipfs=${ipfsResult.ipfsHash}`
+                        // Upload to IPFS via Pinata (with detailed progress)
+                        const USE_IPFS = false; // TODO: Set to true after testing
+                        
+                        if (USE_IPFS) {
+                            console.log(`📤 [${links.length + 1}/${selectedRecipients.length}] Uploading gift for @${r.username} to IPFS...`);
+                            try {
+                                const startTime = Date.now();
+                                const ipfsResponse = await fetch('/api/pinata', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        action: 'upload',
+                                        data: giftData
+                                    })
                                 });
                                 
-                                // Also save to localStorage as backup
-                                plazaGifts.push(giftData);
-                            } else {
-                                console.error('⚠️ IPFS upload failed, using localStorage fallback');
-                                // Fallback to localStorage
+                                console.log(`⏱️ API response time: ${Date.now() - startTime}ms`);
+                                const ipfsResult = await ipfsResponse.json();
+                                
+                                if (ipfsResult.success) {
+                                    console.log(`✅ [${links.length + 1}/${selectedRecipients.length}] Uploaded to IPFS:`, ipfsResult.ipfsHash);
+                                    links.push({ 
+                                        username: r.username, 
+                                        url: `${location.origin}${location.pathname}?ipfs=${ipfsResult.ipfsHash}`
+                                    });
+                                    plazaGifts.push(giftData);
+                                } else {
+                                    console.error('⚠️ IPFS upload failed, using localStorage fallback');
+                                    plazaGifts.push(giftData);
+                                    links.push({ 
+                                        username: r.username, 
+                                        url: `${location.origin}${location.pathname}?gift=${giftId}`
+                                    });
+                                }
+                            } catch (err) {
+                                console.error('⚠️ IPFS upload error:', err);
                                 plazaGifts.push(giftData);
                                 links.push({ 
                                     username: r.username, 
                                     url: `${location.origin}${location.pathname}?gift=${giftId}`
                                 });
                             }
-                        } catch (err) {
-                            console.error('⚠️ IPFS upload error:', err);
-                            // Fallback to localStorage
+                        } else {
+                            // Temporarily skip IPFS, use localStorage only
+                            console.log(`📦 [${links.length + 1}/${selectedRecipients.length}] Saving gift for @${r.username} (IPFS disabled)`);
                             plazaGifts.push(giftData);
                             links.push({ 
                                 username: r.username, 
