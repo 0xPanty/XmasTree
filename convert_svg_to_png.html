@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SVG to PNG Converter</title>
+</head>
+<body>
+    <h2>Convert SVG to PNG</h2>
+    <div>
+        <h3>Icon (200x200)</h3>
+        <canvas id="iconCanvas" width="200" height="200"></canvas>
+        <br>
+        <button onclick="downloadIcon()">Download icon.png</button>
+    </div>
+    <br>
+    <div>
+        <h3>Preview (1200x800)</h3>
+        <canvas id="previewCanvas" width="1200" height="800"></canvas>
+        <br>
+        <button onclick="downloadPreview()">Download preview.png</button>
+    </div>
+
+    <script>
+        // Icon SVG
+        const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#001a10"/>
+  <polygon points="100,20 60,80 75,80 45,130 65,130 30,180 170,180 135,130 155,130 125,80 140,80" fill="#023020"/>
+  <rect x="85" y="180" width="30" height="20" fill="#8B4513"/>
+  <circle cx="100" cy="20" r="10" fill="#FFD700"/>
+  <circle cx="80" cy="60" r="5" fill="#D4AF37"/>
+  <circle cx="120" cy="70" r="5" fill="#D4AF37"/>
+  <circle cx="70" cy="110" r="5" fill="#D4AF37"/>
+  <circle cx="130" cy="120" r="5" fill="#D4AF37"/>
+  <circle cx="90" cy="150" r="5" fill="#D4AF37"/>
+  <circle cx="110" cy="100" r="5" fill="#D4AF37"/>
+</svg>`;
+
+        // Preview SVG
+        const previewSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <rect width="1200" height="800" fill="#001a10"/>
+  <polygon points="600,100 400,350 500,350 350,500 450,500 300,650 900,650 750,500 850,500 700,350 800,350" fill="#023020"/>
+  <rect x="550" y="650" width="100" height="80" fill="#8B4513"/>
+  <circle cx="600" cy="100" r="30" fill="#FFD700"/>
+  <circle cx="500" cy="300" r="15" fill="#D4AF37"/>
+  <circle cx="700" cy="350" r="15" fill="#D4AF37"/>
+  <circle cx="450" cy="450" r="15" fill="#D4AF37"/>
+  <circle cx="750" cy="500" r="15" fill="#D4AF37"/>
+  <circle cx="550" cy="550" r="15" fill="#D4AF37"/>
+  <circle cx="650" cy="400" r="15" fill="#D4AF37"/>
+  <text x="600" y="750" text-anchor="middle" fill="#D4AF37" font-family="serif" font-size="40">Christmas Tree</text>
+</svg>`;
+
+        function svgToPng(svgString, canvas) {
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            const blob = new Blob([svgString], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0);
+                URL.revokeObjectURL(url);
+            };
+            
+            img.src = url;
+        }
+
+        function downloadIcon() {
+            const canvas = document.getElementById('iconCanvas');
+            canvas.toBlob(function(blob) {
+                const link = document.createElement('a');
+                link.download = 'icon.png';
+                link.href = URL.createObjectURL(blob);
+                link.click();
+            });
+        }
+
+        function downloadPreview() {
+            const canvas = document.getElementById('previewCanvas');
+            canvas.toBlob(function(blob) {
+                const link = document.createElement('a');
+                link.download = 'preview.png';
+                link.href = URL.createObjectURL(blob);
+                link.click();
+            });
+        }
+
+        // Convert on load
+        window.onload = function() {
+            svgToPng(iconSvg, document.getElementById('iconCanvas'));
+            svgToPng(previewSvg, document.getElementById('previewCanvas'));
+        };
+    </script>
+</body>
+</html>

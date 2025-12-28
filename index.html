@@ -5884,8 +5884,49 @@
                             sender: currentUser || { fid: 0, username: 'anonymous', pfp: '' },
                             createdAt: Date.now()
                         };
-                        plazaGifts.push(giftData);
-                        links.push({ username: r.username, url: location.origin + location.pathname + '?gift=' + giftId });
+                        
+                        // Upload to IPFS via Pinata
+                        console.log('📤 Uploading gift to IPFS...');
+                        try {
+                            const ipfsResponse = await fetch('/api/pinata', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    action: 'upload',
+                                    data: giftData
+                                })
+                            });
+                            
+                            const ipfsResult = await ipfsResponse.json();
+                            
+                            if (ipfsResult.success) {
+                                console.log('✅ Uploaded to IPFS:', ipfsResult.ipfsHash);
+                                // Use IPFS link
+                                links.push({ 
+                                    username: r.username, 
+                                    url: `${location.origin}${location.pathname}?ipfs=${ipfsResult.ipfsHash}`
+                                });
+                                
+                                // Also save to localStorage as backup
+                                plazaGifts.push(giftData);
+                            } else {
+                                console.error('⚠️ IPFS upload failed, using localStorage fallback');
+                                // Fallback to localStorage
+                                plazaGifts.push(giftData);
+                                links.push({ 
+                                    username: r.username, 
+                                    url: `${location.origin}${location.pathname}?gift=${giftId}`
+                                });
+                            }
+                        } catch (err) {
+                            console.error('⚠️ IPFS upload error:', err);
+                            // Fallback to localStorage
+                            plazaGifts.push(giftData);
+                            links.push({ 
+                                username: r.username, 
+                                url: `${location.origin}${location.pathname}?gift=${giftId}`
+                            });
+                        }
                     }
                     localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
                     
@@ -6747,10 +6788,47 @@
             // Check if user has gifts
             checkMyGifts();
             
-            // Check URL for gift parameter
+            // Check URL for gift parameter (localStorage or IPFS)
             const urlParams = new URLSearchParams(window.location.search);
             const giftId = urlParams.get('gift');
-            if (giftId) {
+            const ipfsHash = urlParams.get('ipfs');
+            
+            if (ipfsHash) {
+                // Load gift from IPFS
+                console.log('🌐 Loading gift from IPFS:', ipfsHash);
+                setTimeout(async () => {
+                    try {
+                        const response = await fetch('/api/pinata', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                action: 'get',
+                                ipfsHash: ipfsHash
+                            })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.success && result.data) {
+                            console.log('✅ Gift loaded from IPFS');
+                            const gift = result.data;
+                            
+                            if (gift.mode === 'direct') {
+                                showGreetingCard(gift);
+                            } else {
+                                openClaimModal(gift.id);
+                            }
+                        } else {
+                            console.error('❌ Failed to load gift from IPFS');
+                            alert('❌ Gift not found\n\nThe link may be invalid or expired.');
+                        }
+                    } catch (err) {
+                        console.error('❌ IPFS load error:', err);
+                        alert('❌ Failed to load gift\n\nPlease try again later.');
+                    }
+                }, 500);
+            } else if (giftId) {
+                // Fallback: Load from localStorage
                 setTimeout(() => {
                     const gift = plazaGifts.find(g => g.id === giftId);
                     if (gift && gift.mode === 'direct') {

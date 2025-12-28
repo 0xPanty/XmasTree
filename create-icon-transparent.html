@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Icon with Transparent Background</title>
+</head>
+<body>
+    <h2>Generate 1024x1024 Icon - Transparent Background</h2>
+    <p>只有圣诞树和装饰，背景透明</p>
+    <canvas id="canvas" width="1024" height="1024"></canvas>
+    <br>
+    <button onclick="download()">Download icon.png</button>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 只包含圣诞树和装饰，没有背景矩形
+        const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 200 200">
+  <polygon points="100,20 60,80 75,80 45,130 65,130 30,180 170,180 135,130 155,130 125,80 140,80" fill="#023020"/>
+  <rect x="85" y="180" width="30" height="20" fill="#8B4513"/>
+  <circle cx="100" cy="20" r="10" fill="#FFD700"/>
+  <circle cx="80" cy="60" r="5" fill="#D4AF37"/>
+  <circle cx="120" cy="70" r="5" fill="#D4AF37"/>
+  <circle cx="70" cy="110" r="5" fill="#D4AF37"/>
+  <circle cx="130" cy="120" r="5" fill="#D4AF37"/>
+  <circle cx="90" cy="150" r="5" fill="#D4AF37"/>
+  <circle cx="110" cy="100" r="5" fill="#D4AF37"/>
+</svg>`;
+
+        function svgToPng() {
+            const img = new Image();
+            const blob = new Blob([iconSvg], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            
+            img.onload = function() {
+                // 不填充背景，保持透明
+                ctx.clearRect(0, 0, 1024, 1024);
+                ctx.drawImage(img, 0, 0, 1024, 1024);
+                URL.revokeObjectURL(url);
+            };
+            
+            img.src = url;
+        }
+
+        function download() {
+            canvas.toBlob(function(blob) {
+                const link = document.createElement('a');
+                link.download = 'icon.png';
+                link.href = URL.createObjectURL(blob);
+                link.click();
+            }, 'image/png');
+        }
+
+        // Auto generate on load
+        window.onload = svgToPng;
+    </script>
+</body>
+</html>

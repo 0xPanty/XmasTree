@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Icon with Matching Background</title>
+</head>
+<body style="background: #FAF0E6;">
+    <h2>Generate 1024x1024 Icon - Background #FAF0E6</h2>
+    <p>背景色：#FAF0E6（和 splashBackgroundColor 完全一致）</p>
+    <canvas id="canvas" width="1024" height="1024" style="border: 1px solid #ccc;"></canvas>
+    <br><br>
+    <button onclick="download()" style="padding: 10px 20px; font-size: 16px;">Download icon.png</button>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 背景色必须是 #FAF0E6
+        const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#FAF0E6"/>
+  <polygon points="100,20 60,80 75,80 45,130 65,130 30,180 170,180 135,130 155,130 125,80 140,80" fill="#023020"/>
+  <rect x="85" y="180" width="30" height="20" fill="#8B4513"/>
+  <circle cx="100" cy="20" r="10" fill="#FFD700"/>
+  <circle cx="80" cy="60" r="5" fill="#D4AF37"/>
+  <circle cx="120" cy="70" r="5" fill="#D4AF37"/>
+  <circle cx="70" cy="110" r="5" fill="#D4AF37"/>
+  <circle cx="130" cy="120" r="5" fill="#D4AF37"/>
+  <circle cx="90" cy="150" r="5" fill="#D4AF37"/>
+  <circle cx="110" cy="100" r="5" fill="#D4AF37"/>
+</svg>`;
+
+        function svgToPng() {
+            const img = new Image();
+            const blob = new Blob([iconSvg], { type: 'image/svg+xml' });
+            const url = URL.createObjectURL(blob);
+            
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, 1024, 1024);
+                URL.revokeObjectURL(url);
+            };
+            
+            img.src = url;
+        }
+
+        function download() {
+            canvas.toBlob(function(blob) {
+                const link = document.createElement('a');
+                link.download = 'icon.png';
+                link.href = URL.createObjectURL(blob);
+                link.click();
+            }, 'image/png');
+        }
+
+        // Auto generate on load
+        window.onload = svgToPng;
+    </script>
+</body>
+</html>
