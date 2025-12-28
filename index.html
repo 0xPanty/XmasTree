@@ -3469,6 +3469,8 @@
         
         // Check stamp eligibility inline (inside the modal)
         async function checkStampEligibilityInline() {
+            console.log('🔍 checkStampEligibilityInline CALLED');
+            
             // Clear fake data first
             clearFakeBasedStamp();
             
@@ -3478,9 +3480,22 @@
             const loadingText = document.getElementById('stamp-loading-inline-text');
             const noStampWarning = document.getElementById('no-stamp-warning');
             
+            console.log('🔍 DOM elements:', {
+                loadingDiv: !!loadingDiv,
+                stampGrid: !!stampGrid,
+                statusIndicator: !!statusIndicator,
+                loadingText: !!loadingText
+            });
+            
             // Verify DOM elements exist
             if (!loadingDiv || !stampGrid || !statusIndicator || !loadingText) {
                 console.error('❌ Missing DOM elements for stamp check');
+                console.error('Missing:', {
+                    loadingDiv: !loadingDiv,
+                    stampGrid: !stampGrid,
+                    statusIndicator: !statusIndicator,
+                    loadingText: !loadingText
+                });
                 // Still try to render what we have
                 if (stampGrid) {
                     stampGrid.style.display = 'grid';
@@ -3489,11 +3504,16 @@
                 return;
             }
             
+            console.log('✅ All DOM elements found, starting animation...');
+            
             // Show loading
             loadingDiv.style.display = 'block';
             stampGrid.style.display = 'none';
             if (noStampWarning) noStampWarning.style.display = 'none';
+            
+            console.log('📺 Setting statusIndicator to "Checking..."');
             statusIndicator.textContent = 'Checking...';
+            console.log('📺 Current statusIndicator:', statusIndicator.textContent);
             
             try {
                 if (!window.currentUser?.fid) {
@@ -3505,16 +3525,24 @@
                 loadUserStamps(userFid);
                 
                 // Real API call with loading animation
+                console.log('🎬 Step 1: Scanning Neynar Score...');
                 loadingText.textContent = 'Scanning Neynar Score...';
+                console.log('📝 loadingText.textContent =', loadingText.textContent);
                 await new Promise(r => setTimeout(r, 500));
                 
+                console.log('🎬 Step 2: Checking Power Badge...');
                 loadingText.textContent = 'Checking Power Badge...';
+                console.log('📝 loadingText.textContent =', loadingText.textContent);
                 await new Promise(r => setTimeout(r, 500));
                 
+                console.log('🎬 Step 3: Verifying Warplet NFT...');
                 loadingText.textContent = 'Verifying Warplet NFT...';
+                console.log('📝 loadingText.textContent =', loadingText.textContent);
                 await new Promise(r => setTimeout(r, 500));
                 
+                console.log('🎬 Step 4: Checking Based NFT...');
                 loadingText.textContent = 'Checking Based NFT...';
+                console.log('📝 loadingText.textContent =', loadingText.textContent);
                 await checkBasedNFTOwnership(userFid);
                 await new Promise(r => setTimeout(r, 500));
                 
