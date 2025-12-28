@@ -4385,6 +4385,13 @@
                     </div>
                 `}
                 
+                ${isBased ? `
+                    <!-- Test Button: Reset Based Stamp -->
+                    <button id="reset-based-stamp" style="width: 100%; padding: 10px; margin-bottom: 10px; border: 1.5px solid rgba(239,68,68,0.6); background: rgba(239,68,68,0.1); color: #ef4444; border-radius: 6px; cursor: pointer; font-size: 0.75rem; font-weight: bold;">
+                        🧪 TEST: Reset Based Stamp
+                    </button>
+                ` : ''}
+                
                 <!-- Close Button -->
                 <button id="close-details" style="width: 100%; padding: 7px; border: 1.5px solid rgba(212,175,55,0.4); background: transparent; color: var(--gold); border-radius: 6px; cursor: pointer; font-size: 0.7rem; font-weight: bold;">Close</button>
             `;
@@ -4402,6 +4409,49 @@
                     modal.remove();
                 }
             };
+            
+            // Reset Based Stamp button (for testing)
+            if (isBased) {
+                const resetBtn = document.getElementById('reset-based-stamp');
+                if (resetBtn) {
+                    resetBtn.onclick = () => {
+                        const confirmed = confirm(
+                            '🧪 TEST MODE\n\n' +
+                            'This will reset your Based stamp data.\n' +
+                            'You can re-mint it again for testing.\n\n' +
+                            'Continue?'
+                        );
+                        
+                        if (confirmed) {
+                            try {
+                                const userFid = getUserFid();
+                                
+                                // Clear Based stamp from userStamps
+                                delete userStamps.based;
+                                
+                                // Save to localStorage
+                                const key = `stamps_${userFid}`;
+                                localStorage.setItem(key, JSON.stringify(userStamps));
+                                
+                                console.log('✅ Based stamp data cleared!');
+                                console.log('Current stamps:', userStamps);
+                                
+                                // Close modal
+                                modal.remove();
+                                
+                                // Refresh stamp grid
+                                renderStampGrid();
+                                
+                                // Show success message
+                                alert('✅ Based stamp reset!\n\nYou can now re-mint it for testing.');
+                            } catch (err) {
+                                console.error('❌ Failed to reset Based stamp:', err);
+                                alert('❌ Reset failed: ' + err.message);
+                            }
+                        }
+                    };
+                }
+            }
             
             // Quantity selector logic
             let purchaseQty = 1;
