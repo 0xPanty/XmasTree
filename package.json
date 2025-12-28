@@ -19,7 +19,8 @@
   },
   "homepage": "https://github.com/0xPanty/XmasTree#readme",
   "dependencies": {
-    "@openzeppelin/contracts": "^5.4.0"
+    "@openzeppelin/contracts": "^5.4.0",
+    "@vercel/kv": "^1.0.1"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",

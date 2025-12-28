@@ -2797,6 +2797,12 @@
                         pfp_url: context.user.pfpUrl || 'https://i.imgur.com/HeIi0wU.png'
                     };
                     console.log('✅ User authenticated:', window.currentUser);
+                    
+                    // Check user's mailbox for new postcards
+                    setTimeout(() => {
+                        checkMyGifts();
+                    }, 1000);
+                    
                 } else {
                     console.warn('⚠️ Not running in Farcaster context or user not available');
                     window.currentUser = null;
@@ -5886,6 +5892,24 @@
                                 
                                 if (ipfsResult.success) {
                                     console.log(`✅ [${links.length + 1}/${selectedRecipients.length}] Uploaded to IPFS:`, ipfsResult.ipfsHash);
+                                    
+                                    // Record in recipient's mailbox
+                                    try {
+                                        await fetch('/api/mailbox', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                action: 'send',
+                                                recipientFid: r.fid,
+                                                ipfsHash: ipfsResult.ipfsHash
+                                            })
+                                        });
+                                        console.log(`📬 Postcard delivered to @${r.username}'s mailbox`);
+                                    } catch (mailboxErr) {
+                                        console.error('⚠️ Failed to deliver to mailbox:', mailboxErr);
+                                        // Continue anyway - user can still use link
+                                    }
+                                    
                                     links.push({ 
                                         username: r.username, 
                                         url: `${location.origin}${location.pathname}?ipfs=${ipfsResult.ipfsHash}`
@@ -5994,24 +6018,143 @@
         }
         
         // Check and show mailbox glow if there are gifts for user
-        function checkMyGifts() {
-            const myGifts = plazaGifts.filter(g => g.mode === 'direct' && g.claimed < g.shares);
-            const mailboxBtn = document.getElementById('mailbox-button');
-            if (myGifts.length > 0) {
-                mailboxBtn.classList.add('has-gift');
-            } else {
-                mailboxBtn.classList.remove('has-gift');
+        async function checkMyGifts() {
+            try {
+                const userFid = getUserFid();
+                if (!userFid) {
+                    console.log('⚠️ No user FID, skipping mailbox check');
+                    return;
+                }
+                
+                // Query mailbox from KV
+                const response = await fetch('/api/mailbox', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'list',
+                        userFid: userFid
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success && result.postcards) {
+                    const unreadCount = result.postcards.filter(p => !p.read).length;
+                    const mailboxBtn = document.getElementById('mailbox-button');
+                    
+                    if (unreadCount > 0) {
+                        mailboxBtn.classList.add('has-gift');
+                        // Update button text to show count
+                        mailboxBtn.textContent = `📬 ${unreadCount}`;
+                        console.log(`📬 You have ${unreadCount} new postcard(s)!`);
+                    } else {
+                        mailboxBtn.classList.remove('has-gift');
+                        mailboxBtn.textContent = '📬';
+                    }
+                    
+                    // Store in window for openMyGifts() to use
+                    window.myMailbox = result.postcards;
+                }
+            } catch (error) {
+                console.error('❌ Failed to check mailbox:', error);
             }
         }
         
-        // Open first available gift
-        function openMyGifts() {
-            const myGifts = plazaGifts.filter(g => g.mode === 'direct' && g.claimed < g.shares);
-            if (myGifts.length > 0) {
-                showGreetingCard(myGifts[0]);
-            } else {
-                showToast('📭 No gifts yet');
+        // Open mailbox and show postcards
+        async function openMyGifts() {
+            const postcards = window.myMailbox || [];
+            
+            if (postcards.length === 0) {
+                showToast('📭 No postcards yet');
+                return;
             }
+            
+            // Show mailbox modal with list of postcards
+            const modal = document.createElement('div');
+            modal.className = 'custom-modal visible';
+            modal.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.8); display:flex; align-items:center; justify-content:center; z-index:10000;';
+            
+            const box = document.createElement('div');
+            box.className = 'modal-box';
+            box.style.cssText = 'max-width:500px; max-height:80vh; overflow-y:auto; background:rgba(0,26,10,0.95); padding:24px; border-radius:16px; border:2px solid var(--gold);';
+            
+            box.innerHTML = `
+                <div style="color:var(--gold); font-size:1.5rem; font-weight:bold; margin-bottom:16px; text-align:center;">
+                    📬 Your Mailbox (${postcards.length})
+                </div>
+                <div style="color:rgba(255,255,255,0.7); font-size:0.85rem; margin-bottom:16px; text-align:center;">
+                    Click any postcard to open
+                </div>
+                <div id="mailbox-list" style="display:flex; flex-direction:column; gap:12px;">
+                    ${postcards.map((card, index) => `
+                        <div class="mailbox-card" data-ipfs="${card.ipfsHash}" data-index="${index}" style="
+                            background:${card.read ? 'rgba(0,0,0,0.3)' : 'linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.1))'};
+                            border:1px solid ${card.read ? 'rgba(255,255,255,0.2)' : 'var(--gold)'};
+                            border-radius:8px;
+                            padding:12px;
+                            cursor:pointer;
+                            transition:all 0.3s ease;
+                        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <div style="font-size:2rem;">${card.read ? '📭' : '💌'}</div>
+                                <div style="flex:1;">
+                                    <div style="color:var(--gold); font-weight:bold;">
+                                        ${card.read ? 'Postcard' : '✨ New Postcard!'}
+                                    </div>
+                                    <div style="color:rgba(255,255,255,0.6); font-size:0.8rem;">
+                                        ${new Date(card.sentAt).toLocaleDateString()}
+                                    </div>
+                                </div>
+                                <div style="color:var(--gold); font-size:1.2rem;">→</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+                <button onclick="this.closest('.custom-modal').remove()" style="
+                    width:100%;
+                    margin-top:16px;
+                    padding:12px;
+                    background:rgba(212,175,55,0.2);
+                    border:1px solid var(--gold);
+                    color:var(--gold);
+                    border-radius:8px;
+                    cursor:pointer;
+                    font-weight:bold;
+                ">Close</button>
+            `;
+            
+            modal.appendChild(box);
+            document.body.appendChild(modal);
+            
+            // Add click handlers to each postcard
+            box.querySelectorAll('.mailbox-card').forEach(card => {
+                card.onclick = async () => {
+                    const ipfsHash = card.dataset.ipfs;
+                    const index = parseInt(card.dataset.index);
+                    
+                    // Mark as read
+                    if (!postcards[index].read) {
+                        try {
+                            await fetch('/api/mailbox', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    action: 'markRead',
+                                    userFid: getUserFid(),
+                                    ipfsHashes: [ipfsHash]
+                                })
+                            });
+                            postcards[index].read = true;
+                        } catch (err) {
+                            console.error('Failed to mark as read:', err);
+                        }
+                    }
+                    
+                    // Close modal and open postcard
+                    modal.remove();
+                    window.location.href = `${location.origin}${location.pathname}?ipfs=${ipfsHash}`;
+                };
+            });
         }
         
         function showToast(message) {
