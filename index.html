@@ -5944,9 +5944,12 @@
                             try {
                                 const startTime = Date.now();
                                 
-                                // Add timeout protection (30 seconds)
+                                // Add timeout protection (10 seconds - reduced for faster fallback)
                                 const timeoutPromise = new Promise((_, reject) => 
-                                    setTimeout(() => reject(new Error('Upload timeout (30s)')), 30000)
+                                    setTimeout(() => {
+                                        console.warn(`⏱️ Upload timeout after 10s, falling back to localStorage`);
+                                        reject(new Error('Upload timeout (10s)'));
+                                    }, 10000)
                                 );
                                 
                                 const uploadPromise = fetch('/api/pinata', {
@@ -5998,12 +6001,14 @@
                                 }
                             } catch (err) {
                                 console.error('⚠️ IPFS upload error:', err.message || err);
+                                console.log(`📦 Falling back to localStorage for @${r.username}`);
                                 // Auto-fallback to localStorage if IPFS fails
                                 plazaGifts.push(giftData);
                                 links.push({ 
                                     username: r.username, 
                                     url: `${location.origin}${location.pathname}?gift=${giftId}`
                                 });
+                                console.log(`✅ Fallback complete, continuing to next recipient...`);
                             }
                         } else {
                             // Temporarily skip IPFS, use localStorage only
@@ -6015,9 +6020,12 @@
                             });
                         }
                     }
+                    
+                    console.log(`🎉 All uploads complete! Generated ${links.length} links`);
                     localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
                     
-                    showShareLinks(links, title, includeGift, amount, token);
+                    console.log(`📋 Showing share links...`);
+                    showShareLinks(links, title);
                     resolve();
                 };
                 stampImage.onerror = () => resolve(); // Continue without stamp if loading fails
