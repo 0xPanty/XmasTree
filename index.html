@@ -2103,35 +2103,6 @@
                         </button>
                     </div>
                 </div>
-                <!-- Gift Money Option -->
-                <div class="form-group">
-                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
-                        <input type="checkbox" id="include-gift-money" onchange="toggleGiftMoney()" checked style="width:18px; height:18px; cursor:pointer;">
-                        <span>Include Gift Money</span>
-                    </label>
-                </div>
-                
-                <!-- Token and Amount (conditional) -->
-                <div id="gift-money-section">
-                    <div style="display:flex; gap:12px;">
-                        <div class="form-group" style="flex:1;">
-                            <label>Token</label>
-                            <select id="direct-gift-token" onchange="toggleCustomToken(); updateDirectPreview();" style="width:100%;">
-                                <option value="USDC">USDC</option>
-                                <option value="ETH">ETH</option>
-                                <option value="CUSTOM">Custom</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="flex:1;">
-                            <label>Amount Each</label>
-                            <input type="number" id="direct-gift-amount" value="0.5" min="0.1" step="0.1" oninput="validateDirectAmount(); updateDirectPreview();">
-                        </div>
-                    </div>
-                    <div id="custom-token-group" class="form-group" style="display:none;">
-                        <label>Custom Token Address</label>
-                        <input type="text" id="custom-token-address" placeholder="0x...">
-                    </div>
-                </div>
                 
                 <!-- Removed Card Cover selection - AI image is the cover -->
                 <div class="form-group" style="display:none;">
@@ -5173,35 +5144,11 @@
         
         function removeUser(index) { selectedRecipients.splice(index, 1); renderSelectedUsers(); updateDirectPreview(); }
         
-        function toggleGiftMoney() {
-            const includeGift = document.getElementById('include-gift-money').checked;
-            document.getElementById('gift-money-section').style.display = includeGift ? 'block' : 'none';
-            updateDirectPreview();
-        }
-        
-        function toggleCustomToken() {
-            const token = document.getElementById('direct-gift-token').value;
-            document.getElementById('custom-token-group').style.display = token === 'CUSTOM' ? 'block' : 'none';
-            updateDirectPreview();
-        }
-        
-        function validateDirectAmount() {
-            const input = document.getElementById('direct-gift-amount');
-            if (parseFloat(input.value) < 0.1) {
-                input.value = '0.1';
-            }
-        }
-        
         function updateDirectPreview() {
-            const amount = document.getElementById('direct-gift-amount').value || '0';
-            let token = document.getElementById('direct-gift-token').value;
-            if (token === 'CUSTOM') token = 'TOKEN';
-            
-            // Only show "each" if 2+ recipients
             const recipientCount = selectedRecipients.length;
-            const eachText = recipientCount > 1 ? ' each' : '';
             
-            document.getElementById('direct-preview-amount').textContent = amount + ' ' + token + eachText;
+            // Just show recipient count (no money involved)
+            document.getElementById('direct-preview-amount').textContent = 'Beautiful Postcard';
             document.getElementById('direct-preview-info').textContent = recipientCount > 0 
                 ? '→ ' + selectedRecipients.map(u => '@' + u.username).join(', ')
                 : 'Select recipient(s) above';
@@ -5807,11 +5754,7 @@
             }
             
             const title = generateGiftTitle(); // Auto-generate beautiful title
-            const includeGift = document.getElementById('include-gift-money').checked;
-            const token = includeGift ? document.getElementById('direct-gift-token').value : null;
-            const amount = includeGift ? document.getElementById('direct-gift-amount').value : '0';
-            
-            if (includeGift && (!amount || parseFloat(amount) <= 0)) { alert('Enter valid amount'); return; }
+            // No money transfer - just beautiful postcards!
             if (selectedRecipients.length === 0) { 
                 alert('⚠️ Please add at least one recipient\n\nTap the search icon to add friends!'); 
                 return; 
@@ -5871,99 +5814,7 @@
                 saveUserStamps(userFid);
             }
             
-            // ===== PAYMENT LOGIC (if includeGift is true) =====
-            if (includeGift && amount && parseFloat(amount) > 0) {
-                const totalAmount = parseFloat(amount) * selectedRecipients.length;
-                
-                const paymentConfirmed = confirm(
-                    `💰 Payment Required\n\n` +
-                    `Recipients: ${selectedRecipients.length}\n` +
-                    `Amount per person: ${amount} ${token}\n` +
-                    `Total: ${totalAmount} ${token}\n\n` +
-                    `Proceed with payment?`
-                );
-                
-                if (!paymentConfirmed) {
-                    // Restore stamps if payment cancelled
-                    if (selectedStamp !== 'based') {
-                        stamp.quantity += requiredStamps;
-                        saveUserStamps(userFid);
-                    }
-                    return;
-                }
-                
-                try {
-                    // Call Farcaster wallet for payment
-                    console.log(`💳 Requesting payment: ${totalAmount} ${token}`);
-                    
-                    const sdk = window.farcasterSDK;
-                    if (!sdk) {
-                        throw new Error('Farcaster SDK not loaded');
-                    }
-                    
-                    // Get wallet provider
-                    const provider = await sdk.wallet.getEthereumProvider();
-                    if (!provider) {
-                        throw new Error('Wallet not available');
-                    }
-                    
-                    // Create ethers provider
-                    let ethersProvider = new ethers.BrowserProvider(provider);
-                    let signer = await ethersProvider.getSigner();
-                    
-                    // Check network (must be Base = 8453)
-                    let network = await ethersProvider.getNetwork();
-                    const currentChainId = Number(network.chainId);
-                    console.log('🌐 Current network:', currentChainId);
-                    
-                    if (currentChainId !== 8453) {
-                        console.log('⚠️ Switching to Base network...');
-                        await provider.request({
-                            method: 'wallet_switchEthereumChain',
-                            params: [{ chainId: '0x2105' }]
-                        });
-                        
-                        // Recreate provider after switch
-                        ethersProvider = new ethers.BrowserProvider(provider);
-                        signer = await ethersProvider.getSigner();
-                    }
-                    
-                    // USDC contract on Base
-                    const usdcAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
-                    const usdcAbi = ['function transfer(address to, uint256 amount) returns (bool)'];
-                    const usdcContract = new ethers.Contract(usdcAddress, usdcAbi, signer);
-                    
-                    // Send USDC payment
-                    const usdcAmount = BigInt(totalAmount * 1000000); // 6 decimals
-                    console.log(`📤 Sending ${totalAmount} USDC...`);
-                    
-                    const tx = await usdcContract.transfer(
-                        PAYMENT_ADDRESS,
-                        usdcAmount,
-                        { gasLimit: 100000 }
-                    );
-                    
-                    console.log('✅ Payment transaction sent:', tx.hash);
-                    
-                    // Don't wait for confirmation, proceed immediately
-                    tx.wait().then(receipt => {
-                        console.log('✅ Payment confirmed on chain:', receipt.transactionHash);
-                    }).catch(err => {
-                        console.error('⚠️ Payment confirmation error:', err);
-                    });
-                    
-                } catch (error) {
-                    console.error('❌ Payment failed:', error);
-                    alert(`❌ Payment Failed\n\n${error.message || 'Please try again'}`);
-                    
-                    // Restore stamps
-                    if (selectedStamp !== 'based') {
-                        stamp.quantity += requiredStamps;
-                        saveUserStamps(userFid);
-                    }
-                    return;
-                }
-            }
+            // Payment logic removed - now just sends beautiful postcards!
             
             closeDirectGiftModal();
             showLoading('Creating personalized postcards...');
@@ -5993,9 +5844,6 @@
                             id: giftId,
                             title: title,
                             message: currentAIGreeting, // Use AI generated greeting
-                            hasGift: includeGift, // Whether includes money
-                            token: token,
-                            amount: amount,
                             cover: selectedCover,
                             aiImage: currentAIImage, // Front side (picture)
                             aiImageBack: personalizedBack, // Personalized back side (address to this recipient)
