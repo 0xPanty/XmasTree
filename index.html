@@ -5832,41 +5832,62 @@
                 );
             }
             
+            console.log('📝 Step 1: Generating title...');
             const title = generateGiftTitle(); // Auto-generate beautiful title
+            console.log('✅ Title generated:', title);
+            
             // No money transfer - just beautiful postcards!
+            console.log('📝 Step 2: Validating recipients...');
             if (selectedRecipients.length === 0) { 
+                console.error('❌ No recipients!');
                 alert('⚠️ Please add at least one recipient\n\nTap the search icon to add friends!'); 
                 return; 
             }
+            console.log('✅ Recipients OK:', selectedRecipients.length);
+            
+            console.log('📝 Step 3: Validating AI generation...');
             if (!isAIGenerated) { 
+                console.error('❌ No AI postcard!');
                 alert('Please generate AI postcard first!'); 
                 return; 
             }
+            console.log('✅ AI postcard OK');
             
             // ===== STAMP CONSUMPTION LOGIC =====
+            console.log('📝 Step 4: Validating stamp...');
             // Check if user has selected a stamp and has enough quantity
             if (!selectedStamp) {
+                console.error('❌ No stamp selected!');
                 alert('⚠️ Please select a stamp first!\n\nStamps are required to send postcards.');
                 return;
             }
+            console.log('✅ Stamp selected:', selectedStamp);
             
+            console.log('📝 Step 5: Checking stamp ownership...');
             const stamp = userStamps[selectedStamp];
+            console.log('Stamp data:', stamp);
             
             // Check if user owns this stamp
             if (!stamp || !stamp.owned) {
+                console.error('❌ User doesn\'t own this stamp!');
                 alert('⚠️ You don\'t own this stamp!\n\nPlease claim or purchase stamps first.');
                 return;
             }
+            console.log('✅ User owns stamp');
             
             // Based stamp has unlimited quantity
             if (selectedStamp === 'based' && stamp.permanent) {
+                console.log('🎯 Based stamp - unlimited quantity');
                 // Unlimited - proceed without consumption
             } else {
+                console.log('📝 Step 6: Checking stamp quantity...');
                 // Check quantity for regular stamps
                 const requiredStamps = selectedRecipients.length; // 1 stamp per friend
                 const availableStamps = stamp.quantity || 0;
+                console.log('Required:', requiredStamps, 'Available:', availableStamps);
                 
                 if (availableStamps < requiredStamps) {
+                    console.error('❌ Not enough stamps!', { required: requiredStamps, available: availableStamps });
                     alert(
                         `⚠️ Not enough stamps!\n\n` +
                         `Sending to ${requiredStamps} friend${requiredStamps > 1 ? 's' : ''} requires ${requiredStamps} stamp${requiredStamps > 1 ? 's' : ''} 🎫\n` +
@@ -5875,7 +5896,9 @@
                     );
                     return;
                 }
+                console.log('✅ Stamp quantity OK');
                 
+                console.log('📝 Step 7: Showing confirmation dialog...');
                 // Confirm consumption
                 const confirmed = confirm(
                     `📮 Confirm Send\n\n` +
@@ -5885,7 +5908,12 @@
                     `Continue?`
                 );
                 
-                if (!confirmed) return;
+                console.log('User confirmed?', confirmed);
+                if (!confirmed) {
+                    console.log('❌ User cancelled');
+                    return;
+                }
+                console.log('✅ User confirmed, consuming stamps...');
                 
                 // Consume stamps
                 stamp.quantity -= requiredStamps;
