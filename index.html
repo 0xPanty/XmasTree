@@ -5621,15 +5621,11 @@
                 
                 console.log('✅ Transaction sent!');
                 console.log('📝 Transaction hash:', tx.hash);
+                console.log('🔗 View on BaseScan:', `https://basescan.org/tx/${tx.hash}`);
                 
-                // Don't wait for confirmation - generate image immediately for better UX
-                // Confirmation happens in background
-                tx.wait().then(receipt => {
-                    console.log('✅ Transaction confirmed in background!');
-                    console.log('📋 Receipt:', receipt);
-                }).catch(err => {
-                    console.error('⚠️ Transaction confirmation failed:', err);
-                });
+                // Note: Farcaster wallet provider doesn't support tx.wait()
+                // Transaction will confirm in ~2 seconds on Base chain
+                // We proceed immediately to generate the image
                 
                 btn.innerHTML = '🎨 Generating new image...';
             } catch (error) {
