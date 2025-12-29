@@ -1776,7 +1776,7 @@
             // Farcaster wallet has issues with gas estimation, so we bypass it
             console.log('🔧 Bypassing gas estimation, using manual gas limit');
             const tx = await contract.mintPostcard(recipientAddress, ipfsCID, cleanMessage, {
-                gasLimit: 250000  // Tested: actual usage is ~232k, so 250k is safe
+                gasLimit: 500000  // Must be high for Pinata's long CID format (bafyXXX...)
             });
             console.log('✅ Transaction sent:', tx.hash);
             console.log('🔗 View on Basescan:', `https://basescan.org/tx/${tx.hash}`);
