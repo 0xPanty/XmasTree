@@ -1532,6 +1532,9 @@
             return ethers.keccak256(ethers.toUtf8Bytes(password));
         }
     </script>
+    
+    <!-- NFT Integration -->
+    <script src="nft-integration.js"></script>
 </head>
 <body>
     <!-- Create Gift Modal -->
@@ -5974,83 +5977,85 @@
                             note: 'Images stored separately to avoid size limits'
                         };
                         
-                        // Upload to IPFS via Pinata (with detailed progress)
-                        const USE_IPFS = true; // Re-enabled - now uploading lightweight metadata only (no images)
+                        // ===== NFT MINTING FLOW =====
+                        // Upload full images to IPFS + Mint NFT on-chain
+                        const USE_NFT = true;
                         
-                        if (USE_IPFS) {
-                            console.log(`📤 [${links.length + 1}/${selectedRecipients.length}] Uploading gift for @${r.username} to IPFS...`);
+                        if (USE_NFT && typeof window.NFTPostcard !== 'undefined') {
+                            console.log(`🎨 [${links.length + 1}/${selectedRecipients.length}] Minting NFT postcard for @${r.username}...`);
+                            
                             try {
-                                const startTime = Date.now();
+                                // Step 1: Upload postcard images to IPFS (via NFT.Storage)
+                                showLoading(`Uploading postcard ${i + 1}/${totalRecipients} to IPFS...`);
                                 
-                                // Add timeout protection (10 seconds - reduced for faster fallback)
-                                const timeoutPromise = new Promise((_, reject) => 
-                                    setTimeout(() => {
-                                        console.warn(`⏱️ Upload timeout after 10s, falling back to localStorage`);
-                                        reject(new Error('Upload timeout (10s)'));
-                                    }, 10000)
+                                const ipfsCID = await window.NFTPostcard.uploadPostcardToIPFS(
+                                    currentAIImage,          // Front image (full size)
+                                    personalizedBack,        // Back image (personalized)
+                                    currentAIGreeting,       // Message
+                                    currentUser || { fid: 0, username: 'anonymous', pfp: '' },
+                                    { fid: r.fid, username: r.username, pfp: r.pfp_url }
                                 );
                                 
-                                const uploadPromise = fetch('/api/pinata', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({
-                                        action: 'upload',
-                                        data: ipfsMetadata  // Use lightweight metadata without images
-                                    })
+                                console.log(`✅ Uploaded to IPFS: ${ipfsCID}`);
+                                
+                                // Step 2: Get recipient's Ethereum address
+                                showLoading(`Getting @${r.username}'s wallet address...`);
+                                
+                                const recipientAddress = await window.NFTPostcard.getAddressFromFid(r.fid);
+                                console.log(`✅ Recipient address: ${recipientAddress}`);
+                                
+                                // Step 3: Mint NFT on-chain
+                                showLoading(`Minting NFT ${i + 1}/${totalRecipients} on Base...`);
+                                
+                                const mintResult = await window.NFTPostcard.mintPostcardNFT(
+                                    recipientAddress,
+                                    ipfsCID,
+                                    currentAIGreeting.substring(0, 200) // Shorten for on-chain storage
+                                );
+                                
+                                console.log(`✅ NFT minted! Token ID: ${mintResult.tokenId}`);
+                                console.log(`   Transaction: ${mintResult.transactionHash}`);
+                                
+                                // Add links for user
+                                links.push({ 
+                                    username: r.username,
+                                    url: `https://basescan.org/tx/${mintResult.transactionHash}`,
+                                    nftUrl: `https://opensea.io/assets/base/${window.NFTPostcard.CONTRACT_ADDRESS}/${mintResult.tokenId}`,
+                                    tokenId: mintResult.tokenId
                                 });
                                 
-                                const ipfsResponse = await Promise.race([uploadPromise, timeoutPromise]);
+                                // Also save to localStorage as backup
+                                plazaGifts.push(giftData);
                                 
-                                console.log(`⏱️ API response time: ${Date.now() - startTime}ms`);
-                                const ipfsResult = await ipfsResponse.json();
-                                
-                                if (ipfsResult.success) {
-                                    console.log(`✅ [${links.length + 1}/${selectedRecipients.length}] Uploaded to IPFS:`, ipfsResult.ipfsHash);
-                                    
-                                    // Record in recipient's mailbox
-                                    try {
-                                        await fetch('/api/mailbox', {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({
-                                                action: 'send',
-                                                recipientFid: r.fid,
-                                                ipfsHash: ipfsResult.ipfsHash
-                                            })
-                                        });
-                                        console.log(`📬 Postcard delivered to @${r.username}'s mailbox`);
-                                    } catch (mailboxErr) {
-                                        console.error('⚠️ Failed to deliver to mailbox:', mailboxErr);
-                                        // Continue anyway - user can still use link
-                                    }
-                                    
-                                    links.push({ 
-                                        username: r.username, 
-                                        url: `${location.origin}${location.pathname}?ipfs=${ipfsResult.ipfsHash}`
-                                    });
-                                    plazaGifts.push(giftData);
-                                } else {
-                                    console.error('⚠️ IPFS upload failed, using localStorage fallback');
-                                    plazaGifts.push(giftData);
-                                    links.push({ 
-                                        username: r.username, 
-                                        url: `${location.origin}${location.pathname}?gift=${giftId}`
-                                    });
-                                }
                             } catch (err) {
-                                console.error('⚠️ IPFS upload error:', err.message || err);
+                                console.error('❌ NFT minting failed:', err);
+                                
+                                // Show error to user
+                                let errorMsg = 'NFT minting failed: ';
+                                if (err.message.includes('rejected')) {
+                                    errorMsg += 'Transaction rejected';
+                                } else if (err.message.includes('insufficient')) {
+                                    errorMsg += 'Insufficient ETH for gas';
+                                } else if (err.message.includes('address')) {
+                                    errorMsg += 'Recipient has no ETH address';
+                                } else {
+                                    errorMsg += err.message;
+                                }
+                                
+                                showLoading(`⚠️ ${errorMsg}`);
+                                await new Promise(resolve => setTimeout(resolve, 3000));
+                                
+                                // Fallback to localStorage
                                 console.log(`📦 Falling back to localStorage for @${r.username}`);
-                                // Auto-fallback to localStorage if IPFS fails
                                 plazaGifts.push(giftData);
                                 links.push({ 
                                     username: r.username, 
                                     url: `${location.origin}${location.pathname}?gift=${giftId}`
                                 });
-                                console.log(`✅ Fallback complete, continuing to next recipient...`);
                             }
                         } else {
-                            // Temporarily skip IPFS, use localStorage only
-                            console.log(`📦 [${links.length + 1}/${selectedRecipients.length}] Saving gift for @${r.username} (IPFS disabled)`);
+                            // NFT integration not loaded, use localStorage only
+                            console.log(`📦 [${links.length + 1}/${selectedRecipients.length}] Saving gift for @${r.username} (NFT disabled)`);
                             plazaGifts.push(giftData);
                             links.push({ 
                                 username: r.username, 

@@ -19,8 +19,7 @@ const CONTRACT_ABI = [
 ];
 
 // NFT.Storage API (free, unlimited storage)
-const NFT_STORAGE_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkaWQ6ZXRocjoweDEyMzQiLCJpc3MiOiJuZnQtc3RvcmFnZSIsImlhdCI6MTYzMzQ2NzY1MiwibmFtZSI6ImNocmlzdG1hcy1wb3N0Y2FyZCJ9.example'; 
-// TODO: Get your own token from https://nft.storage/
+const NFT_STORAGE_TOKEN = '10e8eb67.319f7fe36ec24e86866c884139b87066';
 
 // ============================================
 // IPFS Upload Functions
@@ -285,7 +284,7 @@ async function getAddressFromFid(fid) {
     try {
         const response = await fetch(`https://api.neynar.com/v2/farcaster/user/bulk?fids=${fid}`, {
             headers: {
-                'api_key': 'NEYNAR-API-KEY' // Use your existing Neynar API key
+                'api_key': 'A8C2B3A3-AA8B-4E53-86F3-3E218D70A9BD'
             }
         });
         
