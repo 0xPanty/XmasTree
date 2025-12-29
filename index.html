@@ -1636,7 +1636,18 @@
         console.log('🎨 Minting NFT to:', recipientAddress);
         try {
             const contract = await getContract();
-            const tx = await contract.mintPostcard(recipientAddress, ipfsCID, message.substring(0, 200));
+            
+            // Clean message: remove special characters, keep only basic ASCII + spaces
+            const cleanMessage = message
+                .replace(/[\r\n]+/g, ' ')  // Replace newlines with spaces
+                .replace(/[^\x20-\x7E]/g, '')  // Remove non-printable ASCII
+                .substring(0, 200)
+                .trim();
+            
+            console.log('📝 Original message length:', message.length);
+            console.log('📝 Cleaned message:', cleanMessage);
+            
+            const tx = await contract.mintPostcard(recipientAddress, ipfsCID, cleanMessage);
             console.log('⏳ Transaction:', tx.hash);
             const receipt = await tx.wait();
             
