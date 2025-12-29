@@ -2538,6 +2538,17 @@
                             </div>
                         </div>
                         
+                        <!-- Test: Send to Myself Button (for testing recipient experience) -->
+                        <div id="test-send-myself-section" style="margin-bottom:12px; display:none;">
+                            <button type="button" id="test-send-myself-btn" onclick="handleSendToMyself()" style="width:100%; padding:12px; background:linear-gradient(135deg, #f093fb, #f5576c); border:none; color:#fff; border-radius:8px; cursor:pointer; font-weight:bold; font-size:0.9rem; display:flex; align-items:center; justify-content:center; gap:8px; opacity:0.8;">
+                                <span style="font-size:1rem;">📬</span>
+                                <span>Test: Send to Myself</span>
+                            </button>
+                            <div style="font-size:0.7rem; color:rgba(255,255,255,0.6); margin-top:6px; text-align:center;">
+                                🧪 View as recipient in your mailbox
+                            </div>
+                        </div>
+                        
                         <button type="button" id="regenerate-ai-btn" onclick="regenerateAIPostcard()" style="width:100%; padding:12px; background:linear-gradient(135deg, #f093fb, #f5576c); border:none; color:#fff; border-radius:8px; cursor:pointer; font-weight:bold; pointer-events:auto !important; position:relative; z-index:999;">
                             🔄 REGENERATE (0.1 USDC)
                         </button>
@@ -6024,6 +6035,106 @@
             }
         }
         
+        // Test: Send postcard to myself (for testing recipient experience)
+        async function handleSendToMyself() {
+            const btn = document.getElementById('test-send-myself-btn');
+            const originalHTML = btn.innerHTML;
+            
+            try {
+                // Check if user is logged in
+                const userFid = getUserFid();
+                if (!userFid) {
+                    alert('⚠️ Please login with Farcaster first!');
+                    return;
+                }
+                
+                // Check if postcard is generated
+                if (!currentAIImage || !isAIGenerated) {
+                    alert('❌ Please generate a postcard first!');
+                    return;
+                }
+                
+                // Disable button
+                btn.disabled = true;
+                btn.innerHTML = '<span>⏳ Sending...</span>';
+                btn.style.opacity = '0.5';
+                
+                // Create gift data
+                const senderName = currentUser?.username || 'Test Sender';
+                const giftId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                
+                // Generate back side with stamp
+                const stampImage = new Image();
+                stampImage.src = selectedStamp ? `/stamp/${selectedStamp}.png` : '/stamp/neynar.png';
+                
+                await new Promise(async (resolve) => {
+                    stampImage.onload = async () => {
+                        const backSide = await generateAddressSide(currentAIGreeting, senderName, '亲爱的朋友', stampImage);
+                        
+                        const giftData = {
+                            id: giftId,
+                            title: 'Test Christmas Postcard',
+                            message: currentAIGreeting,
+                            cover: selectedCover,
+                            aiImage: currentAIImage,
+                            aiImageBack: backSide,
+                            sceneType: currentAIScene?.type || 'general',
+                            sceneDescription: currentAIScene?.description || 'holiday celebration',
+                            shares: 1, type: 'equal', mode: 'direct',
+                            requirePro: false, minScore: 0,
+                            claimed: 0, claimedBy: [],
+                            recipient: { fid: userFid, username: currentUser?.username || 'You', pfp: currentUser?.pfp_url || '' },
+                            sender: { fid: userFid, username: senderName, pfp: currentUser?.pfp_url || '' },
+                            createdAt: Date.now()
+                        };
+                        
+                        // Save to localStorage
+                        plazaGifts.push(giftData);
+                        localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+                        
+                        // If has IPFS CID (minted), save to mailbox
+                        if (currentIPFSCID) {
+                            try {
+                                await fetch('/api/mailbox', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        action: 'send',
+                                        recipientFid: userFid,
+                                        ipfsHash: currentIPFSCID
+                                    })
+                                });
+                                console.log('✅ Postcard sent to mailbox');
+                            } catch (err) {
+                                console.error('⚠️ Failed to send to mailbox:', err);
+                            }
+                        }
+                        
+                        resolve();
+                    };
+                    stampImage.onerror = resolve;
+                });
+                
+                // Reset button
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+                btn.style.opacity = '0.8';
+                
+                // Show success and refresh mailbox
+                alert('✅ Test postcard sent to your mailbox!\n\n📬 Click the mailbox button (top right) to view it!\n\nYou\'ll see how recipients experience your postcard.');
+                
+                // Refresh mailbox check
+                await checkMyGifts();
+                
+            } catch (error) {
+                console.error('❌ Send to myself failed:', error);
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+                btn.style.opacity = '0.8';
+                alert('❌ Failed to send test postcard: ' + error.message);
+            }
+        }
+        
         // Mint Postcard NFT (called from button)
         async function handleMintNFT() {
             console.log('🎨 Mint NFT button clicked');
@@ -6111,8 +6222,11 @@
                 btn.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
                 btn.style.cursor = 'default';
                 
+                // Show test button
+                document.getElementById('test-send-myself-section').style.display = 'block';
+                
                 // Show success message
-                alert('🎉 NFT Minting Started!\n\n✅ Transaction sent: ' + currentNFTTransactionHash + '\n\n⏳ Will confirm in ~2 seconds on Base\n\n🔗 View: https://basescan.org/tx/' + currentNFTTransactionHash + '\n\n✅ You can now send this postcard to friends!');
+                alert('🎉 NFT Minting Started!\n\n✅ Transaction sent: ' + currentNFTTransactionHash + '\n\n⏳ Will confirm in ~2 seconds on Base\n\n🔗 View: https://basescan.org/tx/' + currentNFTTransactionHash + '\n\n✅ You can now send this postcard to friends!\n\n📬 Try "Send to Myself" to test the recipient experience!');
                 
             } catch (error) {
                 console.error('❌ Minting failed:', error);
