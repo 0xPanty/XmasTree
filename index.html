@@ -5466,6 +5466,12 @@
         const REGENERATE_COST = 0.1;
         const PAYMENT_ADDRESS = '0x0f540466695cf91203ed8cbca3065fe7232154b9';
         
+        // NFT minting state (single mint per postcard)
+        let currentNFTTokenId = null;
+        let currentNFTTransactionHash = null;
+        let currentIPFSCID = null;
+        let isNFTMinted = false;
+        
         // ===== IndexedDB Cache System (supports large images) =====
         const DB_NAME = 'XmasTreeDB';
         const DB_VERSION = 1;
@@ -6156,13 +6162,16 @@
                     const links = [];
                     const totalRecipients = selectedRecipients.length;
                     
+                    // Generate UNIFIED back side once (same for all recipients)
+                    showLoading('Generating postcard back...');
+                    const unifiedBack = await generateAddressSide(currentAIGreeting, senderName, '亲爱的朋友', stampImage);
+                    console.log('✅ Unified back side generated');
+                    
                     for (let i = 0; i < selectedRecipients.length; i++) {
                         const r = selectedRecipients[i];
                         
                         // Update loading message with progress
-                        showLoading(`Uploading ${i + 1}/${totalRecipients} postcards to IPFS...`);
-                        // Generate personalized address side (just for this recipient)
-                        const personalizedBack = await generateAddressSide(currentAIGreeting, senderName, r.username, stampImage);
+                        showLoading(`Preparing gift ${i + 1}/${totalRecipients}...`);
                         
                         const giftId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
                         
@@ -6173,7 +6182,7 @@
                             message: currentAIGreeting, // Use AI generated greeting
                             cover: selectedCover,
                             aiImage: currentAIImage, // Front side (picture)
-                            aiImageBack: personalizedBack, // Personalized back side (address to this recipient)
+                            aiImageBack: unifiedBack, // Unified back side (same for all)
                             sceneType: currentAIScene?.type || 'general', // Store scene for reply
                             sceneDescription: currentAIScene?.description || 'holiday celebration',
                             shares: 1, type: 'equal', mode: 'direct',
@@ -6198,51 +6207,59 @@
                             note: 'Images stored separately to avoid size limits'
                         };
                         
-                        // ===== NFT MINTING FLOW =====
-                        // Upload full images to IPFS + Mint NFT on-chain
+                        // ===== NFT MINTING FLOW (UNIFIED - ONE MINT FOR ALL) =====
                         const USE_NFT = true;
                         
                         if (USE_NFT && typeof window.NFTPostcard !== 'undefined') {
-                            console.log(`🎨 [${links.length + 1}/${selectedRecipients.length}] Minting NFT postcard for @${r.username}...`);
-                            
                             try {
-                                // Step 1: Upload postcard images to IPFS (via NFT.Storage)
-                                showLoading(`Uploading postcard ${i + 1}/${totalRecipients} to IPFS...`);
+                                // Check if we've already minted for this postcard
+                                if (!isNFTMinted || !currentNFTTokenId) {
+                                    console.log('🎨 First send - Minting unified NFT...');
+                                    
+                                    // Step 1: Upload postcard images to IPFS (via NFT.Storage)
+                                    showLoading(`Uploading postcard to IPFS...`);
+                                    
+                                    currentIPFSCID = await window.NFTPostcard.uploadPostcardToIPFS(
+                                        currentAIImage,          // Front image
+                                        unifiedBack,             // Back image (unified "Dear Friends")
+                                        currentAIGreeting,       // Message
+                                        currentUser || { fid: 0, username: 'anonymous', pfp: '' },
+                                        { fid: 0, username: 'Friends', pfp: '' } // Generic recipient
+                                    );
+                                    
+                                    console.log(`✅ Uploaded to IPFS: ${currentIPFSCID}`);
+                                    
+                                    // Step 2: Get YOUR Ethereum address (mint to yourself)
+                                    showLoading(`Minting NFT on Base...`);
+                                    
+                                    const userFid = getUserFid();
+                                    const yourAddress = await window.NFTPostcard.getAddressFromFid(userFid);
+                                    console.log(`✅ Your address: ${yourAddress}`);
+                                    
+                                    // Step 3: Mint NFT to yourself
+                                    const mintResult = await window.NFTPostcard.mintPostcardNFT(
+                                        yourAddress,
+                                        currentIPFSCID,
+                                        currentAIGreeting.substring(0, 200)
+                                    );
+                                    
+                                    currentNFTTokenId = mintResult.tokenId;
+                                    currentNFTTransactionHash = mintResult.transactionHash;
+                                    isNFTMinted = true;
+                                    
+                                    console.log(`✅ NFT minted! Token ID: ${currentNFTTokenId}`);
+                                    console.log(`   Transaction: ${currentNFTTransactionHash}`);
+                                } else {
+                                    console.log(`✅ Using existing NFT (Token ID: ${currentNFTTokenId})`);
+                                }
                                 
-                                const ipfsCID = await window.NFTPostcard.uploadPostcardToIPFS(
-                                    currentAIImage,          // Front image (full size)
-                                    personalizedBack,        // Back image (personalized)
-                                    currentAIGreeting,       // Message
-                                    currentUser || { fid: 0, username: 'anonymous', pfp: '' },
-                                    { fid: r.fid, username: r.username, pfp: r.pfp_url }
-                                );
-                                
-                                console.log(`✅ Uploaded to IPFS: ${ipfsCID}`);
-                                
-                                // Step 2: Get recipient's Ethereum address
-                                showLoading(`Getting @${r.username}'s wallet address...`);
-                                
-                                const recipientAddress = await window.NFTPostcard.getAddressFromFid(r.fid);
-                                console.log(`✅ Recipient address: ${recipientAddress}`);
-                                
-                                // Step 3: Mint NFT on-chain
-                                showLoading(`Minting NFT ${i + 1}/${totalRecipients} on Base...`);
-                                
-                                const mintResult = await window.NFTPostcard.mintPostcardNFT(
-                                    recipientAddress,
-                                    ipfsCID,
-                                    currentAIGreeting.substring(0, 200) // Shorten for on-chain storage
-                                );
-                                
-                                console.log(`✅ NFT minted! Token ID: ${mintResult.tokenId}`);
-                                console.log(`   Transaction: ${mintResult.transactionHash}`);
-                                
-                                // Add links for user
+                                // Add NFT link for this recipient (all share same NFT)
                                 links.push({ 
                                     username: r.username,
-                                    url: `https://basescan.org/tx/${mintResult.transactionHash}`,
-                                    nftUrl: `https://opensea.io/assets/base/${window.NFTPostcard.CONTRACT_ADDRESS}/${mintResult.tokenId}`,
-                                    tokenId: mintResult.tokenId
+                                    url: `https://basescan.org/tx/${currentNFTTransactionHash}`,
+                                    nftUrl: `https://opensea.io/assets/base/${window.NFTPostcard.CONTRACT_ADDRESS}/${currentNFTTokenId}`,
+                                    tokenId: currentNFTTokenId,
+                                    ipfsCID: currentIPFSCID
                                 });
                                 
                                 // Also save to localStorage as backup
@@ -7433,6 +7450,7 @@ Write only the reply text, nothing else:`;
         }
         
         // Generate letter content (back side) with stamp
+        // NOTE: Unified greeting for all recipients to enable single NFT mint
         function generateAddressSide(greeting, senderName, recipientNames, stampImg) {
             return new Promise((resolve) => {
                 const canvas = document.createElement('canvas');
@@ -7450,16 +7468,21 @@ Write only the reply text, nothing else:`;
                     ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
                     
                     // Stamp is already in the background image, no need to draw it separately
-                    // "To:" removed - background already has postal elements
                     
-                    // Letter content starts safely within border (avoid stamp area)
-                    let yPos = 480;
-                    
-                    // Main greeting message (handwritten style, more content space)
+                    // UNIFIED GREETING: Always "Dear Friends" for cost efficiency
+                    let yPos = 400;
                     const contentX = 110;
                     const contentWidth = canvas.width - 220;
-                
-                    // Greeting text (elegant pen handwriting style) - AI already includes "Dear XXX"
+                    
+                    // "To: Dear Friends" header
+                    ctx.font = 'bold 56px "Brush Script MT", "Lucida Handwriting", cursive';
+                    ctx.fillStyle = '#2c1810';
+                    ctx.textAlign = 'left';
+                    ctx.fillText('To: 亲爱的朋友', contentX, yPos);
+                    
+                    yPos += 80; // Space after header
+                    
+                    // Main greeting message
                     ctx.font = '48px "Brush Script MT", "Lucida Handwriting", "Segoe Script", "Apple Chancery", cursive';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'left';
