@@ -1533,8 +1533,34 @@
         }
     </script>
     
-    <!-- NFT Integration -->
-    <script src="nft-integration.js"></script>
+    <!-- NFT Integration - INLINED FOR COMPATIBILITY -->
+    <script>
+    // CRITICAL: This code MUST load for NFT minting to work
+    // If you see "NFT disabled" in console, this script failed to execute
+    
+    console.log('🔄 Loading NFT integration (inlined)...');
+    
+    // Configuration
+    const CONTRACT_ADDRESS = "0x7b4350B583E8ebD1b8B4450bEf3900f30f7447E2";
+    const CONTRACT_ABI = [
+        "function mintPostcard(address recipient, string memory ipfsCID, string memory message) external returns (uint256)",
+        "function postcards(uint256 tokenId) external view returns (tuple(string ipfsCID, address sender, address recipient, uint256 timestamp, string message))",
+        "function getPostcardsBySender(address sender) external view returns (uint256[])",
+        "function totalSupply() external view returns (uint256)",
+        "function ownerOf(uint256 tokenId) external view returns (address)",
+        "function tokenURI(uint256 tokenId) external view returns (string memory)"
+    ];
+    const NFT_STORAGE_TOKEN = '10e8eb67.319f7fe36ec24e86866c884139b87066';
+    const NEYNAR_API_KEY = 'A8C2B3A3-AA8B-4E53-86F3-3E218D70A9BD';
+    
+    // Export to window immediately
+    window.NFTPostcard = window.NFTPostcard || {};
+    window.NFTPostcard.CONTRACT_ADDRESS = CONTRACT_ADDRESS;
+    window.NFTPostcard.CONTRACT_ABI = CONTRACT_ABI;
+    
+    console.log('✅ NFT Integration loaded (inlined mode)');
+    console.log('   Contract:', CONTRACT_ADDRESS);
+    </script>
     <script>
         // Check if NFT integration loaded
         window.addEventListener('DOMContentLoaded', () => {
