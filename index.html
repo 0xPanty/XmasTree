@@ -1557,7 +1557,7 @@
         "function ownerOf(uint256 tokenId) external view returns (address)",
         "function tokenURI(uint256 tokenId) external view returns (string memory)"
     ];
-    const NFT_STORAGE_TOKEN = '10e8eb67.319f7fe36ec24e86866c884139b87066';
+    const NFT_STORAGE_TOKEN = '9ad9a160.106f9008ff414ca6943ae3427b4ff99b';
     
     // Helper: Convert base64 to Blob
     function base64ToBlob(base64) {
@@ -6208,7 +6208,7 @@
                         };
                         
                         // ===== NFT MINTING FLOW (UNIFIED - ONE MINT FOR ALL) =====
-                        const USE_NFT = false; // TEMPORARY: Disabled due to API token issue
+                        const USE_NFT = true;
                         
                         if (USE_NFT && typeof window.NFTPostcard !== 'undefined') {
                             try {
