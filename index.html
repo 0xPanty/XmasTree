@@ -1685,17 +1685,31 @@
     // Mint postcard NFT
     async function mintPostcardNFT(recipientAddress, ipfsCID, message) {
         console.log('🎨 Minting NFT to:', recipientAddress);
+        console.log('📋 IPFS CID:', ipfsCID);
+        console.log('📝 Message preview:', message.substring(0, 100) + '...');
+        
         try {
             const contract = await getContract();
+            console.log('✅ Contract connected:', CONTRACT_ADDRESS);
             
-            // Clean message: remove special characters, keep only basic ASCII + spaces
-            const cleanMessage = message
+            // Clean message: keep text readable but contract-safe
+            let cleanMessage = message
                 .replace(/[\r\n]+/g, ' ')  // Replace newlines with spaces
-                .replace(/[^\x20-\x7E]/g, '')  // Remove non-printable ASCII
-                .substring(0, 200)
+                .replace(/\s+/g, ' ')      // Normalize multiple spaces
                 .trim();
             
+            // If too long, truncate at word boundary
+            if (cleanMessage.length > 200) {
+                cleanMessage = cleanMessage.substring(0, 197);
+                const lastSpace = cleanMessage.lastIndexOf(' ');
+                if (lastSpace > 150) {
+                    cleanMessage = cleanMessage.substring(0, lastSpace);
+                }
+                cleanMessage += '...';
+            }
+            
             console.log('📝 Original message length:', message.length);
+            console.log('📝 Cleaned message length:', cleanMessage.length);
             console.log('📝 Cleaned message:', cleanMessage);
             
             const tx = await contract.mintPostcard(recipientAddress, ipfsCID, cleanMessage);
