@@ -6424,7 +6424,8 @@
                         if (USE_NFT && typeof window.NFTPostcard !== 'undefined') {
                             try {
                                 // Check if we've already minted for this postcard
-                                if (!isNFTMinted || !currentNFTTokenId) {
+                                // Use transactionHash instead of tokenId (tokenId is null until confirmed)
+                                if (!isNFTMinted || !currentNFTTransactionHash) {
                                     console.log('🎨 First send - Minting unified NFT...');
                                     
                                     // Step 1: Upload postcard images to IPFS (via NFT.Storage)
@@ -6461,15 +6462,15 @@
                                     console.log(`✅ NFT minted! Token ID: ${currentNFTTokenId}`);
                                     console.log(`   Transaction: ${currentNFTTransactionHash}`);
                                 } else {
-                                    console.log(`✅ Using existing NFT (Token ID: ${currentNFTTokenId})`);
+                                    console.log(`✅ Using existing NFT (Transaction: ${currentNFTTransactionHash})`);
                                 }
                                 
                                 // Add NFT link for this recipient (all share same NFT)
                                 links.push({ 
                                     username: r.username,
                                     url: `https://basescan.org/tx/${currentNFTTransactionHash}`,
-                                    nftUrl: `https://opensea.io/assets/base/${window.NFTPostcard.CONTRACT_ADDRESS}/${currentNFTTokenId}`,
-                                    tokenId: currentNFTTokenId,
+                                    nftUrl: currentNFTTokenId ? `https://opensea.io/assets/base/${window.NFTPostcard.CONTRACT_ADDRESS}/${currentNFTTokenId}` : `https://basescan.org/tx/${currentNFTTransactionHash}`,
+                                    tokenId: currentNFTTokenId || 'Confirming',
                                     ipfsCID: currentIPFSCID
                                 });
                                 
