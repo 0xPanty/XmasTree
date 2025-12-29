@@ -1535,6 +1535,23 @@
     
     <!-- NFT Integration -->
     <script src="nft-integration.js"></script>
+    <script>
+        // Check if NFT integration loaded
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (typeof window.NFTPostcard === 'undefined') {
+                    console.error('❌ NFT Integration failed to load!');
+                    console.error('   Please check:');
+                    console.error('   1. Is nft-integration.js accessible?');
+                    console.error('   2. Try: https://xmas-tree-opal.vercel.app/nft-integration.js');
+                    console.error('   3. Check Network tab in DevTools');
+                } else {
+                    console.log('✅ NFT Integration loaded successfully');
+                    console.log('   Contract:', window.NFTPostcard.CONTRACT_ADDRESS);
+                }
+            }, 1000);
+        });
+    </script>
 </head>
 <body>
     <!-- Create Gift Modal -->
