@@ -1678,7 +1678,28 @@
         const sdk = await import('https://esm.sh/@farcaster/miniapp-sdk');
         const provider = await sdk.sdk.wallet.getEthereumProvider();
         const ethersProvider = new ethers.BrowserProvider(provider);
+        
+        // Check network
+        const network = await ethersProvider.getNetwork();
+        console.log('🌐 Network:', network.name, 'Chain ID:', network.chainId);
+        
+        if (Number(network.chainId) !== 8453) {
+            console.warn('⚠️ Wrong network! Expected Base (8453), got:', network.chainId);
+            throw new Error('Please switch to Base network');
+        }
+        
         const signer = await ethersProvider.getSigner();
+        const signerAddress = await signer.getAddress();
+        console.log('👤 Signer address:', signerAddress);
+        
+        // Check balance
+        const balance = await ethersProvider.getBalance(signerAddress);
+        console.log('💰 Balance:', ethers.formatEther(balance), 'ETH');
+        
+        if (balance === 0n) {
+            throw new Error('Insufficient ETH balance for gas fees');
+        }
+        
         return new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
     }
     
