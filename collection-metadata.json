@@ -1,0 +1,10 @@
+{
+  "name": "Christmas Postcard",
+  "description": "AI-generated Christmas postcards minted as NFTs on Base. Each postcard is a unique greeting sent from one Farcaster user to another, featuring personalized AI-generated imagery and heartfelt messages. Powered by Jingle Gift.",
+  "image": "ipfs://QmYOUR_COLLECTION_IMAGE",
+  "external_link": "https://xmas-tree-opal.vercel.app",
+  "seller_fee_basis_points": 0,
+  "fee_recipient": "0x0000000000000000000000000000000000000000",
+  "banner_image": "ipfs://QmYOUR_BANNER_IMAGE",
+  "featured_image": "ipfs://QmYOUR_FEATURED_IMAGE"
+}
