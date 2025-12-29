@@ -25,7 +25,7 @@ module.exports = {
       url: "https://mainnet.base.org",
       chainId: 8453,
       accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
-      gasPrice: 1000000000, // 1 gwei
+      // Let Hardhat auto-estimate gas price (Base is very cheap, ~0.001-0.01 gwei)
     }
   },
   etherscan: {

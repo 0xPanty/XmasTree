@@ -5,8 +5,8 @@
 // Configuration
 // ============================================
 
-// TODO: Update after deployment
-const CONTRACT_ADDRESS = "0x0000000000000000000000000000000000000000"; // Will be updated after deployment
+// ✅ Deployed to Base Mainnet
+const CONTRACT_ADDRESS = "0x7b4350B583E8ebD1b8B4450bEf3900f30f7447E2";
 
 // Contract ABI - minimized for essential functions only
 const CONTRACT_ABI = [
