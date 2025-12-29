@@ -1772,8 +1772,13 @@
             console.log('📝 Cleaned message length:', cleanMessage.length);
             console.log('📝 Cleaned message:', cleanMessage);
             
-            const tx = await contract.mintPostcard(recipientAddress, ipfsCID, cleanMessage);
-            console.log('⏳ Transaction:', tx.hash);
+            // CRITICAL: Manually specify gas limit (same as Regenerate logic)
+            // Farcaster wallet has issues with gas estimation, so we bypass it
+            console.log('🔧 Bypassing gas estimation, using manual gas limit');
+            const tx = await contract.mintPostcard(recipientAddress, ipfsCID, cleanMessage, {
+                gasLimit: 250000  // Tested: actual usage is ~232k, so 250k is safe
+            });
+            console.log('⏳ Transaction sent:', tx.hash);
             const receipt = await tx.wait();
             
             let tokenId = null;
@@ -5973,15 +5978,10 @@
                 
                 // Mint NFT
                 btn.innerHTML = '<span>⏳ Minting NFT...</span>';
-                
-                // TEMPORARY TEST: Use simple message to isolate the issue
-                const testMessage = "Merry Christmas! Wishing you joy and happiness.";
-                console.log('🧪 TEST: Using simplified message:', testMessage);
-                
                 const mintResult = await window.NFTPostcard.mintPostcardNFT(
                     yourAddress,
                     currentIPFSCID,
-                    testMessage // Use simple test message instead of full greeting
+                    currentAIGreeting.substring(0, 200)
                 );
                 
                 currentNFTTokenId = mintResult.tokenId;
