@@ -2339,6 +2339,17 @@
                             </div>
                         </div>
                         
+                        <!-- Mint NFT Button -->
+                        <div id="mint-nft-section" style="margin-bottom:12px;">
+                            <button type="button" id="mint-nft-btn" onclick="handleMintNFT()" style="width:100%; padding:14px; background:linear-gradient(135deg, #667eea, #764ba2); border:none; color:#fff; border-radius:8px; cursor:pointer; font-weight:bold; font-size:1rem; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 15px rgba(102,126,234,0.4);">
+                                <span style="font-size:1.2rem;">🎨</span>
+                                <span>Mint as NFT ($0.0003)</span>
+                            </button>
+                            <div style="font-size:0.7rem; color:rgba(255,255,255,0.6); margin-top:6px; text-align:center;">
+                                ⚡ One-time mint, share with unlimited friends
+                            </div>
+                        </div>
+                        
                         <button type="button" id="regenerate-ai-btn" onclick="regenerateAIPostcard()" style="width:100%; padding:12px; background:linear-gradient(135deg, #f093fb, #f5576c); border:none; color:#fff; border-radius:8px; cursor:pointer; font-weight:bold; pointer-events:auto !important; position:relative; z-index:999;">
                             🔄 REGENERATE (0.1 USDC)
                         </button>
@@ -5822,6 +5833,109 @@
                 alert(`AI generation failed: ${errorMsg}\n\nPlease check console for details.`);
                 btn.disabled = false;
                 btn.innerHTML = '<span style="font-size:1.2rem;">🎨</span><span>Generate AI Postcard</span>';
+            }
+        }
+        
+        // Mint Postcard NFT (called from button)
+        async function handleMintNFT() {
+            console.log('🎨 Mint NFT button clicked');
+            
+            // Check if already minted
+            if (isNFTMinted && currentNFTTokenId) {
+                alert('✅ Already minted!\n\nToken ID: ' + currentNFTTokenId + '\n\nYou can now send this postcard to friends!');
+                return;
+            }
+            
+            // Check if postcard is generated
+            if (!currentAIImage || !isAIGenerated) {
+                alert('❌ Please generate a postcard first!');
+                return;
+            }
+            
+            const btn = document.getElementById('mint-nft-btn');
+            const originalHTML = btn.innerHTML;
+            
+            try {
+                // Disable button
+                btn.disabled = true;
+                btn.innerHTML = '<span>⏳ Minting...</span>';
+                btn.style.opacity = '0.6';
+                btn.style.cursor = 'not-allowed';
+                
+                // Check NFT integration
+                if (typeof window.NFTPostcard === 'undefined') {
+                    throw new Error('NFT integration not loaded');
+                }
+                
+                // Generate unified back side
+                const senderName = currentUser?.username || 'Anonymous';
+                const stampImg = new Image();
+                stampImg.src = selectedStamp ? `/stamp/${selectedStamp}.png` : '/stamp/neynar.png';
+                await new Promise(resolve => {
+                    stampImg.onload = resolve;
+                    stampImg.onerror = resolve;
+                });
+                
+                btn.innerHTML = '<span>⏳ Creating back side...</span>';
+                const unifiedBack = await generateAddressSide(currentAIGreeting, senderName, '亲爱的朋友', stampImg);
+                console.log('✅ Unified back side generated');
+                
+                // Upload to IPFS
+                btn.innerHTML = '<span>⏳ Uploading to IPFS...</span>';
+                currentIPFSCID = await window.NFTPostcard.uploadPostcardToIPFS(
+                    currentAIImage,
+                    unifiedBack,
+                    currentAIGreeting,
+                    currentUser || { fid: 0, username: 'anonymous', pfp: '' },
+                    { fid: 0, username: 'Friends', pfp: '' }
+                );
+                console.log('✅ Uploaded to IPFS:', currentIPFSCID);
+                
+                // Get your address
+                btn.innerHTML = '<span>⏳ Getting your address...</span>';
+                const userFid = getUserFid();
+                const yourAddress = await window.NFTPostcard.getAddressFromFid(userFid);
+                console.log('✅ Your address:', yourAddress);
+                
+                // Mint NFT
+                btn.innerHTML = '<span>⏳ Minting NFT...</span>';
+                const mintResult = await window.NFTPostcard.mintPostcardNFT(
+                    yourAddress,
+                    currentIPFSCID,
+                    currentAIGreeting.substring(0, 200)
+                );
+                
+                currentNFTTokenId = mintResult.tokenId;
+                currentNFTTransactionHash = mintResult.transactionHash;
+                isNFTMinted = true;
+                
+                console.log('✅ NFT minted! Token ID:', currentNFTTokenId);
+                
+                // Update button to success state
+                btn.innerHTML = '<span style="font-size:1.2rem;">✅</span><span>NFT Minted! Token #' + currentNFTTokenId + '</span>';
+                btn.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
+                btn.style.cursor = 'default';
+                
+                // Show success message
+                alert('🎉 NFT Minted Successfully!\n\nToken ID: ' + currentNFTTokenId + '\n\nTransaction: ' + currentNFTTransactionHash + '\n\n✅ You can now send this postcard to friends!');
+                
+            } catch (error) {
+                console.error('❌ Minting failed:', error);
+                
+                // Restore button
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+                
+                // Show error
+                let errorMsg = 'NFT minting failed: ' + (error.message || 'Unknown error');
+                if (error.message && error.message.includes('rejected')) {
+                    errorMsg = '❌ Transaction rejected\n\nYou cancelled the wallet signature.';
+                } else if (error.message && error.message.includes('insufficient')) {
+                    errorMsg = '❌ Insufficient ETH\n\nYou need ~$0.001 ETH for gas fees.';
+                }
+                alert(errorMsg);
             }
         }
         
