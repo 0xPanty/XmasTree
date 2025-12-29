@@ -1561,15 +1561,49 @@
     
     // Helper: Convert base64 to Blob
     function base64ToBlob(base64) {
-        const parts = base64.split(';base64,');
-        const contentType = parts[0].split(':')[1];
-        const raw = window.atob(parts[1]);
-        const rawLength = raw.length;
-        const uInt8Array = new Uint8Array(rawLength);
-        for (let i = 0; i < rawLength; ++i) {
-            uInt8Array[i] = raw.charCodeAt(i);
+        try {
+            // Validate base64 string
+            if (!base64 || typeof base64 !== 'string') {
+                throw new Error('Invalid base64: not a string');
+            }
+            
+            // Auto-add data URL prefix if missing (for compatibility)
+            if (!base64.startsWith('data:')) {
+                console.log('⚠️ Base64 missing prefix, auto-adding data:image/png;base64,');
+                base64 = 'data:image/png;base64,' + base64;
+            }
+            
+            const parts = base64.split(';base64,');
+            if (parts.length !== 2) {
+                throw new Error('Invalid base64: incorrect format');
+            }
+            
+            const contentType = parts[0].split(':')[1];
+            if (!contentType) {
+                throw new Error('Invalid base64: missing content type');
+            }
+            
+            // Clean base64 string (remove whitespace)
+            const base64Data = parts[1].replace(/\s/g, '');
+            
+            // Validate base64 characters
+            if (!/^[A-Za-z0-9+/=]+$/.test(base64Data)) {
+                throw new Error('Invalid base64: contains invalid characters');
+            }
+            
+            console.log('🔍 Base64 validation passed, decoding...');
+            const raw = window.atob(base64Data);
+            const rawLength = raw.length;
+            const uInt8Array = new Uint8Array(rawLength);
+            for (let i = 0; i < rawLength; ++i) {
+                uInt8Array[i] = raw.charCodeAt(i);
+            }
+            return new Blob([uInt8Array], { type: contentType });
+        } catch (error) {
+            console.error('❌ base64ToBlob failed:', error);
+            console.error('   Base64 prefix:', base64?.substring(0, 50));
+            throw new Error(`Failed to convert base64 to blob: ${error.message}`);
         }
-        return new Blob([uInt8Array], { type: contentType });
     }
     
     // Upload postcard to IPFS
