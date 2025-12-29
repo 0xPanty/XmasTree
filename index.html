@@ -6586,16 +6586,19 @@
                                     console.log(`✅ Using existing NFT (Transaction: ${currentNFTTransactionHash})`);
                                 }
                                 
-                                // Add NFT link for this recipient (all share same NFT)
+                                // Add links for this recipient (website + NFT + transaction)
+                                const giftUrl = `${location.origin}${location.pathname}?gift=${giftId}`;
                                 links.push({ 
                                     username: r.username,
-                                    url: `https://basescan.org/tx/${currentNFTTransactionHash}`,
+                                    url: giftUrl,  // Website link for interactive viewing
                                     nftUrl: currentNFTTokenId ? `https://opensea.io/assets/base/${window.NFTPostcard.CONTRACT_ADDRESS}/${currentNFTTokenId}` : `https://basescan.org/tx/${currentNFTTransactionHash}`,
+                                    txUrl: `https://basescan.org/tx/${currentNFTTransactionHash}`,
                                     tokenId: currentNFTTokenId || 'Confirming',
-                                    ipfsCID: currentIPFSCID
+                                    ipfsCID: currentIPFSCID,
+                                    hasNFT: true  // Flag to show NFT links in share message
                                 });
                                 
-                                // Also save to localStorage as backup
+                                // Also save to localStorage for website viewing
                                 plazaGifts.push(giftData);
                                 
                             } catch (err) {
@@ -6657,9 +6660,23 @@
                     ? `🎁 Gift for @${links[0].username}!\n\n${title}\n💰 ${amount} ${token}\n\n🔗 ${links[0].url}`
                     : `🎁 Christmas Gifts!\n\n${title}\n💰 ${amount} ${token} each\n\n` + links.map(l => `→ @${l.username}: ${l.url}`).join('\n');
             } else {
-                shareText = links.length === 1 
-                    ? `💌 Christmas Card for @${links[0].username}!\n\n${title}\n\n🔗 ${links[0].url}`
-                    : `💌 Christmas Cards!\n\n${title}\n\n` + links.map(l => `→ @${l.username}: ${l.url}`).join('\n');
+                if (links.length === 1) {
+                    const link = links[0];
+                    shareText = `💌 Christmas Postcard for @${link.username}!\n\n${title}\n\n`;
+                    shareText += `🎴 View Card: ${link.url}\n`;
+                    if (link.hasNFT && link.nftUrl) {
+                        shareText += `🎨 Collect NFT: ${link.nftUrl}\n`;
+                        shareText += `🔗 Transaction: ${link.txUrl}`;
+                    }
+                } else {
+                    shareText = `💌 Christmas Postcards!\n\n${title}\n\n`;
+                    links.forEach(l => {
+                        shareText += `→ @${l.username}:\n   🎴 ${l.url}\n`;
+                        if (l.hasNFT && l.nftUrl) {
+                            shareText += `   🎨 ${l.nftUrl}\n`;
+                        }
+                    });
+                }
             }
             
             hideLoading();
