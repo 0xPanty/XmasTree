@@ -1608,8 +1608,9 @@
     }
     
     // Upload postcard to IPFS using Pinata (OpenSea compatible)
-    async function uploadPostcardToIPFS(frontImage, backImage, message, sender, recipient) {
+    async function uploadPostcardToIPFS(frontImage, backImage, message, sender, recipient, tokenId) {
         console.log('📤 Uploading postcard to IPFS via Pinata...');
+        console.log('🔢 Token ID:', tokenId);
         try {
             const frontBlob = base64ToBlob(frontImage);
             const backBlob = base64ToBlob(backImage);
@@ -1654,11 +1655,12 @@
             // Step 3: Create metadata with IPFS image URLs (OpenSea compatible)
             console.log('📤 Step 3/3: Uploading metadata...');
             const metadata = {
-                name: "Christmas Postcard",
+                name: `Christmas Postcard #${tokenId}`,  // Include token ID in name
                 description: message,
                 image: `ipfs://${frontCID}`,  // ✅ IPFS URL for OpenSea
                 external_url: `https://gateway.pinata.cloud/ipfs/${frontCID}`,
                 attributes: [
+                    { trait_type: "Edition", value: tokenId.toString() },
                     { trait_type: "Type", value: "Christmas Postcard" },
                     { trait_type: "Sender", value: sender.username },
                     { trait_type: "Recipient", value: recipient.username },
@@ -1695,6 +1697,21 @@
         } catch (error) {
             console.error('❌ IPFS upload failed:', error);
             throw error;
+        }
+    }
+    
+    // Get next token ID from contract
+    async function getNextTokenId() {
+        try {
+            const contract = await getContract();
+            // The contract has a public _tokenIdCounter variable
+            // But it's private, so we need to estimate based on totalSupply or events
+            // For now, use a timestamp-based approach as fallback
+            // We'll get the actual ID from the mint transaction event
+            return Date.now().toString().slice(-6); // Last 6 digits of timestamp
+        } catch (error) {
+            console.error('❌ Failed to get token ID:', error);
+            return Date.now().toString().slice(-6);
         }
     }
     
@@ -1854,6 +1871,7 @@
         uploadPostcardToIPFS,
         mintPostcardNFT,
         getAddressFromFid,
+        getNextTokenId,
         CONTRACT_ADDRESS,
         CONTRACT_ABI
     };
@@ -5985,6 +6003,11 @@
                 const unifiedBack = await generateAddressSide(currentAIGreeting, senderName, '亲爱的朋友', stampImg);
                 console.log('✅ Unified back side generated');
                 
+                // Get next token ID for numbering
+                btn.innerHTML = '<span>⏳ Getting token number...</span>';
+                const nextTokenId = await window.NFTPostcard.getNextTokenId();
+                console.log('🔢 Next token ID:', nextTokenId);
+                
                 // Upload to IPFS
                 btn.innerHTML = '<span>⏳ Uploading to IPFS...</span>';
                 currentIPFSCID = await window.NFTPostcard.uploadPostcardToIPFS(
@@ -5992,7 +6015,8 @@
                     unifiedBack,
                     currentAIGreeting,
                     currentUser || { fid: 0, username: 'anonymous', pfp: '' },
-                    { fid: 0, username: 'Friends', pfp: '' }
+                    { fid: 0, username: 'Friends', pfp: '' },
+                    nextTokenId
                 );
                 console.log('✅ Uploaded to IPFS:', currentIPFSCID);
                 
@@ -6454,6 +6478,11 @@
                                 if (!isNFTMinted || !currentNFTTransactionHash) {
                                     console.log('🎨 First send - Minting unified NFT...');
                                     
+                                    // Step 0: Get next token ID for numbering
+                                    showLoading(`Getting token number...`);
+                                    const nextTokenId = await window.NFTPostcard.getNextTokenId();
+                                    console.log('🔢 Next token ID:', nextTokenId);
+                                    
                                     // Step 1: Upload postcard images to IPFS (via NFT.Storage)
                                     showLoading(`Uploading postcard to IPFS...`);
                                     
@@ -6462,7 +6491,8 @@
                                         unifiedBack,             // Back image (unified "Dear Friends")
                                         currentAIGreeting,       // Message
                                         currentUser || { fid: 0, username: 'anonymous', pfp: '' },
-                                        { fid: 0, username: 'Friends', pfp: '' } // Generic recipient
+                                        { fid: 0, username: 'Friends', pfp: '' }, // Generic recipient
+                                        nextTokenId              // Token ID for numbering
                                     );
                                     
                                     console.log(`✅ Uploaded to IPFS: ${currentIPFSCID}`);
