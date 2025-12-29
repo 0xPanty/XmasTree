@@ -1417,10 +1417,11 @@
     <!-- thirdweb SDK -->
     <script src="https://cdn.jsdelivr.net/npm/thirdweb@5/dist/thirdweb.umd.js"></script>
     <script>
-        // Contract Configuration
-        const CONTRACT_ADDRESS = '0x5307bFc2F5bB5efC858622aDcAeE60619C51b884';
+        // Payment Contract Configuration (wrapped in IIFE to avoid variable conflicts)
+        (function() {
+        const PAYMENT_CONTRACT_ADDRESS = '0x5307bFc2F5bB5efC858622aDcAeE60619C51b884';
         const BASE_CHAIN_ID = 8453;
-        const CONTRACT_ABI = [
+        const PAYMENT_CONTRACT_ABI = [
             "function createGiftETH(uint256 shares, bytes32 passwordHash, uint8 giftType, bool proOnly, string title, uint256 duration) payable returns (uint256)",
             "function createGiftToken(address token, uint256 amount, uint256 shares, bytes32 passwordHash, uint8 giftType, bool proOnly, string title, uint256 duration) returns (uint256)",
             "function claimGift(uint256 giftId, string password, bool isPro)",
@@ -1509,7 +1510,7 @@
                 
                 web3Signer = await web3Provider.getSigner();
                 connectedAddress = await web3Signer.getAddress();
-                giftContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, web3Signer);
+                giftContract = new ethers.Contract(PAYMENT_CONTRACT_ADDRESS, PAYMENT_CONTRACT_ABI, web3Signer);
                 
                 // Update UI
                 const walletBtn = document.getElementById('wallet-btn');
@@ -1531,6 +1532,11 @@
         function hashPassword(password) {
             return ethers.keccak256(ethers.toUtf8Bytes(password));
         }
+        
+        // Export functions to global scope
+        window.connectWallet = connectWallet;
+        window.hashPassword = hashPassword;
+        })(); // End of payment contract IIFE
     </script>
     
     <!-- NFT Integration - COMPLETE INLINED VERSION -->
