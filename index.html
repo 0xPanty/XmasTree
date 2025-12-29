@@ -5973,10 +5973,15 @@
                 
                 // Mint NFT
                 btn.innerHTML = '<span>⏳ Minting NFT...</span>';
+                
+                // TEMPORARY TEST: Use simple message to isolate the issue
+                const testMessage = "Merry Christmas! Wishing you joy and happiness.";
+                console.log('🧪 TEST: Using simplified message:', testMessage);
+                
                 const mintResult = await window.NFTPostcard.mintPostcardNFT(
                     yourAddress,
                     currentIPFSCID,
-                    currentAIGreeting.substring(0, 200)
+                    testMessage // Use simple test message instead of full greeting
                 );
                 
                 currentNFTTokenId = mintResult.tokenId;
