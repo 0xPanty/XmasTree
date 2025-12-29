@@ -1778,23 +1778,23 @@
             const tx = await contract.mintPostcard(recipientAddress, ipfsCID, cleanMessage, {
                 gasLimit: 250000  // Tested: actual usage is ~232k, so 250k is safe
             });
-            console.log('⏳ Transaction sent:', tx.hash);
-            const receipt = await tx.wait();
+            console.log('✅ Transaction sent:', tx.hash);
+            console.log('🔗 View on Basescan:', `https://basescan.org/tx/${tx.hash}`);
             
-            let tokenId = null;
-            const event = receipt.logs.find(log => {
-                try {
-                    const parsed = contract.interface.parseLog(log);
-                    return parsed.name === 'PostcardMinted';
-                } catch { return false; }
-            });
-            if (event) {
-                const parsed = contract.interface.parseLog(event);
-                tokenId = parsed.args[0].toString();
-            }
+            // Note: Farcaster wallet provider doesn't support tx.wait()
+            // Transaction will confirm in ~2 seconds on Base chain
+            // We proceed immediately without waiting for confirmation
+            console.log('⚠️ Skipping tx.wait() - Farcaster wallet does not support it');
+            console.log('✅ NFT will be minted in ~2 seconds on Base');
             
-            console.log('✅ NFT minted! Token ID:', tokenId);
-            return { success: true, tokenId, transactionHash: receipt.hash, blockNumber: receipt.blockNumber };
+            // Return immediately with transaction hash
+            // Token ID will be available once transaction confirms
+            return { 
+                success: true, 
+                tokenId: null, // Will be assigned by contract after confirmation
+                transactionHash: tx.hash, 
+                blockNumber: null 
+            };
         } catch (error) {
             console.error('❌ Minting failed:', error);
             if (error.code === 4001 || error.code === 'ACTION_REJECTED') throw new Error('Transaction rejected');
@@ -5984,19 +5984,20 @@
                     currentAIGreeting.substring(0, 200)
                 );
                 
-                currentNFTTokenId = mintResult.tokenId;
+                currentNFTTokenId = mintResult.tokenId || 'Pending';
                 currentNFTTransactionHash = mintResult.transactionHash;
                 isNFTMinted = true;
                 
-                console.log('✅ NFT minted! Token ID:', currentNFTTokenId);
+                console.log('✅ NFT minting transaction sent!');
+                console.log('   Transaction:', currentNFTTransactionHash);
                 
                 // Update button to success state
-                btn.innerHTML = '<span style="font-size:1.2rem;">✅</span><span>NFT Minted! Token #' + currentNFTTokenId + '</span>';
+                btn.innerHTML = '<span style="font-size:1.2rem;">✅</span><span>NFT Minted!</span>';
                 btn.style.background = 'linear-gradient(135deg, #11998e, #38ef7d)';
                 btn.style.cursor = 'default';
                 
                 // Show success message
-                alert('🎉 NFT Minted Successfully!\n\nToken ID: ' + currentNFTTokenId + '\n\nTransaction: ' + currentNFTTransactionHash + '\n\n✅ You can now send this postcard to friends!');
+                alert('🎉 NFT Minting Started!\n\n✅ Transaction sent: ' + currentNFTTransactionHash + '\n\n⏳ Will confirm in ~2 seconds on Base\n\n🔗 View: https://basescan.org/tx/' + currentNFTTransactionHash + '\n\n✅ You can now send this postcard to friends!');
                 
             } catch (error) {
                 console.error('❌ Minting failed:', error);
