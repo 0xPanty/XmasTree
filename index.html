@@ -1672,23 +1672,62 @@
         }
     }
     
-    // Get contract instance
+    // Get contract instance (with auto network switching)
     async function getContract() {
         const { ethers } = await import('https://cdn.jsdelivr.net/npm/ethers@6.7.0/+esm');
-        const sdk = await import('https://esm.sh/@farcaster/miniapp-sdk');
-        const provider = await sdk.sdk.wallet.getEthereumProvider();
-        const ethersProvider = new ethers.BrowserProvider(provider);
         
-        // Check network
-        const network = await ethersProvider.getNetwork();
-        console.log('🌐 Network:', network.name, 'Chain ID:', network.chainId);
-        
-        if (Number(network.chainId) !== 8453) {
-            console.warn('⚠️ Wrong network! Expected Base (8453), got:', network.chainId);
-            throw new Error('Please switch to Base network');
+        // Use same wallet connection as Regenerate (proven to work)
+        const sdk = window.farcasterSDK;
+        if (!sdk) {
+            throw new Error('Farcaster SDK not loaded');
         }
         
-        const signer = await ethersProvider.getSigner();
+        const provider = await sdk.wallet.getEthereumProvider();
+        if (!provider) {
+            throw new Error('Wallet not available');
+        }
+        
+        // Create ethers provider
+        let ethersProvider = new ethers.BrowserProvider(provider);
+        let signer = await ethersProvider.getSigner();
+        
+        // Check network
+        let network = await ethersProvider.getNetwork();
+        const currentChainId = Number(network.chainId);
+        console.log('🌐 Current network:', network.name, 'Chain ID:', currentChainId);
+        
+        // Auto-switch to Base if needed (same as Regenerate logic)
+        if (currentChainId !== 8453) {
+            console.log('⚠️ Wrong network! Switching to Base (8453)...');
+            
+            try {
+                await provider.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0x2105' }], // Base = 8453 = 0x2105
+                });
+                
+                console.log('⏳ Waiting for network switch...');
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Recreate provider after switch
+                ethersProvider = new ethers.BrowserProvider(provider);
+                signer = await ethersProvider.getSigner();
+                network = await ethersProvider.getNetwork();
+                
+                const newChainId = Number(network.chainId);
+                console.log('✅ Switched to Base! Chain ID:', newChainId);
+                
+                if (newChainId !== 8453) {
+                    throw new Error(`Network switch failed! Expected 8453, got ${newChainId}`);
+                }
+            } catch (switchError) {
+                console.error('❌ Network switch error:', switchError);
+                throw new Error('Failed to switch to Base network. Please switch manually.');
+            }
+        } else {
+            console.log('✅ Already on Base network');
+        }
+        
         const signerAddress = await signer.getAddress();
         console.log('👤 Signer address:', signerAddress);
         
