@@ -6708,8 +6708,11 @@
                         console.log('✅ Reusing existing back side from mint');
                     }
                     
+                    console.log(`📦 Starting to process ${totalRecipients} recipients...`);
+                    
                     for (let i = 0; i < selectedRecipients.length; i++) {
                         const r = selectedRecipients[i];
+                        console.log(`\n👤 Processing recipient ${i + 1}/${totalRecipients}: @${r.username}`);
                         
                         // Update loading message with progress
                         showLoading(`Preparing gift ${i + 1}/${totalRecipients}...`);
@@ -6801,12 +6804,15 @@
                                     console.log(`   Transaction: ${currentNFTTransactionHash}`);
                                 } else {
                                     console.log(`✅ Using existing NFT (Transaction: ${currentNFTTransactionHash})`);
+                                    console.log(`   IPFS CID: ${currentIPFSCID}`);
                                 }
                                 
                                 // Update giftData with IPFS CID
                                 giftData.ipfsCID = currentIPFSCID;
+                                console.log(`💾 Updated giftData with CID`);
                                 
                                 // Send to mailbox (Vercel KV)
+                                console.log(`📬 Sending to mailbox for @${r.username}...`);
                                 try {
                                     await fetch('/api/mailbox', {
                                         method: 'POST',
@@ -6820,12 +6826,13 @@
                                             message: currentAIGreeting.substring(0, 100)
                                         })
                                     });
-                                    console.log(`📬 Sent to @${r.username}'s mailbox`);
+                                    console.log(`✅ Mailbox API call completed for @${r.username}`);
                                 } catch (err) {
-                                    console.error('❌ Mailbox send failed:', err);
+                                    console.error(`❌ Mailbox send failed for @${r.username}:`, err);
                                 }
                                 
                                 // Add links for this recipient (website + NFT + transaction)
+                                console.log(`🔗 Creating share link for @${r.username}...`);
                                 const giftUrl = `${location.origin}${location.pathname}?gift=${giftId}`;
                                 links.push({ 
                                     username: r.username,
@@ -6838,7 +6845,9 @@
                                 });
                                 
                                 // Also save to localStorage for website viewing
+                                console.log(`💾 Saving to localStorage for @${r.username}`);
                                 plazaGifts.push(giftData);
+                                console.log(`✅ Completed processing for @${r.username}\n`);
                                 
                             } catch (err) {
                                 console.error('❌ NFT minting failed:', err);
