@@ -7996,14 +7996,40 @@
                         for (const gateway of gateways) {
                             try {
                                 console.log(`🔄 Trying gateway: ${gateway}`);
-                                const response = await fetch(gateway);
+                                
+                                // Add timeout to prevent hanging
+                                const controller = new AbortController();
+                                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+                                
+                                const response = await fetch(gateway, { 
+                                    signal: controller.signal,
+                                    headers: { 'Accept': 'application/json' }
+                                });
+                                clearTimeout(timeoutId);
+                                
+                                console.log(`📡 Gateway response:`, {
+                                    status: response.status,
+                                    ok: response.ok,
+                                    contentType: response.headers.get('content-type')
+                                });
+                                
                                 if (response.ok) {
-                                    metadata = await response.json();
+                                    const text = await response.text();
+                                    console.log(`📄 Response text (first 200 chars):`, text.substring(0, 200));
+                                    
+                                    metadata = JSON.parse(text);
                                     console.log('✅ Loaded metadata from:', gateway);
+                                    console.log('📋 Metadata:', metadata);
                                     break;
+                                } else {
+                                    console.warn(`⚠️ Gateway returned ${response.status}:`, gateway);
                                 }
                             } catch (e) {
-                                console.warn(`⚠️ Gateway failed: ${gateway}`, e.message);
+                                console.error(`❌ Gateway error: ${gateway}`, {
+                                    name: e.name,
+                                    message: e.message,
+                                    stack: e.stack?.substring(0, 200)
+                                });
                             }
                         }
                         
