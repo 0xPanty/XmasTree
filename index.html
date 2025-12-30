@@ -6153,8 +6153,9 @@
                             title: 'Test Christmas Postcard',
                             message: currentAIGreeting,
                             cover: selectedCover,
-                            aiImage: currentAIImage,
-                            aiImageBack: backSide,
+                            // ❌ DO NOT store base64 - causes localStorage quota exceeded!
+                            // aiImage: currentAIImage,
+                            // aiImageBack: backSide,
                             sceneType: currentAIScene?.type || 'general',
                             sceneDescription: currentAIScene?.description || 'holiday celebration',
                             shares: 1, type: 'equal', mode: 'direct',
@@ -6162,7 +6163,8 @@
                             claimed: 0, claimedBy: [],
                             recipient: { fid: userFid, username: currentUser?.username || 'You', pfp: currentUser?.pfp_url || '' },
                             sender: { fid: userFid, username: senderName, pfp: currentUser?.pfp_url || '' },
-                            createdAt: Date.now()
+                            createdAt: Date.now(),
+                            ipfsCID: currentIPFSCID  // ✅ Store IPFS CID instead
                         };
                         
                         // Save to localStorage
@@ -6699,14 +6701,15 @@
                         
                         const giftId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
                         
-                        // Full gift data with images (for localStorage)
+                        // Lightweight gift data (NO base64 images to avoid QuotaExceededError!)
                         const giftData = {
                             id: giftId,
                             title: title,
                             message: currentAIGreeting, // Use AI generated greeting
                             cover: selectedCover,
-                            aiImage: currentAIImage, // Front side (picture)
-                            aiImageBack: unifiedBack, // Unified back side (same for all)
+                            // ❌ DO NOT store base64 - causes localStorage quota exceeded!
+                            // aiImage: currentAIImage,
+                            // aiImageBack: unifiedBack,
                             sceneType: currentAIScene?.type || 'general', // Store scene for reply
                             sceneDescription: currentAIScene?.description || 'holiday celebration',
                             shares: 1, type: 'equal', mode: 'direct',
@@ -6714,7 +6717,8 @@
                             claimed: 0, claimedBy: [],
                             recipient: { fid: r.fid, username: r.username, pfp: r.pfp_url },
                             sender: currentUser || { fid: 0, username: 'anonymous', pfp: '' },
-                            createdAt: Date.now()
+                            createdAt: Date.now(),
+                            ipfsCID: null  // Will be set after minting
                         };
                         
                         // Lightweight metadata for IPFS (without images to avoid 413 error)
@@ -6782,6 +6786,28 @@
                                     console.log(`   Transaction: ${currentNFTTransactionHash}`);
                                 } else {
                                     console.log(`✅ Using existing NFT (Transaction: ${currentNFTTransactionHash})`);
+                                }
+                                
+                                // Update giftData with IPFS CID
+                                giftData.ipfsCID = currentIPFSCID;
+                                
+                                // Send to mailbox (Vercel KV)
+                                try {
+                                    await fetch('/api/mailbox', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            action: 'send',
+                                            recipientFid: r.fid,
+                                            ipfsHash: currentIPFSCID,
+                                            senderFid: getUserFid(),
+                                            senderUsername: currentUser?.username || 'anonymous',
+                                            message: currentAIGreeting.substring(0, 100)
+                                        })
+                                    });
+                                    console.log(`📬 Sent to @${r.username}'s mailbox`);
+                                } catch (err) {
+                                    console.error('❌ Mailbox send failed:', err);
                                 }
                                 
                                 // Add links for this recipient (website + NFT + transaction)
