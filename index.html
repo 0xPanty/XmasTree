@@ -6922,10 +6922,25 @@
             }
             
             hideLoading();
+            
+            // Try to copy to clipboard (may fail in iframe)
+            let copied = false;
             if (navigator.clipboard) {
-                await navigator.clipboard.writeText(shareText);
-                alert(`Personalized postcard(s) created for ${links.length} friend(s)!\nEach will see their own name!\nLink(s) copied to clipboard!`);
-            } else { alert(shareText); }
+                try {
+                    await navigator.clipboard.writeText(shareText);
+                    copied = true;
+                    console.log('✅ Copied to clipboard');
+                } catch (err) {
+                    console.warn('⚠️ Clipboard copy failed:', err.message);
+                    console.log('📋 Share text:', shareText);
+                }
+            }
+            
+            if (copied) {
+                alert(`✅ Personalized postcard(s) created for ${links.length} friend(s)!\n\nLink(s) copied to clipboard!\n\nShare them on Farcaster!`);
+            } else {
+                alert(`✅ Personalized postcard(s) created for ${links.length} friend(s)!\n\n${shareText}\n\n📋 Copy the links above to share!`);
+            }
             
             // Reset UI state but KEEP the cached postcard (user might want to send to others)
             // DON'T clear IndexedDB cache - let user reuse the generated image
