@@ -1715,14 +1715,15 @@
             
             // Step 1: Upload merged image via backend API (bypasses AdBlock!)
             console.log('📤 Step 1/4: Uploading merged image...');
+            const mergedBlob = base64ToBlob(mergedImage);
+            console.log('📊 Merged blob size:', (mergedBlob.size / 1024 / 1024).toFixed(2), 'MB');
+            
+            const mergedFormData = new FormData();
+            mergedFormData.append('file', mergedBlob, 'merged.png');
+            
             const mergedResponse = await fetch('/api/pinata', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'uploadImage',
-                    imageData: mergedImage,
-                    imageName: `Postcard-Merged-${Date.now()}.png`
-                })
+                body: mergedFormData  // FormData, NOT JSON!
             });
             if (!mergedResponse.ok) {
                 const error = await mergedResponse.json();
@@ -1734,14 +1735,15 @@
             
             // Step 2: Upload front image via backend API
             console.log('📤 Step 2/4: Uploading front image...');
+            const frontBlob = base64ToBlob(frontImage);
+            console.log('📊 Front blob size:', (frontBlob.size / 1024 / 1024).toFixed(2), 'MB');
+            
+            const frontFormData = new FormData();
+            frontFormData.append('file', frontBlob, 'front.png');
+            
             const frontResponse = await fetch('/api/pinata', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'uploadImage',
-                    imageData: frontImage,
-                    imageName: `Postcard-Front-${Date.now()}.png`
-                })
+                body: frontFormData
             });
             if (!frontResponse.ok) {
                 const error = await frontResponse.json();
@@ -1753,14 +1755,15 @@
             
             // Step 3: Upload back image via backend API
             console.log('📤 Step 3/4: Uploading back image...');
+            const backBlob = base64ToBlob(backImage);
+            console.log('📊 Back blob size:', (backBlob.size / 1024 / 1024).toFixed(2), 'MB');
+            
+            const backFormData = new FormData();
+            backFormData.append('file', backBlob, 'back.png');
+            
             const backResponse = await fetch('/api/pinata', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'uploadImage',
-                    imageData: backImage,
-                    imageName: `Postcard-Back-${Date.now()}.png`
-                })
+                body: backFormData
             });
             if (!backResponse.ok) {
                 const error = await backResponse.json();

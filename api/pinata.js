@@ -1,12 +1,28 @@
 // Pinata IPFS upload API
+import formidable from 'formidable';
+
+export const config = {
+    api: {
+        bodyParser: false, // Disable default body parser for file uploads
+    },
+};
+
 export default async function handler(req, res) {
     // Only allow POST
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    // Check if this is a file upload (multipart/form-data)
+    const contentType = req.headers['content-type'] || '';
+    
+    if (contentType.includes('multipart/form-data')) {
+        return handleFileUpload(req, res);
+    }
+
+    // Otherwise handle JSON body
     try {
-        const { action, data, imageData, imageName, metadata } = req.body;
+        const { action, data, metadata } = req.body;
 
         // Upload image file (for NFT minting - bypasses AdBlock!)
         if (action === 'uploadImage') {
@@ -199,6 +215,82 @@ export default async function handler(req, res) {
         return res.status(500).json({ 
             success: false,
             error: error.message 
+        });
+    }
+}
+
+// Handle file upload (multipart/form-data)
+async function handleFileUpload(req, res) {
+    const pinataJWT = process.env.PINATA_JWT;
+    
+    if (!pinataJWT) {
+        return res.status(500).json({ error: 'Pinata JWT not configured' });
+    }
+
+    try {
+        // Parse form data
+        const form = formidable({ maxFileSize: 50 * 1024 * 1024 }); // 50MB max
+        
+        const [fields, files] = await form.parse(req);
+        
+        console.log('📤 File upload request:', {
+            fields: Object.keys(fields),
+            files: Object.keys(files)
+        });
+        
+        const file = files.file?.[0];
+        if (!file) {
+            return res.status(400).json({ error: 'No file provided' });
+        }
+        
+        console.log('📁 File info:', {
+            name: file.originalFilename,
+            size: file.size,
+            type: file.mimetype
+        });
+        
+        // Read file and upload to Pinata
+        const fs = await import('fs');
+        const fileBuffer = fs.readFileSync(file.filepath);
+        
+        const FormData = (await import('form-data')).default;
+        const formData = new FormData();
+        formData.append('file', fileBuffer, {
+            filename: file.originalFilename || 'image.png',
+            contentType: file.mimetype || 'image/png'
+        });
+        
+        const uploadResponse = await fetch('https://uploads.pinata.cloud/v3/files', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${pinataJWT}`,
+                ...formData.getHeaders()
+            },
+            body: formData
+        });
+        
+        if (!uploadResponse.ok) {
+            const errorText = await uploadResponse.text();
+            console.error('❌ Pinata upload failed:', errorText);
+            throw new Error(`Upload failed: ${uploadResponse.status}`);
+        }
+        
+        const result = await uploadResponse.json();
+        
+        // Clean up temp file
+        fs.unlinkSync(file.filepath);
+        
+        return res.status(200).json({
+            success: true,
+            cid: result.data.cid,
+            url: `https://gateway.pinata.cloud/ipfs/${result.data.cid}`
+        });
+        
+    } catch (error) {
+        console.error('❌ File upload error:', error);
+        return res.status(500).json({
+            success: false,
+            error: error.message
         });
     }
 }
