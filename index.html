@@ -7292,21 +7292,36 @@
             // Flip the card open
             container.classList.add('opened');
             
-            // Check if has AI image already generated
-            if (currentCardGift.aiImage) {
+            // Check if has AI image already generated (base64 or URL)
+            const hasFrontImage = currentCardGift.aiImage || currentCardGift.frontImageUrl || currentCardGift.mergedImageUrl;
+            const hasBackImage = currentCardGift.aiImageBack || currentCardGift.backImageUrl;
+            
+            if (hasFrontImage) {
                 // Use pre-generated AI image and greeting
                 document.getElementById('card-inside-loading').style.display = 'none';
                 document.getElementById('card-inside-greeting').textContent = currentCardGift.message || 'Merry Christmas!';
                 
                 // Check if has personalized double-sided card
-                if (currentCardGift.aiImageBack) {
+                if (hasFrontImage && hasBackImage) {
                     // Show double-sided card (front cover first)
                     document.getElementById('card-postcard-preview').style.display = 'block';
-                    document.getElementById('card-postcard-front').src = `data:image/png;base64,${currentCardGift.aiImage}`; // Front: AI illustration
-                    document.getElementById('card-postcard-back').src = currentCardGift.aiImageBack; // Back: Letter + stamp
+                    
+                    // Support both base64 (localStorage) and URL (IPFS) formats
+                    const frontSrc = currentCardGift.aiImage 
+                        ? `data:image/png;base64,${currentCardGift.aiImage}` 
+                        : (currentCardGift.frontImageUrl || currentCardGift.mergedImageUrl);
+                    const backSrc = currentCardGift.aiImageBack || currentCardGift.backImageUrl;
+                    
+                    document.getElementById('card-postcard-front').src = frontSrc; // Front: AI illustration
+                    document.getElementById('card-postcard-back').src = backSrc; // Back: Letter + stamp
                     document.getElementById('card-postcard-flipper').style.transform = 'rotateY(0deg)';
                     document.getElementById('card-flip-hint').textContent = '👉 Click to see the message inside';
                     window.isCardPostcardFlipped = false;
+                    
+                    console.log('🎴 Displaying postcard:', {
+                        frontSrc: frontSrc.substring(0, 50) + '...',
+                        backSrc: backSrc.substring(0, 50) + '...'
+                    });
                 } else {
                     document.getElementById('card-postcard-preview').style.display = 'none';
                 }
