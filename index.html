@@ -1779,6 +1779,7 @@
                 description: message,
                 image: `ipfs://${mergedCID}`,  // ✅ Merged image shows both front and back!
                 external_url: `https://gateway.pinata.cloud/ipfs/${mergedCID}`,
+                animation_url: `https://gateway.pinata.cloud/ipfs/${mergedCID}`,  // Fallback for OpenSea
                 attributes: [
                     { trait_type: "Edition", value: tokenId.toString() },
                     { trait_type: "Type", value: "Christmas Postcard" },
@@ -1818,6 +1819,11 @@
             
             console.log('✅ Metadata CID:', metadataCID);
             console.log('🔗 OpenSea will read:', `https://gateway.pinata.cloud/ipfs/${metadataCID}`);
+            console.log('📋 Metadata preview:', JSON.stringify(metadata, null, 2));
+            console.log('🖼️ Image URLs:');
+            console.log('   - IPFS:', `ipfs://${mergedCID}`);
+            console.log('   - Gateway:', `https://gateway.pinata.cloud/ipfs/${mergedCID}`);
+            console.log('   - Direct:', `https://${mergedCID}.ipfs.dweb.link/`);
             return metadataCID;
         } catch (error) {
             console.error('❌ IPFS upload failed:', error);
@@ -6301,8 +6307,11 @@
                 // Show test button
                 document.getElementById('test-send-myself-section').style.display = 'block';
                 
-                // Show success message
-                alert('🎉 NFT Minting Started!\n\n✅ Transaction sent: ' + currentNFTTransactionHash + '\n\n⏳ Will confirm in ~2 seconds on Base\n\n🔗 View: https://basescan.org/tx/' + currentNFTTransactionHash + '\n\n✅ You can now send this postcard to friends!\n\n📬 Try "Send to Myself" to test the recipient experience!');
+                // Log success (no alert popup)
+                console.log('✅ NFT Minted Successfully!');
+                console.log('🔗 BaseScan:', 'https://basescan.org/tx/' + currentNFTTransactionHash);
+                console.log('📝 IPFS Metadata:', 'https://gateway.pinata.cloud/ipfs/' + currentIPFSCID);
+                console.log('💡 TIP: If OpenSea shows "Content not available", wait 1-2 minutes then click "Refresh metadata" on the NFT page');
                 
             } catch (error) {
                 console.error('❌ Minting failed:', error);
