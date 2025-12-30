@@ -5763,6 +5763,7 @@
         let currentNFTTransactionHash = null;
         let currentIPFSCID = null;
         let isNFTMinted = false;
+        let currentUnifiedBack = null;  // Store the unified back image to reuse
         
         // 🔥 CRITICAL: Clear old localStorage NFT data (one-time cleanup)
         // This removes data from previous buggy versions
@@ -6246,18 +6247,25 @@
                     throw new Error('NFT integration not loaded');
                 }
                 
-                // Generate unified back side
+                // Generate unified back side (or reuse if already generated)
                 const senderName = currentUser?.username || 'Anonymous';
-                const stampImg = new Image();
-                stampImg.src = selectedStamp ? `/stamp/${selectedStamp}.png` : '/stamp/neynar.png';
-                await new Promise(resolve => {
-                    stampImg.onload = resolve;
-                    stampImg.onerror = resolve;
-                });
+                let unifiedBack = currentUnifiedBack;
                 
-                btn.innerHTML = '<span>⏳ Creating back side...</span>';
-                const unifiedBack = await generateAddressSide(currentAIGreeting, senderName, 'Dear Friend', stampImg);
-                console.log('✅ Unified back side generated');
+                if (!unifiedBack) {
+                    const stampImg = new Image();
+                    stampImg.src = selectedStamp ? `/stamp/${selectedStamp}.png` : '/stamp/neynar.png';
+                    await new Promise(resolve => {
+                        stampImg.onload = resolve;
+                        stampImg.onerror = resolve;
+                    });
+                    
+                    btn.innerHTML = '<span>⏳ Creating back side...</span>';
+                    unifiedBack = await generateAddressSide(currentAIGreeting, senderName, 'Dear Friend', stampImg);
+                    currentUnifiedBack = unifiedBack;  // Save for reuse
+                    console.log('✅ Unified back side generated');
+                } else {
+                    console.log('✅ Reusing existing back side');
+                }
                 
                 // Get next token ID for numbering
                 btn.innerHTML = '<span>⏳ Getting token number...</span>';
@@ -6689,10 +6697,16 @@
                     const links = [];
                     const totalRecipients = selectedRecipients.length;
                     
-                    // Generate UNIFIED back side once (same for all recipients)
-                    showLoading('Generating postcard back...');
-                    const unifiedBack = await generateAddressSide(currentAIGreeting, senderName, 'Dear Friend', stampImage);
-                    console.log('✅ Unified back side generated');
+                    // Use existing unified back (already generated during mint) or generate if needed
+                    let unifiedBack = currentUnifiedBack;
+                    if (!unifiedBack) {
+                        showLoading('Generating postcard back...');
+                        unifiedBack = await generateAddressSide(currentAIGreeting, senderName, 'Dear Friend', stampImage);
+                        currentUnifiedBack = unifiedBack;  // Save for reuse
+                        console.log('✅ Unified back side generated');
+                    } else {
+                        console.log('✅ Reusing existing back side from mint');
+                    }
                     
                     for (let i = 0; i < selectedRecipients.length; i++) {
                         const r = selectedRecipients[i];
