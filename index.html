@@ -8095,13 +8095,8 @@ Write only the reply text, nothing else:`;
                     const contentX = 110;
                     const contentWidth = canvas.width - 220;
                     
-                    // "To: Dear Friends" header
-                    ctx.font = 'bold 56px "Brush Script MT", "Lucida Handwriting", cursive';
-                    ctx.fillStyle = '#2c1810';
-                    ctx.textAlign = 'left';
-                    ctx.fillText('To: Dear Friend', contentX, yPos);
-                    
-                    yPos += 80; // Space after header
+                    // ❌ Removed "To: Dear Friend" header - greeting already starts with "Dear dear"
+                    // The AI greeting already contains the salutation, no need for duplicate
                     
                     // Main greeting message
                     ctx.font = '48px "Brush Script MT", "Lucida Handwriting", "Segoe Script", "Apple Chancery", cursive';
