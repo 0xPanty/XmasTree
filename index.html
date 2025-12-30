@@ -6118,7 +6118,7 @@
                 
                 await new Promise(async (resolve) => {
                     stampImage.onload = async () => {
-                        const backSide = await generateAddressSide(currentAIGreeting, senderName, '亲爱的朋友', stampImage);
+                        const backSide = await generateAddressSide(currentAIGreeting, senderName, 'Dear Friend', stampImage);
                         
                         const giftData = {
                             id: giftId,
@@ -6229,7 +6229,7 @@
                 });
                 
                 btn.innerHTML = '<span>⏳ Creating back side...</span>';
-                const unifiedBack = await generateAddressSide(currentAIGreeting, senderName, '亲爱的朋友', stampImg);
+                const unifiedBack = await generateAddressSide(currentAIGreeting, senderName, 'Dear Friend', stampImg);
                 console.log('✅ Unified back side generated');
                 
                 // Get next token ID for numbering
@@ -6657,7 +6657,7 @@
                     
                     // Generate UNIFIED back side once (same for all recipients)
                     showLoading('Generating postcard back...');
-                    const unifiedBack = await generateAddressSide(currentAIGreeting, senderName, '亲爱的朋友', stampImage);
+                    const unifiedBack = await generateAddressSide(currentAIGreeting, senderName, 'Dear Friend', stampImage);
                     console.log('✅ Unified back side generated');
                     
                     for (let i = 0; i < selectedRecipients.length; i++) {
@@ -7995,7 +7995,7 @@ Write only the reply text, nothing else:`;
                     ctx.font = 'bold 56px "Brush Script MT", "Lucida Handwriting", cursive';
                     ctx.fillStyle = '#2c1810';
                     ctx.textAlign = 'left';
-                    ctx.fillText('To: 亲爱的朋友', contentX, yPos);
+                    ctx.fillText('To: Dear Friend', contentX, yPos);
                     
                     yPos += 80; // Space after header
                     
@@ -8123,9 +8123,19 @@ Write only the reply text, nothing else:`;
         
         // Resize AI image to standard postcard size (1080x1920) with cover fit (no distortion)
         function resizeAIImage(base64Image) {
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
+                // Ensure base64Image has data URI prefix
+                let imageDataUri = base64Image;
+                if (!base64Image.startsWith('data:')) {
+                    console.log('[resizeAIImage] Adding data URI prefix');
+                    imageDataUri = `data:image/png;base64,${base64Image}`;
+                }
+                
+                console.log('[resizeAIImage] Loading image, length:', imageDataUri.length);
+                
                 const img = new Image();
                 img.onload = () => {
+                    console.log('[resizeAIImage] Image loaded:', img.width, 'x', img.height);
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     
@@ -8158,9 +8168,16 @@ Write only the reply text, nothing else:`;
                     // Draw image centered and cropped (no distortion)
                     ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
                     
-                    resolve(canvas.toDataURL('image/png'));
+                    const resized = canvas.toDataURL('image/png');
+                    console.log('[resizeAIImage] Resize complete, output length:', resized.length);
+                    resolve(resized);
                 };
-                img.src = `data:image/png;base64,${base64Image}`;
+                img.onerror = (e) => {
+                    console.error('[resizeAIImage] Failed to load image');
+                    console.error('   Image src starts with:', imageDataUri.substring(0, 100));
+                    reject(new Error('Failed to load image in resizeAIImage'));
+                };
+                img.src = imageDataUri;
             });
         }
         
