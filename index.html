@@ -6120,11 +6120,11 @@
             
             try {
                 // Check if user is logged in
-                const userFid = getUserFid();
-                if (!userFid) {
-                    alert('⚠️ Please login with Farcaster first!');
+                if (!window.currentUser?.fid) {
+                    alert('⚠️ Please login with Farcaster first!\n\nOpen this app in the Farcaster mobile app.');
                     return;
                 }
+                const userFid = window.currentUser.fid;
                 
                 // Check if postcard is generated
                 if (!currentAIImage || !isAIGenerated) {
@@ -7012,11 +7012,13 @@
         // Check and show mailbox glow if there are gifts for user
         async function checkMyGifts() {
             try {
-                const userFid = getUserFid();
-                if (!userFid) {
-                    console.log('⚠️ No user FID, skipping mailbox check');
+                // Check if user is authenticated first
+                if (!window.currentUser?.fid) {
+                    console.log('⚠️ User not authenticated, skipping mailbox check');
                     return;
                 }
+                
+                const userFid = window.currentUser.fid;
                 
                 // Query mailbox from KV
                 const response = await fetch('/api/mailbox', {
