@@ -6,7 +6,111 @@ export default async function handler(req, res) {
     }
 
     try {
-        const { action, data } = req.body;
+        const { action, data, imageData, imageName, metadata } = req.body;
+
+        // Upload image file (for NFT minting - bypasses AdBlock!)
+        if (action === 'uploadImage') {
+            const pinataJWT = process.env.PINATA_JWT;
+            
+            if (!pinataJWT) {
+                throw new Error('Pinata JWT not configured');
+            }
+
+            if (!imageData || !imageName) {
+                throw new Error('imageData and imageName required');
+            }
+
+            console.log('🖼️ Uploading image to Pinata:', {
+                name: imageName,
+                size: imageData.length
+            });
+
+            // Pinata v3 API expects FormData
+            // We'll convert base64 to blob on server side
+            const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
+            const buffer = Buffer.from(base64Data, 'base64');
+            
+            // Create form data
+            const FormData = (await import('form-data')).default;
+            const formData = new FormData();
+            formData.append('file', buffer, {
+                filename: imageName,
+                contentType: 'image/png'
+            });
+
+            const uploadResponse = await fetch('https://uploads.pinata.cloud/v3/files', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${pinataJWT}`,
+                    ...formData.getHeaders()
+                },
+                body: formData
+            });
+
+            if (!uploadResponse.ok) {
+                const errorText = await uploadResponse.text();
+                console.error('❌ Pinata upload failed:', errorText);
+                throw new Error(`Upload failed: ${uploadResponse.status}`);
+            }
+
+            const result = await uploadResponse.json();
+            
+            return res.status(200).json({
+                success: true,
+                cid: result.data.cid,
+                url: `https://gateway.pinata.cloud/ipfs/${result.data.cid}`
+            });
+        }
+
+        // Upload metadata JSON (for NFT metadata)
+        if (action === 'uploadMetadata') {
+            const pinataJWT = process.env.PINATA_JWT;
+            
+            if (!pinataJWT) {
+                throw new Error('Pinata JWT not configured');
+            }
+
+            if (!metadata) {
+                throw new Error('metadata required');
+            }
+
+            console.log('📋 Uploading metadata to Pinata');
+
+            // Convert JSON to buffer for v3 API
+            const jsonString = JSON.stringify(metadata);
+            const buffer = Buffer.from(jsonString, 'utf-8');
+            
+            // Create form data
+            const FormData = (await import('form-data')).default;
+            const formData = new FormData();
+            formData.append('file', buffer, {
+                filename: 'metadata.json',
+                contentType: 'application/json'
+            });
+
+            const uploadResponse = await fetch('https://uploads.pinata.cloud/v3/files', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${pinataJWT}`,
+                    ...formData.getHeaders()
+                },
+                body: formData
+            });
+
+            if (!uploadResponse.ok) {
+                const errorText = await uploadResponse.text();
+                console.error('❌ Metadata upload failed:', errorText);
+                throw new Error(`Metadata upload failed: ${uploadResponse.status}`);
+            }
+
+            const result = await uploadResponse.json();
+            
+            return res.status(200).json({
+                success: true,
+                cid: result.data.cid,
+                url: `https://gateway.pinata.cloud/ipfs/${result.data.cid}`
+            });
+        }
 
         if (action === 'upload') {
             // Upload gift data to Pinata IPFS

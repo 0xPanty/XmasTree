@@ -1661,58 +1661,61 @@
             const backBlob = base64ToBlob(backImage);
             console.log('📊 Front:', (frontBlob.size / 1024 / 1024).toFixed(2), 'MB, Back:', (backBlob.size / 1024 / 1024).toFixed(2), 'MB');
             
-            // Step 1: Upload merged image to IPFS (this will be the main display)
+            // Step 1: Upload merged image via backend API (bypasses AdBlock!)
             console.log('📤 Step 1/4: Uploading merged image...');
-            const mergedFile = new File([mergedBlob], 'postcard.png', { type: 'image/png' });
-            const mergedFormData = new FormData();
-            mergedFormData.append('file', mergedFile);
-            mergedFormData.append('name', `Postcard-Merged-${Date.now()}`);
-            mergedFormData.append('network', 'public');
-            
-            const mergedResponse = await fetch('https://uploads.pinata.cloud/v3/files', {
+            const mergedResponse = await fetch('/api/pinata', {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${PINATA_JWT}` },
-                body: mergedFormData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'uploadImage',
+                    imageData: mergedImage,
+                    imageName: `Postcard-Merged-${Date.now()}.png`
+                })
             });
-            if (!mergedResponse.ok) throw new Error(`Merged image upload failed: ${mergedResponse.status}`);
+            if (!mergedResponse.ok) {
+                const error = await mergedResponse.json();
+                throw new Error(error.error || 'Merged image upload failed');
+            }
             const mergedResult = await mergedResponse.json();
-            const mergedCID = mergedResult.data.cid;
+            const mergedCID = mergedResult.cid;
             console.log('✅ Merged image CID:', mergedCID);
             
-            // Step 2: Upload front image to IPFS
+            // Step 2: Upload front image via backend API
             console.log('📤 Step 2/4: Uploading front image...');
-            const frontFile = new File([frontBlob], 'front.png', { type: 'image/png' });
-            const frontFormData = new FormData();
-            frontFormData.append('file', frontFile);
-            frontFormData.append('name', `Postcard-Front-${Date.now()}`);
-            frontFormData.append('network', 'public');
-            
-            const frontResponse = await fetch('https://uploads.pinata.cloud/v3/files', {
+            const frontResponse = await fetch('/api/pinata', {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${PINATA_JWT}` },
-                body: frontFormData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'uploadImage',
+                    imageData: frontImage,
+                    imageName: `Postcard-Front-${Date.now()}.png`
+                })
             });
-            if (!frontResponse.ok) throw new Error(`Front image upload failed: ${frontResponse.status}`);
+            if (!frontResponse.ok) {
+                const error = await frontResponse.json();
+                throw new Error(error.error || 'Front image upload failed');
+            }
             const frontResult = await frontResponse.json();
-            const frontCID = frontResult.data.cid;
+            const frontCID = frontResult.cid;
             console.log('✅ Front image CID:', frontCID);
             
-            // Step 3: Upload back image to IPFS
+            // Step 3: Upload back image via backend API
             console.log('📤 Step 3/4: Uploading back image...');
-            const backFile = new File([backBlob], 'back.png', { type: 'image/png' });
-            const backFormData = new FormData();
-            backFormData.append('file', backFile);
-            backFormData.append('name', `Postcard-Back-${Date.now()}`);
-            backFormData.append('network', 'public');
-            
-            const backResponse = await fetch('https://uploads.pinata.cloud/v3/files', {
+            const backResponse = await fetch('/api/pinata', {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${PINATA_JWT}` },
-                body: backFormData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'uploadImage',
+                    imageData: backImage,
+                    imageName: `Postcard-Back-${Date.now()}.png`
+                })
             });
-            if (!backResponse.ok) throw new Error(`Back image upload failed: ${backResponse.status}`);
+            if (!backResponse.ok) {
+                const error = await backResponse.json();
+                throw new Error(error.error || 'Back image upload failed');
+            }
             const backResult = await backResponse.json();
-            const backCID = backResult.data.cid;
+            const backCID = backResult.cid;
             console.log('✅ Back image CID:', backCID);
             
             // Step 4: Create metadata with merged image (OpenSea will show both sides!)
@@ -1740,21 +1743,21 @@
                 }
             };
             
-            const jsonBlob = new Blob([JSON.stringify(metadata)], { type: 'application/json' });
-            const jsonFile = new File([jsonBlob], 'metadata.json', { type: 'application/json' });
-            const metadataFormData = new FormData();
-            metadataFormData.append('file', jsonFile);
-            metadataFormData.append('name', `Postcard-Metadata-${Date.now()}`);
-            metadataFormData.append('network', 'public');
-            
-            const metadataResponse = await fetch('https://uploads.pinata.cloud/v3/files', {
+            // Step 4a: Upload metadata via backend API (use original Pinata JSON API)
+            const metadataResponse = await fetch('/api/pinata', {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${PINATA_JWT}` },
-                body: metadataFormData
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'uploadMetadata',
+                    metadata: metadata
+                })
             });
-            if (!metadataResponse.ok) throw new Error(`Metadata upload failed: ${metadataResponse.status}`);
+            if (!metadataResponse.ok) {
+                const error = await metadataResponse.json();
+                throw new Error(error.error || 'Metadata upload failed');
+            }
             const metadataResult = await metadataResponse.json();
-            const metadataCID = metadataResult.data.cid;
+            const metadataCID = metadataResult.cid;
             
             console.log('✅ Metadata CID:', metadataCID);
             console.log('🔗 OpenSea will read:', `https://gateway.pinata.cloud/ipfs/${metadataCID}`);
