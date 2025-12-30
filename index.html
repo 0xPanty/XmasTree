@@ -8026,29 +8026,37 @@
                 console.log('🌐 Loading NFT metadata from IPFS:', ipfsHash);
                 setTimeout(async () => {
                     try {
-                        // Try multiple IPFS gateways for reliability
+                        // Try multiple IPFS gateways for reliability (with longer timeout)
                         const gateways = [
                             `https://gateway.pinata.cloud/ipfs/${ipfsHash}`,
+                            `https://ipfs.io/ipfs/${ipfsHash}`,
                             `https://${ipfsHash}.ipfs.dweb.link/`,
-                            `https://ipfs.io/ipfs/${ipfsHash}`
+                            `https://cloudflare-ipfs.com/ipfs/${ipfsHash}`,
+                            `https://4everland.io/ipfs/${ipfsHash}`
                         ];
                         
                         let metadata = null;
-                        for (const gateway of gateways) {
+                        let lastError = null;
+                        
+                        for (let i = 0; i < gateways.length; i++) {
+                            const gateway = gateways[i];
                             try {
-                                console.log(`🔄 Trying gateway: ${gateway}`);
+                                console.log(`🔄 Trying gateway ${i+1}/${gateways.length}: ${gateway}`);
                                 
-                                // Add timeout to prevent hanging
+                                // Increase timeout to 20 seconds for slower networks
                                 const controller = new AbortController();
-                                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+                                const timeoutId = setTimeout(() => controller.abort(), 20000);
                                 
                                 const response = await fetch(gateway, { 
                                     signal: controller.signal,
-                                    headers: { 'Accept': 'application/json' }
+                                    headers: { 
+                                        'Accept': 'application/json',
+                                        'Cache-Control': 'no-cache'
+                                    }
                                 });
                                 clearTimeout(timeoutId);
                                 
-                                console.log(`📡 Gateway response:`, {
+                                console.log(`📡 Gateway ${i+1} response:`, {
                                     status: response.status,
                                     ok: response.ok,
                                     contentType: response.headers.get('content-type')
@@ -8058,15 +8066,23 @@
                                     const text = await response.text();
                                     console.log(`📄 Response text (first 200 chars):`, text.substring(0, 200));
                                     
-                                    metadata = JSON.parse(text);
-                                    console.log('✅ Loaded metadata from:', gateway);
-                                    console.log('📋 Metadata:', metadata);
-                                    break;
+                                    try {
+                                        metadata = JSON.parse(text);
+                                        console.log('✅ Loaded metadata from:', gateway);
+                                        console.log('📋 Metadata:', metadata);
+                                        break;
+                                    } catch (parseError) {
+                                        console.error(`❌ JSON parse error:`, parseError);
+                                        lastError = `Invalid JSON response from gateway ${i+1}`;
+                                        continue;
+                                    }
                                 } else {
-                                    console.warn(`⚠️ Gateway returned ${response.status}:`, gateway);
+                                    lastError = `Gateway ${i+1} returned ${response.status}`;
+                                    console.warn(`⚠️ ${lastError}:`, gateway);
                                 }
                             } catch (e) {
-                                console.error(`❌ Gateway error: ${gateway}`, {
+                                lastError = e.name === 'AbortError' ? `Gateway ${i+1} timeout (20s)` : e.message;
+                                console.error(`❌ Gateway ${i+1} error: ${gateway}`, {
                                     name: e.name,
                                     message: e.message,
                                     stack: e.stack?.substring(0, 200)
@@ -8097,11 +8113,32 @@
                             showGreetingCard(gift);
                         } else {
                             console.error('❌ Failed to load from any IPFS gateway');
-                            alert('❌ Failed to load postcard\n\nPlease check your internet connection and try again.');
+                            console.error('Last error:', lastError);
+                            
+                            // Show error with retry option
+                            const retry = confirm(
+                                `❌ Failed to load postcard\n\n` +
+                                `Tried ${gateways.length} IPFS gateways\n` +
+                                `Last error: ${lastError}\n\n` +
+                                `Click OK to retry, or Cancel to go back.`
+                            );
+                            
+                            if (retry) {
+                                location.reload();
+                            }
                         }
                     } catch (err) {
                         console.error('❌ IPFS load error:', err);
-                        alert('❌ Failed to load postcard: ' + err.message);
+                        
+                        const retry = confirm(
+                            `❌ Failed to load postcard\n\n` +
+                            `Error: ${err.message}\n\n` +
+                            `Click OK to retry, or Cancel to go back.`
+                        );
+                        
+                        if (retry) {
+                            location.reload();
+                        }
                     }
                 }, 500);
             } else if (giftId) {
