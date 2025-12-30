@@ -6218,14 +6218,11 @@
         async function handleMintNFT() {
             console.log('🎨 Mint NFT button clicked');
             
-            // 🔥 TEMP FIX: Always allow minting for testing
-            // Clear state to allow fresh mint each time
-            if (isNFTMinted) {
-                console.log('⚠️ Resetting NFT state to allow re-mint');
-                isNFTMinted = false;
-                currentNFTTokenId = null;
-                currentNFTTransactionHash = null;
-                currentIPFSCID = null;
+            // Check if already minted
+            if (isNFTMinted && currentIPFSCID) {
+                console.log('✅ Already minted! IPFS CID:', currentIPFSCID);
+                console.log('💡 You can now send this postcard to friends!');
+                return; // Don't mint again!
             }
             
             // Check if postcard is generated
@@ -6863,7 +6860,24 @@
                     }
                     
                     console.log(`🎉 All uploads complete! Generated ${links.length} links`);
-                    localStorage.setItem('plaza_gifts', JSON.stringify(plazaGifts));
+                    
+                    // Clean base64 images before saving to avoid QuotaExceededError
+                    const cleanedGifts = plazaGifts.map(g => {
+                        const cleaned = { ...g };
+                        delete cleaned.aiImage;      // Remove base64
+                        delete cleaned.aiImageBack;  // Remove base64
+                        return cleaned;
+                    });
+                    
+                    try {
+                        localStorage.setItem('plaza_gifts', JSON.stringify(cleanedGifts));
+                        console.log('✅ Saved to localStorage (cleaned)');
+                    } catch (err) {
+                        console.error('❌ localStorage save failed:', err);
+                        // Clear old data and retry
+                        localStorage.removeItem('plaza_gifts');
+                        localStorage.setItem('plaza_gifts', JSON.stringify(cleanedGifts));
+                    }
                     
                     console.log(`📋 Showing share links...`);
                     showShareLinks(links, title);
