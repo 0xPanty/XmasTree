@@ -6311,6 +6311,10 @@
                 console.log('📝 IPFS Metadata:', 'https://gateway.pinata.cloud/ipfs/' + currentIPFSCID);
                 console.log('💡 TIP: If OpenSea shows "Content not available", wait 1-2 minutes then click "Refresh metadata" on the NFT page');
                 
+                // Enable Send Gift button
+                updateSendGiftButtonState();
+                console.log('🎁 Send Gift button should now be enabled');
+                
             } catch (error) {
                 console.error('❌ Minting failed:', error);
                 
