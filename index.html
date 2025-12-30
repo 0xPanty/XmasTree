@@ -1617,8 +1617,25 @@
             }
             
             console.log('🖼️ Merging images...');
-            console.log('   Front:', frontImage.substring(0, 50) + '...');
-            console.log('   Back:', backImage.substring(0, 50) + '...');
+            console.log('   Front length:', frontImage.length);
+            console.log('   Back length:', backImage.length);
+            
+            // 🔥 CRITICAL: Ensure both images have data URI prefix
+            let frontDataUri = frontImage;
+            let backDataUri = backImage;
+            
+            if (!frontImage.startsWith('data:')) {
+                console.log('   ⚠️ Front image missing data URI prefix, adding...');
+                frontDataUri = `data:image/png;base64,${frontImage}`;
+            }
+            
+            if (!backImage.startsWith('data:')) {
+                console.log('   ⚠️ Back image missing data URI prefix, adding...');
+                backDataUri = `data:image/png;base64,${backImage}`;
+            }
+            
+            console.log('   Front starts with:', frontDataUri.substring(0, 30));
+            console.log('   Back starts with:', backDataUri.substring(0, 30));
             
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -1645,25 +1662,26 @@
                     
                     // Convert to base64
                     const merged = canvas.toDataURL('image/png');
-                    console.log('✅ Images merged successfully');
+                    console.log('✅ Images merged successfully, length:', merged.length);
                     resolve(merged);
                 }
             };
             
-            const onError = (event, imageName) => {
+            const onError = (event, imageName, imageData) => {
                 console.error(`❌ Failed to load ${imageName} image`);
                 console.error('   Event:', event);
-                console.error('   Image src length:', event.target.src.length);
-                reject(new Error(`Failed to load ${imageName} image - possibly invalid base64 data`));
+                console.error('   Image data starts with:', imageData.substring(0, 100));
+                console.error('   Image data length:', imageData.length);
+                reject(new Error(`Failed to load ${imageName} image - check if data URI prefix is correct`));
             };
             
             frontImg.onload = onLoad;
             backImg.onload = onLoad;
-            frontImg.onerror = (e) => onError(e, 'front');
-            backImg.onerror = (e) => onError(e, 'back');
+            frontImg.onerror = (e) => onError(e, 'front', frontDataUri);
+            backImg.onerror = (e) => onError(e, 'back', backDataUri);
             
-            frontImg.src = frontImage;
-            backImg.src = backImage;
+            frontImg.src = frontDataUri;
+            backImg.src = backDataUri;
         });
     }
     
