@@ -5702,6 +5702,18 @@
         let currentIPFSCID = null;
         let isNFTMinted = false;
         
+        // 🔥 CRITICAL: Clear old localStorage NFT data (one-time cleanup)
+        // This removes data from previous buggy versions
+        (function cleanupOldNFTState() {
+            const keysToRemove = ['currentNFTTokenId', 'currentNFTTransactionHash', 'currentIPFSCID', 'isNFTMinted'];
+            keysToRemove.forEach(key => {
+                if (localStorage.getItem(key)) {
+                    console.log('🗑️ Removing old NFT state:', key);
+                    localStorage.removeItem(key);
+                }
+            });
+        })();
+        
         // ===== IndexedDB Cache System (supports large images) =====
         const DB_NAME = 'XmasTreeDB';
         const DB_VERSION = 1;
@@ -6142,10 +6154,14 @@
         async function handleMintNFT() {
             console.log('🎨 Mint NFT button clicked');
             
-            // Check if already minted
-            if (isNFTMinted && currentNFTTokenId) {
-                alert('✅ Already minted!\n\nToken ID: ' + currentNFTTokenId + '\n\nYou can now send this postcard to friends!');
-                return;
+            // 🔥 TEMP FIX: Always allow minting for testing
+            // Clear state to allow fresh mint each time
+            if (isNFTMinted) {
+                console.log('⚠️ Resetting NFT state to allow re-mint');
+                isNFTMinted = false;
+                currentNFTTokenId = null;
+                currentNFTTransactionHash = null;
+                currentIPFSCID = null;
             }
             
             // Check if postcard is generated
