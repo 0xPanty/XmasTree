@@ -6877,10 +6877,11 @@
                                 
                                 // Add links for this recipient (website + NFT + transaction)
                                 console.log(`🔗 Creating share link for @${r.username}...`);
-                                const giftUrl = `${location.origin}${location.pathname}?gift=${giftId}`;
+                                // Use IPFS hash in URL so recipient can load the postcard from IPFS
+                                const giftUrl = `${location.origin}${location.pathname}?ipfs=${currentIPFSCID}`;
                                 links.push({ 
                                     username: r.username,
-                                    url: giftUrl,  // Website link for interactive viewing
+                                    url: giftUrl,  // IPFS link - anyone can view!
                                     nftUrl: currentNFTTokenId ? `https://opensea.io/assets/base/${window.NFTPostcard.CONTRACT_ADDRESS}/${currentNFTTokenId}` : `https://basescan.org/tx/${currentNFTTransactionHash}`,
                                     txUrl: `https://basescan.org/tx/${currentNFTTransactionHash}`,
                                     tokenId: currentNFTTokenId || 'Confirming',
