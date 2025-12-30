@@ -1797,21 +1797,24 @@
                 }
             };
             
-            // Step 4a: Upload metadata via backend API (use original Pinata JSON API)
-            const metadataResponse = await fetch('/api/pinata', {
+            // Step 4a: Upload metadata - DIRECT to Pinata (like images!)
+            const metadataBlob = new Blob([JSON.stringify(metadata)], { type: 'application/json' });
+            const metadataFile = new File([metadataBlob], 'metadata.json', { type: 'application/json' });
+            const metadataFormData = new FormData();
+            metadataFormData.append('file', metadataFile);
+            
+            const metadataResponse = await fetch('https://uploads.pinata.cloud/v3/files', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'uploadMetadata',
-                    metadata: metadata
-                })
+                headers: { 'Authorization': `Bearer ${PINATA_JWT}` },
+                body: metadataFormData
             });
+            
             if (!metadataResponse.ok) {
-                const error = await metadataResponse.json();
-                throw new Error(error.error || 'Metadata upload failed');
+                const errorText = await metadataResponse.text();
+                throw new Error(`Metadata upload failed: ${metadataResponse.status} - ${errorText}`);
             }
             const metadataResult = await metadataResponse.json();
-            const metadataCID = metadataResult.cid;
+            const metadataCID = metadataResult.data.cid;
             
             console.log('✅ Metadata CID:', metadataCID);
             console.log('🔗 OpenSea will read:', `https://gateway.pinata.cloud/ipfs/${metadataCID}`);
