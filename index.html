@@ -1705,13 +1705,6 @@
             console.log('🖼️ Merging front and back images...');
             const mergedImage = await mergePostcardImages(frontImage, backImage);
             console.log('✅ Images merged, length:', mergedImage.length);
-            const mergedBlob = base64ToBlob(mergedImage);
-            console.log('📊 Merged image:', (mergedBlob.size / 1024 / 1024).toFixed(2), 'MB');
-            
-            // Also keep individual images
-            const frontBlob = base64ToBlob(frontImage);
-            const backBlob = base64ToBlob(backImage);
-            console.log('📊 Front:', (frontBlob.size / 1024 / 1024).toFixed(2), 'MB, Back:', (backBlob.size / 1024 / 1024).toFixed(2), 'MB');
             
             // Step 1: Upload merged image via backend API (bypasses AdBlock!)
             console.log('📤 Step 1/4: Uploading merged image...');
@@ -1737,6 +1730,7 @@
             console.log('📤 Step 2/4: Uploading front image...');
             const frontBlob = base64ToBlob(frontImage);
             console.log('📊 Front blob size:', (frontBlob.size / 1024 / 1024).toFixed(2), 'MB');
+            console.log('📊 Back (for reference):', (base64ToBlob(backImage).size / 1024 / 1024).toFixed(2), 'MB');
             
             const frontFormData = new FormData();
             frontFormData.append('file', frontBlob, 'front.png');
