@@ -5758,12 +5758,50 @@
         const REGENERATE_COST = 0.1;
         const PAYMENT_ADDRESS = '0x0f540466695cf91203ed8cbca3065fe7232154b9';
         
-        // NFT minting state (single mint per postcard)
+        // NFT minting state (single mint per postcard) - saved to sessionStorage to survive page refresh
         let currentNFTTokenId = null;
         let currentNFTTransactionHash = null;
         let currentIPFSCID = null;
         let isNFTMinted = false;
         let currentUnifiedBack = null;  // Store the unified back image to reuse
+        
+        // Restore NFT state from sessionStorage (survives page refresh)
+        (function restoreNFTState() {
+            try {
+                const saved = sessionStorage.getItem('nftState');
+                if (saved) {
+                    const state = JSON.parse(saved);
+                    currentNFTTokenId = state.tokenId;
+                    currentNFTTransactionHash = state.txHash;
+                    currentIPFSCID = state.ipfsCID;
+                    isNFTMinted = state.isMinted;
+                    console.log('✅ Restored NFT state from sessionStorage:', {
+                        tokenId: currentNFTTokenId,
+                        txHash: currentNFTTransactionHash,
+                        ipfsCID: currentIPFSCID,
+                        isMinted: isNFTMinted
+                    });
+                }
+            } catch (e) {
+                console.warn('⚠️ Failed to restore NFT state:', e);
+            }
+        })();
+        
+        // Save NFT state to sessionStorage (called after minting)
+        function saveNFTState() {
+            try {
+                const state = {
+                    tokenId: currentNFTTokenId,
+                    txHash: currentNFTTransactionHash,
+                    ipfsCID: currentIPFSCID,
+                    isMinted: isNFTMinted
+                };
+                sessionStorage.setItem('nftState', JSON.stringify(state));
+                console.log('💾 Saved NFT state to sessionStorage');
+            } catch (e) {
+                console.error('❌ Failed to save NFT state:', e);
+            }
+        }
         
         // 🔥 CRITICAL: Clear old localStorage NFT data (one-time cleanup)
         // This removes data from previous buggy versions
@@ -6302,6 +6340,9 @@
                 currentNFTTransactionHash = mintResult.transactionHash;
                 isNFTMinted = true;
                 
+                // Save state to sessionStorage to survive page refresh
+                saveNFTState();
+                
                 console.log('✅ NFT minting transaction sent!');
                 console.log('   Transaction:', currentNFTTransactionHash);
                 
@@ -6799,6 +6840,9 @@
                                     currentNFTTokenId = mintResult.tokenId;
                                     currentNFTTransactionHash = mintResult.transactionHash;
                                     isNFTMinted = true;
+                                    
+                                    // Save state to sessionStorage to survive page refresh
+                                    saveNFTState();
                                     
                                     console.log(`✅ NFT minted! Token ID: ${currentNFTTokenId}`);
                                     console.log(`   Transaction: ${currentNFTTransactionHash}`);
