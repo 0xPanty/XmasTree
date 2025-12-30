@@ -7965,43 +7965,60 @@
             const ipfsHash = urlParams.get('ipfs');
             
             if (ipfsHash) {
-                // Load gift from IPFS
-                console.log('🌐 Loading gift from IPFS:', ipfsHash);
+                // Load NFT metadata directly from IPFS Gateway
+                console.log('🌐 Loading NFT metadata from IPFS:', ipfsHash);
                 setTimeout(async () => {
                     try {
-                        const response = await fetch('/api/pinata', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                action: 'get',
-                                ipfsHash: ipfsHash
-                            })
-                        });
+                        // Try multiple IPFS gateways for reliability
+                        const gateways = [
+                            `https://gateway.pinata.cloud/ipfs/${ipfsHash}`,
+                            `https://${ipfsHash}.ipfs.dweb.link/`,
+                            `https://ipfs.io/ipfs/${ipfsHash}`
+                        ];
                         
-                        const result = await response.json();
+                        let metadata = null;
+                        for (const gateway of gateways) {
+                            try {
+                                console.log(`🔄 Trying gateway: ${gateway}`);
+                                const response = await fetch(gateway);
+                                if (response.ok) {
+                                    metadata = await response.json();
+                                    console.log('✅ Loaded metadata from:', gateway);
+                                    break;
+                                }
+                            } catch (e) {
+                                console.warn(`⚠️ Gateway failed: ${gateway}`, e.message);
+                            }
+                        }
                         
-                        if (result.success && result.data) {
-                            console.log('✅ Gift loaded from IPFS');
-                            const gift = result.data;
+                        if (metadata) {
+                            console.log('✅ NFT metadata loaded:', metadata);
                             
-                            // Note: IPFS only contains metadata, not images (to avoid 413 error)
-                            if (!gift.aiImage || !gift.aiImageBack) {
-                                console.log('⚠️ Gift loaded from IPFS (metadata only, images not included)');
-                                gift._ipfsMetadataOnly = true;
-                            }
+                            // Convert NFT metadata format to gift format for display
+                            const gift = {
+                                id: ipfsHash,
+                                title: metadata.name || 'Christmas Postcard',
+                                message: metadata.description || 'Merry Christmas!',
+                                sender: metadata.properties?.sender || { username: 'Someone', fid: 0 },
+                                recipient: metadata.properties?.recipient || { username: 'You', fid: 0 },
+                                mode: 'direct',
+                                // Get image URLs from metadata
+                                frontImageUrl: metadata.properties?.frontImage || metadata.image,
+                                backImageUrl: metadata.properties?.backImage,
+                                mergedImageUrl: metadata.properties?.mergedImage || metadata.image,
+                                createdAt: metadata.properties?.timestamp || Date.now(),
+                                _fromIPFS: true
+                            };
                             
-                            if (gift.mode === 'direct') {
-                                showGreetingCard(gift);
-                            } else {
-                                openClaimModal(gift.id);
-                            }
+                            console.log('📬 Showing postcard from IPFS...');
+                            showGreetingCard(gift);
                         } else {
-                            console.error('❌ Failed to load gift from IPFS');
-                            alert('❌ Gift not found\n\nThe link may be invalid or expired.');
+                            console.error('❌ Failed to load from any IPFS gateway');
+                            alert('❌ Failed to load postcard\n\nPlease check your internet connection and try again.');
                         }
                     } catch (err) {
                         console.error('❌ IPFS load error:', err);
-                        alert('❌ Failed to load gift\n\nPlease try again later.');
+                        alert('❌ Failed to load postcard: ' + err.message);
                     }
                 }, 500);
             } else if (giftId) {
