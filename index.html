@@ -1610,6 +1610,16 @@
     // Merge front and back images side by side
     async function mergePostcardImages(frontImage, backImage) {
         return new Promise((resolve, reject) => {
+            // Validate inputs
+            if (!frontImage || !backImage) {
+                reject(new Error('Missing image data: frontImage or backImage is empty'));
+                return;
+            }
+            
+            console.log('🖼️ Merging images...');
+            console.log('   Front:', frontImage.substring(0, 50) + '...');
+            console.log('   Back:', backImage.substring(0, 50) + '...');
+            
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
@@ -1619,10 +1629,13 @@
             let loaded = 0;
             const onLoad = () => {
                 loaded++;
+                console.log(`✅ Image ${loaded}/2 loaded`);
                 if (loaded === 2) {
                     // Set canvas size: two images side by side
                     canvas.width = frontImg.width + backImg.width;
                     canvas.height = Math.max(frontImg.height, backImg.height);
+                    
+                    console.log(`📐 Canvas size: ${canvas.width}x${canvas.height}`);
                     
                     // Draw front image on left
                     ctx.drawImage(frontImg, 0, 0);
@@ -1631,14 +1644,23 @@
                     ctx.drawImage(backImg, frontImg.width, 0);
                     
                     // Convert to base64
-                    resolve(canvas.toDataURL('image/png'));
+                    const merged = canvas.toDataURL('image/png');
+                    console.log('✅ Images merged successfully');
+                    resolve(merged);
                 }
+            };
+            
+            const onError = (event, imageName) => {
+                console.error(`❌ Failed to load ${imageName} image`);
+                console.error('   Event:', event);
+                console.error('   Image src length:', event.target.src.length);
+                reject(new Error(`Failed to load ${imageName} image - possibly invalid base64 data`));
             };
             
             frontImg.onload = onLoad;
             backImg.onload = onLoad;
-            frontImg.onerror = reject;
-            backImg.onerror = reject;
+            frontImg.onerror = (e) => onError(e, 'front');
+            backImg.onerror = (e) => onError(e, 'back');
             
             frontImg.src = frontImage;
             backImg.src = backImage;
@@ -1649,10 +1671,22 @@
     async function uploadPostcardToIPFS(frontImage, backImage, message, sender, recipient, tokenId) {
         console.log('📤 Uploading postcard to IPFS via Pinata...');
         console.log('🔢 Token ID:', tokenId);
+        
+        // Validate inputs
+        if (!frontImage || !backImage) {
+            throw new Error('❌ Missing image data: frontImage or backImage is empty');
+        }
+        
+        console.log('📊 Input validation:');
+        console.log('   Front image length:', frontImage.length);
+        console.log('   Back image length:', backImage.length);
+        console.log('   Message length:', message.length);
+        
         try {
             // Step 0: Merge front and back images
             console.log('🖼️ Merging front and back images...');
             const mergedImage = await mergePostcardImages(frontImage, backImage);
+            console.log('✅ Images merged, length:', mergedImage.length);
             const mergedBlob = base64ToBlob(mergedImage);
             console.log('📊 Merged image:', (mergedBlob.size / 1024 / 1024).toFixed(2), 'MB');
             
