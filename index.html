@@ -1765,11 +1765,11 @@
                 body: backFormData
             });
             if (!backResponse.ok) {
-                const error = await backResponse.json();
-                throw new Error(error.error || 'Back image upload failed');
+                const errorText = await backResponse.text();
+                throw new Error(`Back upload failed: ${backResponse.status} - ${errorText}`);
             }
             const backResult = await backResponse.json();
-            const backCID = backResult.cid;
+            const backCID = backResult.data.cid;
             console.log('✅ Back image CID:', backCID);
             
             // Step 4: Create metadata with merged image (OpenSea will show both sides!)
