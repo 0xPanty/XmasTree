@@ -1777,9 +1777,8 @@
             const metadata = {
                 name: `Christmas Postcard #${tokenId}`,  // Include token ID in name
                 description: message,
-                image: `ipfs://${mergedCID}`,  // ✅ Merged image shows both front and back!
+                image: `https://gateway.pinata.cloud/ipfs/${mergedCID}`,  // HTTP URL for OpenSea compatibility
                 external_url: `https://gateway.pinata.cloud/ipfs/${mergedCID}`,
-                animation_url: `https://gateway.pinata.cloud/ipfs/${mergedCID}`,  // Fallback for OpenSea
                 attributes: [
                     { trait_type: "Edition", value: tokenId.toString() },
                     { trait_type: "Type", value: "Christmas Postcard" },
@@ -1788,9 +1787,9 @@
                     { trait_type: "Year", value: new Date().getFullYear().toString() }
                 ],
                 properties: {
-                    frontImage: `ipfs://${frontCID}`,  // Individual front image
-                    backImage: `ipfs://${backCID}`,    // Individual back image
-                    mergedImage: `ipfs://${mergedCID}`, // Combined front+back
+                    frontImage: `https://gateway.pinata.cloud/ipfs/${frontCID}`,  // Individual front image
+                    backImage: `https://gateway.pinata.cloud/ipfs/${backCID}`,    // Individual back image
+                    mergedImage: `https://gateway.pinata.cloud/ipfs/${mergedCID}`, // Combined front+back
                     message: message,
                     sender: { fid: sender.fid, username: sender.username },
                     recipient: { fid: recipient.fid, username: recipient.username },
