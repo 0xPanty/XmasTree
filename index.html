@@ -1706,57 +1706,62 @@
             const mergedImage = await mergePostcardImages(frontImage, backImage);
             console.log('✅ Images merged, length:', mergedImage.length);
             
-            // Step 1: Upload merged image via backend API (bypasses AdBlock!)
+            // Step 1: Upload merged image - DIRECT to Pinata (works!)
             console.log('📤 Step 1/4: Uploading merged image...');
             const mergedBlob = base64ToBlob(mergedImage);
             console.log('📊 Merged blob size:', (mergedBlob.size / 1024 / 1024).toFixed(2), 'MB');
             
+            const mergedFile = new File([mergedBlob], 'merged.png', { type: 'image/png' });
             const mergedFormData = new FormData();
-            mergedFormData.append('file', mergedBlob, 'merged.png');
+            mergedFormData.append('file', mergedFile);
             
-            const mergedResponse = await fetch('/api/pinata', {
+            const mergedResponse = await fetch('https://uploads.pinata.cloud/v3/files', {
                 method: 'POST',
-                body: mergedFormData  // FormData, NOT JSON!
+                headers: { 'Authorization': `Bearer ${PINATA_JWT}` },
+                body: mergedFormData
             });
             if (!mergedResponse.ok) {
-                const error = await mergedResponse.json();
-                throw new Error(error.error || 'Merged image upload failed');
+                const errorText = await mergedResponse.text();
+                throw new Error(`Merged upload failed: ${mergedResponse.status} - ${errorText}`);
             }
             const mergedResult = await mergedResponse.json();
-            const mergedCID = mergedResult.cid;
+            const mergedCID = mergedResult.data.cid;
             console.log('✅ Merged image CID:', mergedCID);
             
-            // Step 2: Upload front image via backend API
+            // Step 2: Upload front image - DIRECT to Pinata
             console.log('📤 Step 2/4: Uploading front image...');
             const frontBlob = base64ToBlob(frontImage);
             console.log('📊 Front blob size:', (frontBlob.size / 1024 / 1024).toFixed(2), 'MB');
-            console.log('📊 Back (for reference):', (base64ToBlob(backImage).size / 1024 / 1024).toFixed(2), 'MB');
             
+            const frontFile = new File([frontBlob], 'front.png', { type: 'image/png' });
             const frontFormData = new FormData();
-            frontFormData.append('file', frontBlob, 'front.png');
+            frontFormData.append('file', frontFile);
             
-            const frontResponse = await fetch('/api/pinata', {
+            const frontResponse = await fetch('https://uploads.pinata.cloud/v3/files', {
                 method: 'POST',
+                headers: { 'Authorization': `Bearer ${PINATA_JWT}` },
                 body: frontFormData
             });
             if (!frontResponse.ok) {
-                const error = await frontResponse.json();
-                throw new Error(error.error || 'Front image upload failed');
+                const errorText = await frontResponse.text();
+                throw new Error(`Front upload failed: ${frontResponse.status} - ${errorText}`);
             }
             const frontResult = await frontResponse.json();
-            const frontCID = frontResult.cid;
+            const frontCID = frontResult.data.cid;
             console.log('✅ Front image CID:', frontCID);
             
-            // Step 3: Upload back image via backend API
+            // Step 3: Upload back image - DIRECT to Pinata
             console.log('📤 Step 3/4: Uploading back image...');
             const backBlob = base64ToBlob(backImage);
             console.log('📊 Back blob size:', (backBlob.size / 1024 / 1024).toFixed(2), 'MB');
             
+            const backFile = new File([backBlob], 'back.png', { type: 'image/png' });
             const backFormData = new FormData();
-            backFormData.append('file', backBlob, 'back.png');
+            backFormData.append('file', backFile);
             
-            const backResponse = await fetch('/api/pinata', {
+            const backResponse = await fetch('https://uploads.pinata.cloud/v3/files', {
                 method: 'POST',
+                headers: { 'Authorization': `Bearer ${PINATA_JWT}` },
                 body: backFormData
             });
             if (!backResponse.ok) {
