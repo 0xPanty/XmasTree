@@ -7101,7 +7101,48 @@
         
         // Open mailbox and show postcards
         async function openMyGifts() {
+            console.log('📬 Opening mailbox...');
+            
+            // If no cached data, fetch from server
+            if (!window.myMailbox || window.myMailbox.length === 0) {
+                console.log('📡 No cached mailbox data, fetching from server...');
+                
+                // Check authentication
+                if (!window.currentUser?.fid) {
+                    showToast('⚠️ Please wait for authentication...');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/api/mailbox', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'list',
+                            userFid: window.currentUser.fid
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    console.log('📬 Mailbox fetch result:', result);
+                    
+                    if (result.success && result.postcards) {
+                        window.myMailbox = result.postcards;
+                        console.log('✅ Loaded mailbox:', result.postcards.length, 'postcards');
+                    } else {
+                        console.warn('⚠️ Failed to load mailbox:', result);
+                        showToast('📭 No postcards yet');
+                        return;
+                    }
+                } catch (error) {
+                    console.error('❌ Failed to fetch mailbox:', error);
+                    showToast('❌ Failed to load mailbox');
+                    return;
+                }
+            }
+            
             const postcards = window.myMailbox || [];
+            console.log('📬 Mailbox has', postcards.length, 'postcards');
             
             if (postcards.length === 0) {
                 showToast('📭 No postcards yet');
