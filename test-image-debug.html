@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Debug Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #f0f0f0; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        button { padding: 10px 20px; margin: 10px 5px; cursor: pointer; background: #4CAF50; color: white; border: none; border-radius: 4px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-left: 3px solid #2196F3; max-height: 300px; overflow-y: auto; }
+        .error { border-left-color: #f44336; }
+        .success { border-left-color: #4CAF50; }
+        img { max-width: 100%; margin: 10px 0; border: 1px solid #ddd; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Image Loading Debug</h1>
+        
+        <h2>Step 1: Test Base64 to Image</h2>
+        <button onclick="testBase64Loading()">Test Base64 → Image</button>
+        <div id="base64-result"></div>
+        
+        <h2>Step 2: Check localStorage</h2>
+        <button onclick="checkLocalStorage()">Check localStorage</button>
+        <button onclick="clearAllStorage()">Clear All Storage</button>
+        <div id="storage-result"></div>
+        
+        <h2>Step 3: Test Image Loading</h2>
+        <button onclick="testImageLoading()">Load Test Image</button>
+        <div id="image-result"></div>
+        
+        <h2>Logs:</h2>
+        <div id="logs"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log ${type}`;
+            logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logsDiv.insertBefore(logEntry, logsDiv.firstChild);
+            console.log(message);
+        }
+
+        function testBase64Loading() {
+            log('Testing base64 image loading...');
+            const resultDiv = document.getElementById('base64-result');
+            
+            // Create a simple test image (1x1 red pixel)
+            const testBase64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+            
+            // Test without prefix
+            log('Test 1: Loading without data URI prefix');
+            const img1 = new Image();
+            img1.onload = () => {
+                log('✅ Test 1 SUCCESS: Image loaded without prefix (should fail)', 'success');
+                resultDiv.innerHTML += '<img src="' + img1.src + '" width="50">';
+            };
+            img1.onerror = () => {
+                log('❌ Test 1 EXPECTED: Failed without prefix (correct)', 'error');
+            };
+            img1.src = testBase64;
+            
+            // Test with prefix
+            setTimeout(() => {
+                log('Test 2: Loading WITH data URI prefix');
+                const img2 = new Image();
+                img2.onload = () => {
+                    log('✅ Test 2 SUCCESS: Image loaded with prefix', 'success');
+                    resultDiv.innerHTML += '<img src="' + img2.src + '" width="50">';
+                };
+                img2.onerror = () => {
+                    log('❌ Test 2 FAILED: Should have loaded with prefix!', 'error');
+                };
+                img2.src = `data:image/png;base64,${testBase64}`;
+            }, 1000);
+        }
+
+        function checkLocalStorage() {
+            log('Checking localStorage...');
+            const resultDiv = document.getElementById('storage-result');
+            resultDiv.innerHTML = '';
+            
+            const keys = Object.keys(localStorage);
+            log(`Found ${keys.length} localStorage items`);
+            
+            if (keys.length === 0) {
+                resultDiv.innerHTML = '<p>✅ localStorage is empty</p>';
+                log('✅ localStorage is clean', 'success');
+                return;
+            }
+            
+            let html = '<ul>';
+            keys.forEach(key => {
+                const value = localStorage.getItem(key);
+                const valuePreview = value.length > 50 ? value.substring(0, 50) + '...' : value;
+                html += `<li><b>${key}</b>: ${valuePreview} (${value.length} chars)</li>`;
+                log(`  - ${key}: ${value.length} chars`);
+            });
+            html += '</ul>';
+            resultDiv.innerHTML = html;
+        }
+
+        function clearAllStorage() {
+            log('Clearing ALL storage...');
+            const beforeCount = Object.keys(localStorage).length;
+            localStorage.clear();
+            sessionStorage.clear();
+            const afterCount = Object.keys(localStorage).length;
+            log(`✅ Cleared ${beforeCount} items from localStorage`, 'success');
+            checkLocalStorage();
+        }
+
+        function testImageLoading() {
+            log('Testing image loading from your app...');
+            const resultDiv = document.getElementById('image-result');
+            
+            // Check if currentAIImage exists
+            if (typeof currentAIImage === 'undefined') {
+                log('❌ currentAIImage not found - you need to generate a card first', 'error');
+                resultDiv.innerHTML = '<p style="color:red;">❌ No card generated. Go back and generate a card first.</p>';
+                return;
+            }
+            
+            if (!currentAIImage) {
+                log('❌ currentAIImage is null/empty', 'error');
+                resultDiv.innerHTML = '<p style="color:red;">❌ currentAIImage is empty</p>';
+                return;
+            }
+            
+            log(`currentAIImage length: ${currentAIImage.length}`);
+            log(`Starts with: ${currentAIImage.substring(0, 50)}`);
+            
+            // Try to load it
+            const img = new Image();
+            img.onload = () => {
+                log(`✅ Image loaded successfully: ${img.width}x${img.height}`, 'success');
+                resultDiv.innerHTML = '<p>✅ Image loaded!</p><img src="' + img.src + '">';
+            };
+            img.onerror = (e) => {
+                log('❌ Failed to load image', 'error');
+                log(`Error: ${JSON.stringify(e)}`, 'error');
+                resultDiv.innerHTML = '<p style="color:red;">❌ Failed to load image</p>';
+            };
+            
+            // Add prefix if missing
+            let imgSrc = currentAIImage;
+            if (!imgSrc.startsWith('data:')) {
+                log('⚠️ Adding data URI prefix');
+                imgSrc = `data:image/png;base64,${imgSrc}`;
+            }
+            
+            img.src = imgSrc;
+        }
+
+        // Auto check on load
+        window.addEventListener('DOMContentLoaded', () => {
+            log('🔍 Debug page loaded', 'success');
+            checkLocalStorage();
+        });
+    </script>
+</body>
+</html>
